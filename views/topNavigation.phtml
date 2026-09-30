@@ -1,0 +1,83 @@
+<?php $currentPage = $currentPage ?? 'sprint'; ?>
+
+<!-- Dépendances front communes à toutes les pages (le header est inclus partout) :
+     store de persistance des sélections Jira + préférences de métriques + Alpine.js.
+     Chargées ici une seule fois. -->
+<script src="/js/jiraPoolStore.js"></script>
+<script src="/js/metricPreferences.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<header class="app-header">
+    <!-- Colonne gauche : logo (grid-row 1/3), cliquable vers l'accueil -->
+    <a href="/" class="app-logo-link">
+        <img src="/img/OPALE.png" alt="Logo OPALE — retour à l'accueil" class="app-logo" />
+    </a>
+
+    <!-- Colonne droite, ligne 1 : titre + CTA discrets (onboarding + configuration) -->
+    <div class="app-header__title">
+        Bienvenue sur OPALE <span> — <u>O</u>util <u>P</u>our l'<u>A</u>mélioration <u>L</u>ean des <u>É</u>quipes</span>
+        <div class="app-header__ctas">
+            <!-- Rouvre la popin d'onboarding (écoutée sur window par onboardingModal). -->
+            <a href="#" class="header-cta"
+                onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('open-onboarding'));">
+                👋 Première visite ?
+            </a>
+            <a href="/docs" class="header-cta <?= $currentPage === 'docs' ? 'header-cta--active' : '' ?>">
+                📙 Manuel Utilisateur
+            </a>
+            <a href="/config" class="header-cta <?= $currentPage === 'config' ? 'header-cta--active' : '' ?>">
+                ⚙️ Configuration du projet
+            </a>
+        </div>
+    </div>
+
+    <!-- Colonne droite, ligne 2 : navigation -->
+    <nav class="app-header__nav">
+        <a href="/sprint" class="nav-item <?= $currentPage === 'sprint' ? 'active' : '' ?>">
+            🛠️ Analyse du Sprint
+        </a>
+        <a href="/capacity" class="nav-item <?= $currentPage === 'capacity' ? 'active' : '' ?>">
+            📅 Capacité équipe
+        </a>
+        <a href="/planification" class="nav-item <?= $currentPage === 'planification' ? 'active' : '' ?>">
+            🧮 Planification de Sprint
+        </a>
+        <!-- position:fixed + coordonnées calculées au survol (Alpine) : .app-header__nav est en
+             overflow-x:auto (donc overflow-y:auto implicite), qui clippe tout dropdown en
+             position:absolute placé sous un nav-item. Le fixed échappe à ce clip. -->
+        <div class="nav-item-wrapper" x-data="{ open: false }"
+            @mouseenter="open = true; $nextTick(() => {
+                const r = $refs.teamMetricsTrigger.getBoundingClientRect();
+                $refs.teamMetricsDropdown.style.top = r.bottom + 'px';
+                $refs.teamMetricsDropdown.style.left = r.left + 'px';
+            })"
+            @mouseleave="open = false">
+            <a href="/team-metrics" x-ref="teamMetricsTrigger"
+                class="nav-item <?= $currentPage === 'team_metrics' ? 'active' : '' ?>">
+                📊 Métriques équipe
+            </a>
+            <!-- Sous-menu (survol) : accès direct à l'un des 3 onglets de /team-metrics. -->
+            <div class="nav-dropdown" x-ref="teamMetricsDropdown" x-show="open" x-cloak>
+                <a href="/team-metrics?tab=sprints" class="nav-dropdown__item">📊 Sprints</a>
+                <a href="/team-metrics?tab=releases" class="nav-dropdown__item">🚀 Releases</a>
+                <a href="/team-metrics?tab=features" class="nav-dropdown__item">⭐ Features</a>
+            </div>
+        </div>
+        <a href="/release" class="nav-item <?= $currentPage === 'release' ? 'active' : '' ?>">
+            🚀 VSM par Release ou Version
+        </a>
+        <a href="/feature" class="nav-item <?= $currentPage === 'feature' ? 'active' : '' ?>">
+            ⭐ VSM par Feature
+        </a>
+        <!-- <a href="/pi" class="nav-item <//?= $currentPage === 'pi' ? 'active' : '' ?>">
+            🚅 Métriques du PI <em>v. Beta</em>
+        </a> -->
+    </nav>
+</header>
+
+<?php
+// Popin d'onboarding : présente sur toutes les pages (rouvrable via le header).
+// Auto-affichage partout SAUF sur l'accueil, qui montre déjà le contenu inline.
+$onboardingAutoShow = ($currentPage !== 'home');
+include __DIR__ . '/onboardingModal.phtml';
+?>

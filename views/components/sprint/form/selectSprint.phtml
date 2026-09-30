@@ -1,0 +1,437 @@
+<?php
+
+/**
+ * Composant de sélection d'un Sprint Jira.
+ *
+ * Le projet et le board proviennent de la page Configuration (/config) via le
+ * pool partagé « jira_pool_team » : ils sont rappelés en lecture seule par
+ * projectRecap.phtml (avec un CTA « Configurer le projet »). Cette page ne gère
+ * plus que le choix du sprint.
+ *
+ * Enchaînement :
+ *   1. Résolution du projet + board depuis le pool (ou lien profond).
+ *   2. Liste déroulante des sprints du board, triée du plus récent au plus ancien.
+ *      Le sprint actif est présélectionné ; à défaut, le plus récent.
+ *
+ * Le formulaire soumet `sprintId` en POST vers /sprint.
+ */
+?>
+<!-- Deux cartes dans un même scope Alpine (projectRecap lit selectedProject/boardName) : seule la seconde
+     est collante, pour n'épingler que la ligne réellement utile au défilement (choix du sprint + toggle) et
+     laisser le rappel projet remonter avec la page.
+     .sprint-selector-scope neutralise la mise en page de ce conteneur, sans quoi il bornerait le collage
+     du bandeau à sa propre hauteur (voir sprint.css). -->
+<div x-data="sprintSelector()" class="jira-project-search sprint-selector-scope">
+
+    <!-- ===== 1. Rappel projet + board (lecture seule) + CTA ===== -->
+    <div class="card">
+        <?php include __DIR__ . '/../../../common/form/projectRecap.phtml'; ?>
+    </div>
+
+    <!-- ===== 2. Choix du sprint (bandeau collant) ===== -->
+    <div class="card sticky-bar sprint-selector-bar">
+        <!-- Toggle du niveau de détail des métriques : flotté à droite, il se cale sur la ligne du choix
+             de sprint qui suit. -->
+        <?php
+        $metricViewPage = 'sprint';
+include __DIR__ . '/../../../common/metricViewToggle.phtml';
+?>
+
+        <form method="POST" action="/sprint" x-ref="analyzeForm" x-show="sprints.length" class="jira-search__block">
+            <input type="hidden" name="projectKey" :value="selectedProject?.key ?? ''">
+            <input type="hidden" name="boardId" :value="boardId">
+            <label for="sprint-select"><strong>Sprint à analyser :</strong></label>
+            <select
+                id="sprint-select"
+                name="sprintId"
+                x-model="sprintId"
+                @change="save(); $nextTick(() => clearAsOfOutOfBounds())"
+                required
+                class="input jira-search__select">
+                <template x-for="sprint in sprints" :key="sprint.id">
+                    <option :value="sprint.id" x-text="sprint.label + cacheIcon(sprint)" :class="sprint.ignored ? 'sprint-ignored' : ''"></option>
+                </template>
+            </select>
+            <button type="submit" @click="loading = true">📊 Analyser</button>
+            <?php include __DIR__ . '/../../../common/form/sprintCacheLegend.phtml'; ?>
+
+            <!-- Reconstruction à une date passée : fonctionnalité de secours (reliquat déplacé avant la clôture),
+                 donc repliée par défaut pour ne pas alourdir le choix de sprint. -->
+            <details class="sprint-asof-toggle" <?= !empty($view) && $view->isAsOfPhoto() ? 'open' : '' ?>>
+                <summary>🕗 Voir l'état du sprint à une date antérieure</summary>
+                <p class="sprint-asof-toggle__hint">
+                    Reconstruit le sprint tel qu'il était à cet instant, <strong>périmètre compris</strong> : les
+                    tickets sortis du sprint après cette date y sont réintégrés. Utile quand le reliquat a été déplacé
+                    vers le sprint suivant avant la clôture.
+                </p>
+                <label for="sprint-asof-date">Date et heure d'observation :</label>
+                <!-- Le navigateur ne renseigne la valeur d'un datetime-local qu'une fois date ET heure complètes : le
+                     CTA n'apparaît donc qu'à la fin de la saisie. Le calendrier est borné à la vie du sprint choisi
+                     (asOfMin/asOfMax). -->
+                <input type="datetime-local" id="sprint-asof-date" name="asOfDate" class="input" x-ref="asOfInput"
+                       value="<?= !empty($view) ? htmlspecialchars((string) $view->getAsOfInputValue()) : '' ?>"
+                       :min="asOfMin()" :max="asOfMax()"
+                       x-init="asOfFilled = $el.value !== ''"
+                       @input="asOfFilled = $event.target.value !== ''">
+                <button type="submit" class="sprint-asof-toggle__submit" x-show="asOfFilled" x-cloak
+                        @click="loading = true">📊 Analyser</button>
+            </details>
+        </form>
+
+        <!-- Rafraîchissement explicite de la LISTE des sprints — à ne pas confondre avec « Recalculer
+             depuis Jira » de /team-metrics, qui recalcule des MÉTRIQUES. Boards et sprints sont cachés
+             12 h (BoardCacheService) : un sprint tout juste créé dans Jira n'y figure pas encore.
+             Placé hors du <form>, qui n'est rendu que si sprints.length : c'est justement quand la liste
+             revient vide ou incomplète qu'il faut pouvoir la redemander. -->
+        <p class="list-refresh" x-show="selectedProject" x-cloak>
+            <button type="button" @click="refreshLists()" :disabled="loading"
+                    title="Redemande à Jira les boards et les sprints, sans attendre l'expiration du cache (12 h)">
+                ↻ Rafraîchir la liste des sprints
+            </button>
+        </p>
+
+        <div x-show="loading" aria-busy="true" class="jira-search__loading">⏳ Chargement…</div>
+
+        <div x-show="noSprints && !loading" class="jira-search__empty">
+            ⚠️ Aucun sprint trouvé pour ce board.
+        </div>
+
+        <div x-show="error" class="inline-error" x-cloak>❌ <span x-text="error"></span></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const LOCAL_KEY = 'jira_sprint_selector';
+        const POOL_KEY = 'jira_pool_team';
+
+        window.sprintSelector = function() {
+            return {
+                // --- Projet (résolu depuis le pool, en lecture seule sur cette page) ---
+                selectedProject: null,
+
+                // --- Boards ---
+                boards: [],
+                boardId: '',
+
+                // --- Sprints ---
+                sprints: [],
+                sprintId: '',
+                cacheStatus: {}, // { sprintId: bool } — ⚡ si true, ⏳ si false
+
+                // --- UI ---
+                loading: false,
+                error: '',
+                noSprints: false,
+
+                /** true quand la date et l'heure d'observation « à date » sont entièrement saisies (affiche son CTA Analyser) */
+                asOfFilled: false,
+
+                /** true si le board par défaut n'est pas configuré alors que plusieurs boards Scrum existent */
+                boardNotConfigured: false,
+
+                /** ID de board mémorisé (localStorage) à re-sélectionner après chargement */
+                _savedBoardId: '',
+
+                /** ID de sprint mémorisé (localStorage) à re-sélectionner après chargement */
+                _savedSprintId: '',
+
+                /** true en mode lien profond : soumettre l'analyse une fois le sprint résolu */
+                _autoSubmit: false,
+
+                /** Libellé du board courant (alimente le rappel projectRecap.phtml) */
+                get boardName() {
+                    const board = this.boards.find(b => String(b.id) === String(this.boardId));
+                    return board ? board.label : '';
+                },
+
+                /** Sprint actuellement choisi dans la liste (objet complet), ou null. */
+                selectedSprint() {
+                    return this.sprints.find(s => String(s.id) === String(this.sprintId)) || null;
+                },
+
+                /**
+                 * Borne basse du calendrier de la photo « à date » : jour de démarrage du sprint, à 00:00.
+                 * null (aucune borne) pour un sprint non démarré.
+                 *
+                 * @returns {?string} Valeur 'YYYY-MM-DDTHH:MM' pour l'attribut min, ou null.
+                 */
+                asOfMin() {
+                    const sprint = this.selectedSprint();
+                    return sprint && sprint.startDate ? sprint.startDate + 'T00:00' : null;
+                },
+
+                /**
+                 * Borne haute du calendrier de la photo « à date » : jour de clôture réelle du sprint à 23:59 (à défaut sa fin
+                 * prévue) ; pour un sprint non clôturé, l'instant présent (on ne photographie pas l'avenir).
+                 *
+                 * @returns {?string} Valeur 'YYYY-MM-DDTHH:MM' pour l'attribut max, ou null.
+                 */
+                asOfMax() {
+                    const sprint = this.selectedSprint();
+                    if (!sprint) return null;
+                    const closedOn = sprint.state === 'closed' ? (sprint.completeDate || sprint.endDate) : null;
+                    if (closedOn) return closedOn + 'T23:59';
+                    const now = new Date();
+                    const pad = n => String(n).padStart(2, '0');
+                    return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
+                        + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+                },
+
+                /**
+                 * Après un changement de sprint, vide la date « à date » saisie si elle sort des bornes du nouveau sprint : sans
+                 * ça, la validation native du formulaire bloquerait aussi le bouton « Analyser » principal.
+                 * Comparaison de chaînes 'YYYY-MM-DDTHH:MM', valide car de même format et de même longueur.
+                 */
+                clearAsOfOutOfBounds() {
+                    const input = this.$refs.asOfInput;
+                    if (!input || input.value === '') return;
+                    const min = this.asOfMin();
+                    const max = this.asOfMax();
+                    if ((min && input.value < min) || (max && input.value > max)) {
+                        input.value = '';
+                        this.asOfFilled = false;
+                    }
+                },
+
+                /**
+                 * Suffixe d'icône accolé au libellé d'un sprint dans la liste :
+                 * ⚡ snapshot déjà en cache (affichage instantané), ⏳ à recharger depuis Jira, 📷 une photo « à date »
+                 * est enregistrée pour ce sprint.
+                 * Rien pour un sprint non clôturé (jamais mis en cache) ni tant que le statut n'est pas connu.
+                 *
+                 * @param {object} sprint Sprint de la liste (id, state…)
+                 * @returns {string} Suffixe à concaténer au libellé, ou chaîne vide.
+                 */
+                cacheIcon(sprint) {
+                    if (sprint.state !== 'closed') {
+                        return '';
+                    }
+                    const status = this.cacheStatus[String(sprint.id)];
+                    if (status === undefined) {
+                        return '';
+                    }
+                    return (status.cached ? ' ⚡' : ' ⏳') + (status.asOf ? ' 📷' : '');
+                },
+
+                /**
+                 * Récupère le statut de cache des sprints CLÔTURÉS et le stocke dans `cacheStatus`
+                 * (map sprintId → {cached, asOf}). Les autres états ne sont jamais mis en cache : inutile de les
+                 * interroger.
+                 */
+                loadCacheStatus() {
+                    const closed = this.sprints.filter(s => s.state === 'closed');
+                    if (!closed.length) return;
+                    const projectKey = this.selectedProject?.key ?? '';
+                    const params = closed.map(s => 'sprintId[]=' + encodeURIComponent(s.id)).join('&')
+                        + (projectKey ? '&projectKey=' + encodeURIComponent(projectKey) : '');
+                    fetch('/api/internal/sprints/cache-status?' + params)
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => { this.cacheStatus = data; })
+                        .catch(() => {}); // best-effort : pas critique si ça échoue
+                },
+
+                /**
+                 * Restauration de la sélection : on retient la plus récente entre
+                 * la clé locale de la page et la clé partagée du pool « team »
+                 * (alimenté par /config). Le board provient du gagnant ; le sprint,
+                 * propre à la page, n'est restauré que si c'est la sélection LOCALE
+                 * qui l'emporte.
+                 */
+                init() {
+                    // Lien profond (appli tierce) prioritaire : ?projectKey=&boardId=&sprintId=
+                    if (this.applyDeepLink()) {
+                        return;
+                    }
+
+                    const local = window.jiraStore.read(LOCAL_KEY);
+                    const winner = window.jiraStore.mostRecent(local, window.jiraStore.read(POOL_KEY));
+                    if (winner && winner.project) {
+                        this.selectedProject = winner.project;
+                        this._savedBoardId  = winner.boardId || '';
+                        // sprintId est propre à la page (jamais dans le pool) : on lit
+                        // toujours depuis local, indépendamment du winner projet/board.
+                        const savedSprintId = local ? (local.sprintId || '') : '';
+                        this._savedSprintId = savedSprintId;
+                        // Auto-analyse si un sprint était déjà sélectionné ET que les
+                        // résultats ne sont pas déjà affichés sur la page (évite la boucle
+                        // infinie : après chaque POST, PHP pose window.__sprintAnalyzed).
+                        this._autoSubmit = savedSprintId !== '' && !window.__sprintAnalyzed;
+                        this.loadBoards();
+                    }
+                },
+
+                /**
+                 * Pré-remplit le sélecteur depuis un lien profond
+                 * (?projectKey=ABC&boardId=456&sprintId=789) puis déclenche l'analyse.
+                 *
+                 * On amorce le projet avec sa clé (le nom est inconnu côté lien, sans
+                 * impact : seule la clé est postée et sert à l'URL de rapport), on
+                 * mémorise board + sprint comme « sélections sauvegardées », puis
+                 * loadBoards()/loadSprints() les re-sélectionnent. Le sprint résolu,
+                 * submitAnalysis() poste le formulaire.
+                 *
+                 * @returns {boolean} true si un lien profond complet a été détecté et appliqué.
+                 */
+                applyDeepLink() {
+                    const params     = new URLSearchParams(window.location.search);
+                    const projectKey = (params.get('projectKey') || '').trim();
+                    const boardId    = (params.get('boardId') || '').trim();
+                    const sprintId   = (params.get('sprintId') || '').trim();
+
+                    // Les trois paramètres sont requis pour un pré-remplissage complet.
+                    if (!projectKey || !boardId || !sprintId) {
+                        return false;
+                    }
+
+                    // Amorce minimale : la clé suffit (nom/id projet non nécessaires ici).
+                    this.selectedProject = { key: projectKey, name: '', id: '' };
+
+                    // Re-sélection via le mécanisme déjà présent dans la cascade.
+                    this._savedBoardId  = boardId;
+                    this._savedSprintId = sprintId;
+                    this._autoSubmit    = true;
+
+                    this.loadBoards();
+                    return true;
+                },
+
+                /**
+                 * Soumet automatiquement le formulaire d'analyse (clic « Analyser »).
+                 * Attend le prochain tick Alpine pour que les champs cachés
+                 * (projectKey, boardId) aient bien reçu leur valeur avant le POST.
+                 */
+                submitAnalysis() {
+                    this.loading = true;
+                    this.$nextTick(() => {
+                        if (this.$refs.analyzeForm) {
+                            this.$refs.analyzeForm.submit();
+                        }
+                    });
+                },
+
+                /**
+                 * Redemande boards ET sprints à Jira en ignorant le cache serveur (TTL 12 h), pour
+                 * faire apparaître un sprint tout juste créé. La cascade loadBoards → loadSprints
+                 * propage le drapeau, sans quoi seuls les boards seraient rafraîchis.
+                 */
+                refreshLists() {
+                    this.loadBoards(true);
+                },
+
+                /**
+                 * Charge les boards du projet et résout le board courant dans l'ordre :
+                 * board mémorisé → board par défaut (config) → unique board scrum.
+                 * Le choix de board ne se fait plus sur cette page : si aucun board
+                 * n'est résoluble (0 board, ou plusieurs sans par défaut), on n'affiche
+                 * que le rappel — son CTA « Configurer le projet » renvoie vers /config.
+                 *
+                 * @param {boolean} refresh Ignore le cache serveur des boards et des sprints.
+                 */
+                loadBoards(refresh = false) {
+                    this.loading = true;
+                    this.error = '';
+                    this.noSprints = false;
+                    this.boardNotConfigured = false;
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/boards'
+                        + (refresh ? '?refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            this.boards = data;
+                            const scrumBoards = data.filter(b => b.type === 'scrum');
+                            const preferredBoard = data.find(b => b.preferred);
+
+                            let resolvedId = '';
+                            if (this._savedBoardId && data.some(b => String(b.id) === String(this._savedBoardId))) {
+                                resolvedId = String(this._savedBoardId);
+                            } else if (preferredBoard) {
+                                resolvedId = String(preferredBoard.id);
+                            } else if (scrumBoards.length === 1) {
+                                resolvedId = String(scrumBoards[0].id);
+                            }
+
+                            if (resolvedId) {
+                                this.boardId = resolvedId;
+                                this.save();
+                                this.loadSprints(refresh);
+                            } else {
+                                // Board non résoluble. Plusieurs boards Scrum sans par défaut :
+                                // message dédié invitant à configurer le projet. Sinon (0 board),
+                                // le rappel + son CTA « Configurer le projet » suffisent.
+                                this.loading = false;
+                                this.boardNotConfigured = scrumBoards.length > 0;
+                            }
+                        })
+                        .catch(err => { this.error = err.message; this.loading = false; console.error(err); });
+                },
+
+                /**
+                 * Charge les sprints du board (déjà triés du plus récent au plus ancien).
+                 * Présélectionne le sprint actif, sinon le plus récent.
+                 *
+                 * @param {boolean} refresh Ignore le cache serveur des sprints (TTL 12 h).
+                 */
+                loadSprints(refresh = false) {
+                    if (!this.boardId) return;
+                    this.loading = true;
+                    this.error = '';
+                    this.noSprints = false;
+                    this.sprints = [];
+                    this.sprintId = '';
+                    fetch('/api/internal/boards/' + encodeURIComponent(this.boardId) + '/sprints?projectKey='
+                        + encodeURIComponent(this.selectedProject?.key ?? '')
+                        + (refresh ? '&refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            this.sprints = data;
+                            if (!data.length) {
+                                this.noSprints = true;
+                                return;
+                            }
+                            if (this._savedSprintId && data.some(s => String(s.id) === String(this._savedSprintId))) {
+                                this.sprintId = String(this._savedSprintId);
+                            } else {
+                                // Présélection : sprint actif, sinon le plus récent non ignoré.
+                                const active = data.find(s => s.state === 'active');
+                                this.sprintId = String(active ? active.id : (data.find(s => !s.ignored) || data[0]).id);
+                            }
+                            // Persiste le sprint résolu : loadBoards() avait sauvegardé avec
+                            // sprintId vide (les sprints n'étaient pas encore chargés). On
+                            // écrit ici l'ID définitif pour que le prochain rechargement
+                            // retrouve le bon sprint plutôt que de retomber sur l'actif.
+                            this.save();
+                            this.loadCacheStatus();
+
+                            // Mode lien profond : le sprint est résolu → on lance l'analyse.
+                            if (this._autoSubmit && this.sprintId) {
+                                this._autoSubmit = false;
+                                this.submitAnalysis();
+                            }
+                        })
+                        .catch(err => { this.error = err.message; console.error(err); })
+                        .finally(() => { this.loading = false; });
+                },
+
+                /**
+                 * Persiste la sélection : en local (projet + board + sprint) et dans le
+                 * pool « team » (projet + board). Le projet/board valent ce que /config
+                 * a fixé ; cette écriture préserve l'arbitrage mostRecent. Le sprint
+                 * reste propre à la page (clé locale uniquement).
+                 */
+                save() {
+                    window.jiraStore.write(LOCAL_KEY, {
+                        project:  this.selectedProject,
+                        boardId:  this.boardId,
+                        sprintId: this.sprintId,
+                    });
+                    window.jiraStore.write(POOL_KEY, {
+                        project: this.selectedProject,
+                        boardId: this.boardId,
+                    });
+                },
+            };
+        };
+    })();
+</script>

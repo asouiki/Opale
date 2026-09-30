@@ -1,0 +1,1820 @@
+{
+    "cached_at": 1780662102,
+    "metrics_version": 9,
+    "data": {
+        "sprintId": "16801",
+        "projectKey": "GCS",
+        "boardId": "3493",
+        "sprintData": {
+            "id": 16801,
+            "self": "https:\/\/imsa.atlassian.net\/rest\/agile\/1.0\/sprint\/16801",
+            "state": "closed",
+            "name": "GCS PI7 it\u00e9 2",
+            "startDate": "2026-02-02T11:01:29.000Z",
+            "endDate": "2026-02-20T17:00:00.000Z",
+            "completeDate": "2026-02-23T08:38:45.989Z",
+            "createdDate": "2025-12-02T14:01:09.968Z",
+            "originBoardId": 3493,
+            "goal": "* [K28 DPAE] Livrer en Production la r\u00e9solution des anomalies K28 bloquant l'int\u00e9gration des DPAE (PM55301)\n* [Val'Hor] Livrer en Production la r\u00e9solution des \u00e9carts de population Val'Hor (PM54477)\n* [Recod NAF] Pr\u00e9senter en Vainci 1 l'\u00e9volution pour les codes NAF 0149Z FMSE"
+        },
+        "issuesCount": 29,
+        "landingByStatus": [
+            {
+                "status": "En r\u00e9daction",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 0.3,
+                "averageDays": 0
+            },
+            {
+                "status": "A affiner",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 7,
+                "averageDays": 0.2
+            },
+            {
+                "status": "\u00c0 faire",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 2,
+                "totalDays": 144.8,
+                "averageDays": 5
+            },
+            {
+                "status": "En cours",
+                "category": "sprint",
+                "count": 9,
+                "storyPoints": 15,
+                "totalDays": 136.5,
+                "averageDays": 4.7
+            },
+            {
+                "status": "Revue D\u00e9v \/ Pair",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 10.8,
+                "averageDays": 0.4
+            },
+            {
+                "status": "Qualif En Cours",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 13,
+                "averageDays": 0.4
+            },
+            {
+                "status": "Validation PO \/ Vainci",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 35.5,
+                "averageDays": 1.2
+            },
+            {
+                "status": "Termin\u00e9(e)",
+                "category": "done",
+                "count": 18,
+                "storyPoints": 30,
+                "totalDays": 122.5,
+                "averageDays": 4.2
+            }
+        ],
+        "objectiveGroups": [
+            {
+                "label": "objectif_1",
+                "title": "[K28 DPAE] Livrer en Production la r\u00e9solution des anomalies K28 bloquant l'int\u00e9gration des DPAE (PM55301)",
+                "issues": [
+                    {
+                        "key": "GCS-581",
+                        "summary": "PM00055301 : Anomalies K28 bloquant l'int\u00e9gration des DPAE + MEP",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-581",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 40,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            {
+                "label": "objectif_2",
+                "title": "[Val'Hor] Livrer en Production la r\u00e9solution des \u00e9carts de population Val'Hor (PM54477)",
+                "issues": [
+                    {
+                        "key": "GCS-525",
+                        "summary": "PM54477 - Mise en production de la correction des \u00e9carts Val'hor",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-525",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 25.75,
+                        "leadTime": 49.5,
+                        "labels": [
+                            "BA",
+                            "Dev",
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            {
+                "label": "objectif_3",
+                "title": "[Recod NAF] Pr\u00e9senter en Vainci 1 l'\u00e9volution pour les codes NAF 0149Z FMSE",
+                "issues": [
+                    {
+                        "key": "GCS-513",
+                        "summary": "[Recodif NAF - FMSE] contr\u00f4le du code production pour les NAF 0149Z (FMSE)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-513",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 45,
+                        "leadTime": 90.5,
+                        "labels": [
+                            "Dev",
+                            "objectif_3"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            {
+                "label": "objectif_it\u00e9",
+                "title": "Objectif_it\u00e9",
+                "issues": [
+                    {
+                        "key": "GCS-556",
+                        "summary": "[Optimisation K4430] - Passer le K4430 en \"mode interruptible\"",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-556",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 19.5,
+                        "leadTime": 39,
+                        "labels": [
+                            "Dev",
+                            "objectif_it\u00e9"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-588",
+                        "summary": "Report et am\u00e9lioration de code suite \u00e0 reprise des workflows 444015 par la task force",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-588",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 19.5,
+                        "leadTime": 34.25,
+                        "labels": [
+                            "Dev",
+                            "objectif_it\u00e9"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        ],
+        "features": [
+            {
+                "key": "REP-172",
+                "summary": "Redescente des fins de contrats LUCEA en caisse de gestion"
+            },
+            {
+                "key": "REP-233",
+                "summary": "Compl\u00e9tude RGCU lot1"
+            },
+            {
+                "key": "REP-263",
+                "summary": "MCO REPAIRES PI7"
+            },
+            {
+                "key": "REP-264",
+                "summary": "MCO REPAIRES PI8"
+            },
+            {
+                "key": "REP-269",
+                "summary": "D\u00e9marrage et garantie DPAE pour la DGT"
+            },
+            {
+                "key": "REP-352",
+                "summary": "Am\u00e9lioration de l'installation du guide DMO en mensuel"
+            },
+            {
+                "key": "REP-360",
+                "summary": "Rectification de r\u00e9mun\u00e9ration sur contrats en cours sur TESAS"
+            },
+            {
+                "key": "REP-362",
+                "summary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)"
+            },
+            {
+                "key": "REP-376",
+                "summary": "Fichiers init AA p\u00e9riode D\u00e9cembre 2025"
+            },
+            {
+                "key": "REP-377",
+                "summary": "Certification des comptes"
+            },
+            {
+                "key": "REP-461",
+                "summary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)"
+            },
+            {
+                "key": "REP-472",
+                "summary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#7"
+            }
+        ],
+        "stats": {
+            "issuesWithoutStoryPoints": 9,
+            "estimatedAfterAdd": {
+                "count": 11,
+                "storyPoints": 27.5,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-513",
+                        "summary": "[Recodif NAF - FMSE] contr\u00f4le du code production pour les NAF 0149Z (FMSE)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-513",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 45,
+                        "leadTime": 90.5,
+                        "labels": [
+                            "Dev",
+                            "objectif_3"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-574",
+                        "summary": "D\u00e9marrage et garantie DPAE DGT (f\u00e9vrier)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-574",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-269",
+                        "parentSummary": "D\u00e9marrage et garantie DPAE pour la DGT",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 5,
+                        "leadTime": 38.5,
+                        "labels": [
+                            "Dev",
+                            "Qualif"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-575",
+                        "summary": "Soutient pour la certification des comptes (f\u00e9vrier)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-575",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-377",
+                        "parentSummary": "Certification des comptes",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 46,
+                        "labels": [
+                            "BA"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-581",
+                        "summary": "PM00055301 : Anomalies K28 bloquant l'int\u00e9gration des DPAE + MEP",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-581",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 40,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-590",
+                        "summary": "Analyse AA - Suite",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-590",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 33.75,
+                        "leadTime": 42,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-636",
+                        "summary": "[PM55682] R\u00e9solution du d\u00e9faut d'int\u00e9gration des ACIJ du 4T 2025",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-636",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 10,
+                        "leadTime": 20,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-605",
+                        "summary": "[enabler] Etude KE103 (A4)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-605",
+                        "issueType": "Enabler Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 22.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-632",
+                        "summary": "Volum\u00e9trie DSN mises de cot\u00e9 pour les cas d\u2019abort K4430 phase E",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-632",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 11.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-655",
+                        "summary": "(Vainci 1) K4430 - Abort phase E -  gestion de la date de fin de contrat",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-655",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 43.5,
+                        "leadTime": 61.75,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-659",
+                        "summary": "M17 DPAE supprim\u00e9es \u00e0 tort",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-659",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 8,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-648",
+                        "summary": "K4430 - Abort phase E -  gestion de la date de fin de contrat pr\u00e9visionnelle",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-648",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 48.5,
+                        "leadTime": 64,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "totalStoryPoints": 47,
+            "storyPointsRange": {
+                "min": 0.5,
+                "max": 5,
+                "median": 2,
+                "average": 2.47
+            },
+            "scopeChange": {
+                "plannedTicketCount": 20,
+                "currentTicketCount": 29,
+                "ticketDelta": 9,
+                "ticketGrowthPercent": 45,
+                "plannedStoryPoints": 33,
+                "currentStoryPoints": 47,
+                "storyPointsDelta": 14,
+                "storyPointsGrowthPercent": 42.4,
+                "addedStoryPointsPercent": 42.4,
+                "nouvellePrioStoryPointsPercent": 4.5
+            },
+            "addedDuringSprint": {
+                "count": 9,
+                "storyPoints": 14,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-144",
+                        "summary": "[FdC LUCEA] Int\u00e9grer les messages issus du d\u00e9coupage r\u00e9alis\u00e9 par le Socle",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-144",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-172",
+                        "parentSummary": "Redescente des fins de contrats LUCEA en caisse de gestion",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 10.25,
+                        "leadTime": 172.25,
+                        "labels": [
+                            "Qualif"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-146",
+                        "summary": "[FdC LUCEA] R\u00e9partition des messages en rapport avec la DSN",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-146",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-172",
+                        "parentSummary": "Redescente des fins de contrats LUCEA en caisse de gestion",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 10.75,
+                        "leadTime": 172.75,
+                        "labels": [
+                            "Qualif",
+                            "attente_socle"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-587",
+                        "summary": "[compl\u00e9tude RGCU] -  Produire un fichier \u00e0 compl\u00e9ter par RGCU",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-587",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-233",
+                        "parentSummary": "Compl\u00e9tude RGCU lot1",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12,
+                        "leadTime": 53.5,
+                        "labels": [
+                            "RGCU",
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-636",
+                        "summary": "[PM55682] R\u00e9solution du d\u00e9faut d'int\u00e9gration des ACIJ du 4T 2025",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-636",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 10,
+                        "leadTime": 20,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-617",
+                        "summary": "Qualif transverse rectif de rem avec TESAs (K4430 + tortue)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-617",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-360",
+                        "parentSummary": "Rectification de r\u00e9mun\u00e9ration sur contrats en cours sur TESAS",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12.25,
+                        "leadTime": 34.75,
+                        "labels": [
+                            "Dev",
+                            "Qualif"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-632",
+                        "summary": "Volum\u00e9trie DSN mises de cot\u00e9 pour les cas d\u2019abort K4430 phase E",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-632",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 11.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-659",
+                        "summary": "M17 DPAE supprim\u00e9es \u00e0 tort",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-659",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 8,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-670",
+                        "summary": "[Accords] Agrica - Fournir les codes conventions pour Loire-Atlantique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-670",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-472",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 1.5,
+                        "leadTime": 1.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-672",
+                        "summary": "R\u00e9daction strat\u00e9gie de tests autos K28",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-672",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 20.5,
+                        "leadTime": 20.5,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "removedDuringSprint": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "nouvellePrio": {
+                "count": 2,
+                "storyPoints": 1.5,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-587",
+                        "summary": "[compl\u00e9tude RGCU] -  Produire un fichier \u00e0 compl\u00e9ter par RGCU",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-587",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-233",
+                        "parentSummary": "Compl\u00e9tude RGCU lot1",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12,
+                        "leadTime": 53.5,
+                        "labels": [
+                            "RGCU",
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-670",
+                        "summary": "[Accords] Agrica - Fournir les codes conventions pour Loire-Atlantique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-670",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-472",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 1.5,
+                        "leadTime": 1.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "continuousImprovement": [
+                {
+                    "key": "GCS-672",
+                    "summary": "R\u00e9daction strat\u00e9gie de tests autos K28",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-672",
+                    "issueType": "T\u00e2che",
+                    "status": "En cours",
+                    "statusCategory": "sprint",
+                    "statusRank": 57,
+                    "storyPoints": null,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": "REP-263",
+                    "parentSummary": "MCO REPAIRES PI7",
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 20.5,
+                    "leadTime": 20.5,
+                    "labels": [
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": true,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                }
+            ],
+            "doneTickets": {
+                "count": 18,
+                "storyPoints": 30,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-144",
+                        "summary": "[FdC LUCEA] Int\u00e9grer les messages issus du d\u00e9coupage r\u00e9alis\u00e9 par le Socle",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-144",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-172",
+                        "parentSummary": "Redescente des fins de contrats LUCEA en caisse de gestion",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 10.25,
+                        "leadTime": 172.25,
+                        "labels": [
+                            "Qualif"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-146",
+                        "summary": "[FdC LUCEA] R\u00e9partition des messages en rapport avec la DSN",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-146",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-172",
+                        "parentSummary": "Redescente des fins de contrats LUCEA en caisse de gestion",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 10.75,
+                        "leadTime": 172.75,
+                        "labels": [
+                            "Qualif",
+                            "attente_socle"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-517",
+                        "summary": " [Etude \/ A4] Extension du p\u00e9rim\u00e8tre de l'init de la population pour Agrica",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-517",
+                        "issueType": "Spike",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 12,
+                        "leadTime": 52,
+                        "labels": [
+                            "en_attente_gpcd"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-525",
+                        "summary": "PM54477 - Mise en production de la correction des \u00e9carts Val'hor",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-525",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 25.75,
+                        "leadTime": 49.5,
+                        "labels": [
+                            "BA",
+                            "Dev",
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-581",
+                        "summary": "PM00055301 : Anomalies K28 bloquant l'int\u00e9gration des DPAE + MEP",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-581",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 40,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-590",
+                        "summary": "Analyse AA - Suite",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-590",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 33.75,
+                        "leadTime": 42,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-605",
+                        "summary": "[enabler] Etude KE103 (A4)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-605",
+                        "issueType": "Enabler Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 22.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-632",
+                        "summary": "Volum\u00e9trie DSN mises de cot\u00e9 pour les cas d\u2019abort K4430 phase E",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-632",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 11.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-636",
+                        "summary": "[PM55682] R\u00e9solution du d\u00e9faut d'int\u00e9gration des ACIJ du 4T 2025",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-636",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 10,
+                        "leadTime": 20,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-659",
+                        "summary": "M17 DPAE supprim\u00e9es \u00e0 tort",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-659",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 8,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-574",
+                        "summary": "D\u00e9marrage et garantie DPAE DGT (f\u00e9vrier)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-574",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-269",
+                        "parentSummary": "D\u00e9marrage et garantie DPAE pour la DGT",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 5,
+                        "leadTime": 38.5,
+                        "labels": [
+                            "Dev",
+                            "Qualif"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-530",
+                        "summary": "Suivi Init AA phase 3",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-530",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-376",
+                        "parentSummary": "Fichiers init AA p\u00e9riode D\u00e9cembre 2025",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 5.5,
+                        "leadTime": 45.75,
+                        "labels": [
+                            "Dev"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-575",
+                        "summary": "Soutient pour la certification des comptes (f\u00e9vrier)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-575",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-377",
+                        "parentSummary": "Certification des comptes",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 46,
+                        "labels": [
+                            "BA"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-556",
+                        "summary": "[Optimisation K4430] - Passer le K4430 en \"mode interruptible\"",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-556",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 19.5,
+                        "leadTime": 39,
+                        "labels": [
+                            "Dev",
+                            "objectif_it\u00e9"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-588",
+                        "summary": "Report et am\u00e9lioration de code suite \u00e0 reprise des workflows 444015 par la task force",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-588",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 19.5,
+                        "leadTime": 34.25,
+                        "labels": [
+                            "Dev",
+                            "objectif_it\u00e9"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-627",
+                        "summary": "[K4430][Enabler] Documentation des contr\u00f4les effectu\u00e9s sur les phases D et E",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-627",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Mineur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/lowest_new.svg",
+                            "id": "5"
+                        },
+                        "cycleTime": 7.5,
+                        "leadTime": 13.25,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-690",
+                        "summary": " [K4430] - Hotfix TESA+ Particuliers Employeurs gestion du SIRET",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-690",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 1.5,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-670",
+                        "summary": "[Accords] Agrica - Fournir les codes conventions pour Loire-Atlantique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-670",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-472",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 1.5,
+                        "leadTime": 1.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "reliquat": {
+                "count": 11,
+                "storyPoints": 17,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-587",
+                        "summary": "[compl\u00e9tude RGCU] -  Produire un fichier \u00e0 compl\u00e9ter par RGCU",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-587",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-233",
+                        "parentSummary": "Compl\u00e9tude RGCU lot1",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12,
+                        "leadTime": 53.5,
+                        "labels": [
+                            "RGCU",
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-655",
+                        "summary": "(Vainci 1) K4430 - Abort phase E -  gestion de la date de fin de contrat",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-655",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 43.5,
+                        "leadTime": 61.75,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-672",
+                        "summary": "R\u00e9daction strat\u00e9gie de tests autos K28",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-672",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 20.5,
+                        "leadTime": 20.5,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-648",
+                        "summary": "K4430 - Abort phase E -  gestion de la date de fin de contrat pr\u00e9visionnelle",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-648",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 48.5,
+                        "leadTime": 64,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-491",
+                        "summary": "[R\u00e9tro documentation] tableaux de bord Comptable",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-491",
+                        "issueType": "Spike",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 122.25,
+                        "leadTime": 126,
+                        "labels": [
+                            "BA"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-694",
+                        "summary": "[K4430] - PM56093 - ANO WKF 444015 DSN",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-694",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-352",
+                        "parentSummary": "Am\u00e9lioration de l'installation du guide DMO en mensuel",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 3.5,
+                        "leadTime": 4.5,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-617",
+                        "summary": "Qualif transverse rectif de rem avec TESAs (K4430 + tortue)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-617",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-360",
+                        "parentSummary": "Rectification de r\u00e9mun\u00e9ration sur contrats en cours sur TESAS",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12.25,
+                        "leadTime": 34.75,
+                        "labels": [
+                            "Dev",
+                            "Qualif"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-513",
+                        "summary": "[Recodif NAF - FMSE] contr\u00f4le du code production pour les NAF 0149Z (FMSE)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-513",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 45,
+                        "leadTime": 90.5,
+                        "labels": [
+                            "Dev",
+                            "objectif_3"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-649",
+                        "summary": "[K4430 Optimisation] - Reprise de l'interruptibilit\u00e9 sur le code de reprise",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-649",
+                        "issueType": "Story",
+                        "status": "Revue D\u00e9v \/ Pair",
+                        "statusCategory": "sprint",
+                        "statusRank": 65,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 24.75,
+                        "leadTime": 31.75,
+                        "labels": [
+                            "TASKFORCE-444015"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-650",
+                        "summary": "[K4430] - PM55352 - G\u00e9rer les DSN mixtes (TESA et DSN) ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-650",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 44.75,
+                        "leadTime": 51.75,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-658",
+                        "summary": "[K4430] R\u00e9g\u00e9n\u00e9r\u00e9 la mati\u00e8re d'exploit",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-658",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 21,
+                        "leadTime": 30.25,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        },
+        "predictability": {
+            "startStoryPoints": 33,
+            "completedStoryPoints": 30,
+            "startTicketCount": 20,
+            "completedTicketCount": 18,
+            "completedFromStartTicketCount": 12,
+            "targetPercent": 80,
+            "targetStoryPoints": 26.4,
+            "achievedPercent": 90.9,
+            "isReached": true,
+            "engagementPercent": 60,
+            "isEngagementReached": false
+        }
+    }
+}

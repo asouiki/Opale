@@ -1,0 +1,1676 @@
+/* ============================================================
+ * OPALE — Outil Pour l'Amélioration Lean des Équipes
+ * global.css — styles communs à toutes les pages
+ *
+ * Le CSS est découpé par page dans public/css/ : global (ce fichier, chargé
+ * partout) + une feuille par page (sprint, planification, feature, metrics,
+ * team-metrics, config, pi, docs) chargée via <link> dans chaque vue.
+ *
+ * Police : DM Sans (Google Fonts, chargée dans le <head>)
+ * ============================================================ */
+
+/* ============================================================
+ * 1. DESIGN TOKENS (CSS Variables)
+ * ============================================================ */
+:root {
+    /* Couleurs de fond */
+    --bg:          #f1f5f9;   /* page background — slate-100 */
+    --card:        #ffffff;   /* card surface */
+    --card-hover:  #fafcff;
+
+    /* Palette principale */
+    --primary:     #0ea5e9;   /* sky-500 — accent principal */
+    --primary-dark:#0284c7;   /* sky-600 — hover */
+    --primary-bg:  #f0f9ff;   /* sky-50 — fond doux */
+    --primary-border: #bae6fd;/* sky-200 */
+
+    /* Texte */
+    --text:        #0f172a;   /* slate-900 */
+    --text-muted:  #64748b;   /* slate-500 */
+    --text-light:  #94a3b8;   /* slate-400 */
+
+    /* Bordures */
+    --border:      #e2e8f0;   /* slate-200 */
+    --border-strong: #cbd5e1; /* slate-300 */
+
+    /* Navbar */
+    --nav-bg:      #0f1c2e;
+    --nav-border:  rgba(255,255,255,0.07);
+    --nav-text:    rgba(255,255,255,0.55);
+    --nav-text-hover: rgba(255,255,255,0.9);
+    --nav-active:  #ffffff;
+    --nav-active-line: #38bdf8; /* sky-400 */
+
+    /* États sémantiques */
+    --success-bg:  #f0fdf4; --success-text: #166534; --success-border: #bbf7d0;
+    --warning-bg:  #fffbeb; --warning-text: #92400e; --warning-border: #fde68a;
+    --danger-bg:   #fef2f2; --danger-text:  #991b1b; --danger-border:  #fecaca;
+    --info-bg:     #f0f9ff; --info-text:    #075985; --info-border:    #bae6fd;
+    --neutral-bg:  #f8fafc; --neutral-text: #334155; --neutral-border: #e2e8f0;
+
+    /* Geometry */
+    --radius-sm:   6px;
+    --radius:      10px;
+    --radius-lg:   14px;
+    --radius-pill: 999px;
+
+    /* Shadows */
+    --shadow-sm:   0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+    --shadow:      0 4px 16px rgba(15,23,42,0.07), 0 1px 4px rgba(15,23,42,0.04);
+    --shadow-md:   0 8px 24px rgba(15,23,42,0.09), 0 2px 6px rgba(15,23,42,0.05);
+
+    /* Transitions */
+    --transition:  0.15s ease;
+}
+
+/* ============================================================
+ * 2. RESET & BASE
+ * ============================================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Désactivé sur toute la page, pas seulement sur l'élément qui varie en hauteur (ex. le bandeau
+       collant de /planification, cf. .planif-summary) : le « scroll anchoring » cherche un nœud
+       ancre n'importe où dans le viewport pour compenser un changement de mise en page, pas
+       forcément le nœud qui a changé lui-même — le restreindre à un seul élément ne suffit pas à
+       éliminer la boucle de compensation (la page continue de sauter, juste dans l'autre sens).
+       Aucune page du projet ne s'appuie sur ce comportement (prévu pour du contenu qui charge
+       au-dessus du viewport visible, ex. infinite scroll), le désactiver globalement est sans risque.
+       Cf. https://web.dev/articles/scroll-anchoring */
+    overflow-anchor: none;
+}
+
+body {
+    font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;          /* force 400, évite le rendu thin sur certains OS */
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+a:hover { color: var(--primary-dark); text-decoration: underline; }
+
+h1, h2, h3, h4 { line-height: 1.3; font-weight: 600; color: var(--text); }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; margin-bottom: 12px; }
+h3 { font-size: 1rem; margin-bottom: 8px; }
+h4 { font-size: 0.9rem; margin-bottom: 6px; color: var(--text-muted); font-weight: 500; }
+
+p { color: var(--text-muted); font-size: 0.875rem; }
+
+/* ============================================================
+ * 3. LAYOUT
+ * ============================================================ */
+.container {
+    max-width: 1280px;
+    margin: 32px auto;
+    padding: 0 24px;
+}
+
+/* Espacement entre les cards au niveau page */
+body > .card,
+body > .timeline-grid,
+body > div.card {
+    margin-bottom: 20px;
+}
+
+/* ============================================================
+ * 4. CARD
+ * ============================================================ */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition);
+}
+.card:hover { box-shadow: var(--shadow); }
+
+/* ============================================================
+ * 5. FORMULAIRES
+ * ============================================================ */
+input[type="text"],
+input[type="number"],
+select {
+    height: 38px;
+    padding: 0 12px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+input[type="text"]:hover,
+input[type="number"]:hover,
+select:hover { border-color: var(--border-strong); }
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.12);
+}
+
+.input       { width: auto; min-width: 160px; }
+.input-large { width: 480px; }
+
+button[type="submit"],
+button[type="button"],
+button {
+    height: 38px;
+    padding: 0 18px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    font-weight: 500;
+    color: #fff;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition);
+}
+button:hover { background: var(--primary-dark); box-shadow: 0 2px 8px rgba(14,165,233,0.3); }
+button:active { transform: scale(0.98); }
+
+/* CTA principal désactivé (ex. pendant un chargement) : grisé et non cliquable. */
+button[type="submit"]:disabled,
+button[type="submit"]:disabled:hover {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--primary);
+    box-shadow: none;
+}
+
+/* Bouton secondaire (reset, etc.) */
+button[type="button"],
+button.secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+button[type="button"]:hover,
+button.secondary:hover {
+    background: var(--neutral-bg);
+    color: var(--text);
+    border-color: var(--border-strong);
+    box-shadow: none;
+}
+
+label {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+label em { font-weight: 400; }
+
+form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+/* ============================================================
+ * 6. BADGES & PILLS
+ * ============================================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.badge.green  { background: var(--success-bg);  color: var(--success-text);  border-color: var(--success-border); }
+.badge.orange { background: var(--warning-bg);  color: var(--warning-text);  border-color: var(--warning-border); }
+.badge.red    { background: var(--danger-bg);   color: var(--danger-text);   border-color: var(--danger-border); }
+.badge.blue   { background: var(--info-bg);     color: var(--info-text);     border-color: var(--info-border); }
+.badge.grey   { background: var(--neutral-bg);  color: var(--neutral-text);  border-color: var(--neutral-border); }
+.badge.wait   { background: #fecaca; /* red-200 */ color: #7f1d1d; /* red-900 */ border: 1px solid #f87171; /* red-400 */ }
+
+/* Icône officielle du flag Jira, préfixée devant la cause d'attente « Ticket flaggé » */
+.waiting-flag-icon {
+    height: 0.9em;
+    width: auto;
+    vertical-align: -0.1em;
+    margin-right: 2px;
+}
+
+/* Couleurs de statut sur les cellules de tableau — saturées pour lisibilité */
+.blue-gray  { background: #dbeafe; color: #1e3a8a; } /* blue-100 / blue-900 */
+.green      { background: #bbf7d0; color: #14532d; } /* green-200 / green-900 */
+.yellow     { background: #fef08a; color: #713f12; } /* yellow-200 / yellow-900 */
+
+/* ============================================================
+ * 7. META & MÉTRIQUES
+ * ============================================================ */
+.meta {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.meta-line-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.meta-line-info span { display: flex; align-items: center; gap: 5px; }
+
+.meta-line-metrics {
+    display: flex;
+    flex-wrap: wrap;             /* les .metric se mettent côte à côte */
+    align-items: stretch;
+    gap: 14px;
+    /* Même container que .feature-self-metrics-section */
+    width: 100%;
+    padding: 18px 20px;
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-border);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* Le h3 prend toute la largeur → force un saut de ligne avant les .metric */
+.meta-line-metrics > h3 {
+    flex: 0 0 100%;
+    width: 100%;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 2px;          /* gap: 14px gère l'espace vertical */
+    color: var(--text);
+}
+
+/* Metric card */
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1 1 180px;
+    min-width: 160px;
+    padding: 14px 16px;
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.metric:nth-of-type(1) { border-left-color: #f59e0b; }
+.metric:nth-of-type(2) { border-left-color: #0ea5e9; }
+.metric:nth-of-type(3) { border-left-color: #8b5cf6; }
+.metric:nth-of-type(4) { border-left-color: #10b981; }
+
+.metric-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+.metric-title em {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 1px;
+}
+.metric-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.metric span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+.metric span strong { color: var(--text); font-weight: 600; }
+
+/* Ligne de détail sous une valeur de métrique (ex: ventilation du périmètre) */
+.metric-detail {
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* Groupe « libellé : valeur(s) » empilé ligne par ligne (carte Vélocité de l'équipe).
+   Bloc (et non flex) pour que les <br/> du template cassent les lignes quelle que soit
+   la largeur de page ; le min-width du libellé aligne la valeur de la ligne « SP par
+   personne » qui reste sur la même ligne que son libellé. */
+.metric-kv-line {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+.metric .metric-kv-line__label {
+    display: inline-block;
+    min-width: 175px;
+    font-weight: 600;
+    color: var(--text);
+}
+.metric-kv-line b {
+    font-weight: 600;
+    color: var(--text);
+}
+/* Déclencheur « Plus / Moins de détail » d'une carte .metric affichant une valeur principale et gardant
+   ses déclinaisons repliées. Lien discret aligné à gauche, pour ne pas concurrencer la valeur affichée.
+   Sélecteur préfixé `button` : l'emporte sur `button[type="button"]`, de spécificité supérieure. */
+button.metric-more-btn {
+    margin: 8px 0 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+button.metric-more-btn:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+    background: none;
+}
+
+/* Annotation médiane discrète, accolée à la valeur moyenne (carte Vélocité). */
+.metric-median {
+    margin-left: 8px;
+    font-style: normal;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* Champ de saisie d'un réglage de capacité de sprint (jours/homme, capacité en
+   points). Partagé par la page Sprint (carte Capacité) et la page Métriques
+   d'équipe (tableau « Détail par sprint »). */
+.mandays-input {
+    width: 75px;
+    padding: 4px 6px;
+    text-align: center;
+    font: inherit;
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+}
+.mandays-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+/* Jours/homme pilotés par l'onglet Capacité (source de vérité) : champ verrouillé. */
+.mandays-input[readonly] {
+    background: var(--bg-muted, #f1f5f9);
+    color: var(--text-muted);
+    border-style: dashed;
+    cursor: not-allowed;
+}
+.mandays-input[readonly]:focus {
+    border-color: var(--border-strong);
+}
+/* Mention discrète rappelant que la « vraie » valeur vient de l'onglet Capacité. */
+.mandays-source {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* ============================================================
+ * 8. TABLEAUX
+ * ============================================================ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+thead tr {
+    border-bottom: 2px solid var(--border);
+    background: var(--neutral-bg);
+}
+
+th {
+    padding: 10px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-align: left;
+    white-space: nowrap;
+}
+
+td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+
+tbody tr:hover { background: #f8fafd; }
+
+td img {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+/* Ligne de détail sous chaque ticket */
+tbody tr:nth-child(even) td { background: transparent; }
+tbody tr td[colspan] {
+    background: var(--neutral-bg);
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* --- En-têtes de colonnes triables (pages Sprint & Planification) --- */
+th.col-sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+th.col-sortable::after {
+    content: '↕';
+    margin-left: 5px;
+    font-size: 0.85em;
+    opacity: 0.35;
+}
+th.col-sortable--asc::after  { content: '▲'; opacity: 0.9; }
+th.col-sortable--desc::after { content: '▼'; opacity: 0.9; }
+
+/* --- Cellule Priorité --- */
+.priority-cell { white-space: nowrap; }
+.priority-cell__icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+/* Colonne « Type » (icône du type Jira + nom), homogène avec .priority-cell. */
+.type-cell { white-space: nowrap; }
+.type-cell__icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+/* --- Largeurs de colonnes homogènes des tableaux de tickets ---
+   Appliquées aux <th> : le tableau étant en table-layout auto, la largeur de
+   l'en-tête détermine la largeur de la colonne. Les colonnes à contenu borné
+   ont une largeur FIXE ; Titre / Statut / Parent utilisent min-width et peuvent
+   donc s'étendre si le contenu l'exige. */
+.colw-priorite { width: 114px; }
+.colw-type     { width: 95px; }
+.colw-key      { width: 95px; }
+.colw-titre    { min-width: 260px; }
+.colw-statut   { min-width: 150px; }
+.colw-origine  { width: 150px; }
+.colw-sp       { width: 120px; }
+.colw-reste    { width: 120px; }
+.colw-reestime { width: 220px; }
+.colw-parent   { min-width: 500px; }
+
+/* Ces tableaux dépassent parfois la largeur de la carte (Titre 700 + Parent 500…).
+   On ne crée volontairement AUCUN conteneur de défilement ici : un `overflow` (même
+   seulement horizontal) piégerait l'en-tête `thead` collant dans la carte au lieu de le
+   laisser se figer en haut de la fenêtre (voir règle `thead th`). Le repli responsive
+   plus bas (@media 2300px) suffit à faire tenir ces tableaux dans la carte. */
+
+/* En-têtes de tableaux collants : restent figés en haut de la FENÊTRE pendant le défilement de la page.
+   `--sticky-bar-h` vaut la hauteur du bandeau collant de la page quand elle en a un (voir .sticky-bar) :
+   l'en-tête se cale alors dessous plutôt que de disparaître derrière. Repli 0px = collé au haut de la
+   fenêtre, la barre de navigation n'étant pas collante.
+   Fond opaque obligatoire (sinon les lignes défilent par transparence sous l'en-tête) ;
+   l'ombre interne recrée la ligne de séparation, car une bordure ne suit pas un élément
+   `position: sticky` en `border-collapse`. */
+thead th {
+    position: sticky;
+    top: var(--sticky-bar-h, 0px);
+    z-index: 2;
+    background: var(--neutral-bg);
+    box-shadow: inset 0 -2px 0 var(--border);
+}
+
+/* Bandeau collant en haut de page (carte de sélection de /sprint, aide à la planification de
+   /planification). z-index élevé : passe PAR-DESSUS la barre de navigation et les en-têtes de tableaux
+   (z-index 2) lors du défilement.
+   Toute page qui pose cette classe doit inclure views/common/stickyBarScript.phtml, qui publie la hauteur
+   du bandeau dans `--sticky-bar-h` pour décaler les en-têtes de tableaux d'autant. */
+.sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 150;
+}
+
+/* Sous 2300px, la somme des largeurs fixes + min-width déborde et fait
+   apparaître une scrollbar horizontale. On relâche les min-width des colonnes
+   à texte long (Titre, Parent) : l'auto-layout (table-layout:auto + width:100%)
+   redistribue alors l'espace disponible et le texte se replie au lieu de
+   déborder, ce qui supprime la scrollbar. */
+@media (max-width: 2300px) {
+    .colw-titre  { min-width: 0; }
+    .colw-parent { min-width: 0; }
+}
+/* ============================================================
+ * 12. DETAILS / ACCORDION
+ * ============================================================ */
+details {
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+details[open] {}
+
+summary {
+    cursor: pointer;
+    padding: 12px 16px 12px 38px; /* espace à gauche pour le chevron */
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--neutral-bg);
+    border-radius: var(--radius);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    transition: background var(--transition);
+    user-select: none;
+}
+summary::-webkit-details-marker { display: none; }
+
+/* Chevron à gauche */
+summary::before {
+    content: '›';
+    position: absolute;
+    left: 14px;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text-light);
+    transition: transform var(--transition);
+}
+details[open] > summary::before { transform: rotate(90deg); }
+summary:hover { background: var(--border); }
+
+details > *:not(summary) {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+}
+
+/* ============================================================
+ * 13. ERROR CARD
+ * ============================================================ */
+.error-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    border-left: 4px solid #ef4444;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 20px;
+}
+.error-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+.error-content h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--danger-text);
+    margin-bottom: 4px;
+}
+.error-content p {
+    font-size: 0.82rem;
+    color: #7f1d1d;
+    word-break: break-word;
+    line-height: 1.5;
+}
+.inline-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius);
+    padding: 5px 12px;
+    margin-top: 6px;
+}
+
+/* ============================================================
+ * 14. DEMO BANNER
+ * ============================================================ */
+.demo-banner {
+    background: #fffbeb;
+    color: #92400e;
+    border-bottom: 1px solid #fde68a;
+    text-align: center;
+    padding: 7px 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+/* ============================================================
+ * 15. APP HEADER (NAVBAR)
+ * ============================================================ */
+.app-header {
+    background: var(--nav-bg);
+    /* Volontairement NON sticky : la barre défile avec la page,
+       seul le bandeau « Sélection à planifier » reste collé en haut. */
+    border-bottom: 1px solid var(--nav-border);
+
+    /* Grille : [logo] [titre + nav] — hauteur dictée par le logo */
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: stretch;
+}
+
+/* Colonne gauche : logo seul, couvre les 2 lignes */
+/* Le logo est enveloppé dans un lien vers l'accueil : c'est désormais ce lien qui
+   occupe la cellule de grille (colonne 1, sur les deux lignes). */
+.app-logo-link {
+    grid-column: 1;
+    grid-row: 1 / 3;          /* s'étire sur titre + nav */
+    display: block;
+    flex-shrink: 0;
+}
+.app-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    margin: 0;                /* retire tout espace résiduel */
+    display: block;
+}
+
+/* Colonne droite, ligne 1 : titre */
+.app-header__title {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 10px 24px 0;
+    font-size: 1.80rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.app-header__title span {
+    font-weight: 400;
+    font-size: 1.00rem;
+    color: rgba(255,255,255,0.35);
+}
+
+/* Colonne droite, ligne 2 : nav */
+.app-header__nav {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    padding: 0 20px;
+    height: 48px;             /* légèrement agrandi vs 44px */
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.app-header__nav::-webkit-scrollbar { display: none; }
+
+.app-header__nav .nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 14px;
+    height: 48px;             /* suit la hauteur de la nav */
+    font-size: 0.875rem;      /* légèrement plus lisible vs 0.82rem */
+    font-weight: 400;
+    color: var(--nav-text);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color var(--transition), border-color var(--transition), background var(--transition);
+    border-radius: 0;
+}
+.app-header__nav .nav-item:hover {
+    color: var(--nav-text-hover);
+    background: rgba(255,255,255,0.05);
+    text-decoration: none;
+}
+.app-header__nav .nav-item.active {
+    color: var(--nav-active);
+    font-weight: 500;
+    border-bottom-color: var(--nav-active-line);
+}
+.app-header__nav .nav-item em {
+    font-size: 0.72rem;
+    opacity: 0.45;
+    margin-left: 2px;
+    font-style: italic;
+}
+
+/* Sous-menu (survol) du nav-item « Métriques équipe » : accès direct à un onglet
+   de /team-metrics (?tab=sprints|releases|features). En position:fixed, coordonnées
+   (top/left) posées par Alpine au survol (voir topNavigation.phtml) : .app-header__nav
+   est en overflow-x:auto (donc overflow-y:auto implicite) et clippe tout dropdown en
+   position:absolute placé sous un nav-item — le fixed échappe à ce clip. */
+.nav-item-wrapper {
+    display: flex;
+}
+/* z-index au-dessus de .sticky-bar (150) : sur une page à bandeau collant, le sous-menu s'ouvre
+   au-dessus du bandeau plutôt que de disparaître derrière. Reste sous les modales (1000). */
+.nav-dropdown {
+    position: fixed;
+    z-index: 200;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    min-width: 190px;
+    overflow: hidden;
+}
+.nav-dropdown__item {
+    display: block;
+    padding: 9px 14px;
+    font-size: 0.85rem;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+}
+.nav-dropdown__item:last-child { border-bottom: none; }
+.nav-dropdown__item:hover { background: var(--primary-bg); text-decoration: none; }
+
+/* CTA discrets du header (« Première visite ? » + « Configuration du projet ») :
+   groupés à droite de la ligne de titre, au-dessus des onglets. Rendus un peu plus
+   visibles qu'avant (contour léger + opacité accrue) sans concurrencer la navigation. */
+.app-header__ctas {
+    margin-left: auto;
+    align-self: center;
+    display: flex;
+    gap: 8px;
+}
+.header-cta {
+    align-self: center;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 4px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color var(--transition), background var(--transition), border-color var(--transition);
+}
+.header-cta:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+}
+.header-cta--active {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ============================================================
+ * 16. JIRA PROJECT SEARCH (Alpine.js component)
+ * ============================================================ */
+.jira-project-search { width: 100%; }
+
+/* Ancre le dropdown sur le seul champ de saisie : il n'enveloppe QUE l'input,
+   donc le `top: 100%` du dropdown vise le bas de l'input et non le bas de tout
+   le bloc (label, toggle, projet sélectionné, filtre PI…), ce qui le faisait
+   apparaître en bas de l'écran quand le contenu sous l'input grandissait. */
+.project-search-field { position: relative; }
+
+.project-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 50;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 500px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+.hover-bg {
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: background var(--transition);
+    border-bottom: 1px solid var(--border);
+}
+.hover-bg:last-child { border-bottom: none; }
+.hover-bg:hover { background: var(--primary-bg); }
+.hover-bg strong { color: var(--text); font-weight: 600; }
+
+/* selectJiraProjectWithReleases — bandeau projet sélectionné + 2 dropdowns Release / Version */
+.jira-project-selected {
+    margin-top: 8px;
+    font-size: 14px;
+}
+.jira-project-reset-btn {
+    font-size: 12px;
+    cursor: pointer;
+}
+.jira-selector-row {
+    display: flex;
+    gap: 100px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin-top: 16px;
+}
+.jira-selector-col {
+    flex: 0 0 auto;
+}
+.jira-selector-empty {
+    margin-top: 8px;
+    font-style: italic;
+    color: var(--danger-text);
+}
+
+/* Case à cocher « Persister cette sélection » — partage la sélection projet/board
+ * avec les autres pages du même pool (cf. public/js/jiraPoolStore.js). */
+.persist-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+}
+.persist-toggle input { cursor: pointer; }
+
+/* Filtre par équipe — checkboxes multi-sélection (page Feature, customfield_10244) */
+.team-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-top: 8px;
+}
+/* Libellé sur la même ligne que les checkboxes */
+.team-filter-label { margin-bottom: 0; }
+.team-filter-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+}
+.team-filter-option input { cursor: pointer; }
+.team-filter-all { font-weight: 600; }
+
+/* ============================================================
+ * 19. SPINNER (aria-busy)
+ * ============================================================ */
+[aria-busy] {
+    --loading-size:   48px;
+    --loading-stroke: 4px;
+    position: relative;
+    opacity: 0.6;
+    pointer-events: none;
+    min-height: calc(var(--loading-size) * 2);
+}
+[aria-busy]::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: var(--loading-size);
+    height: var(--loading-size);
+    margin: calc(var(--loading-size) / -2) 0 0 calc(var(--loading-size) / -2);
+    border: var(--loading-stroke) solid rgba(14,165,233,0.15);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+ * Synthèse IA (composant partagé — pages Sprint et Métriques)
+ * ============================================================ */
+.ai-synthesis__disclaimer {
+    margin: 0 0 14px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+/* Zone d'actions initiale : indications libres + bouton, empilés verticalement */
+.ai-synthesis__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+/* Champ d'indications libres (label + textarea empilés) — partagé état initial / résultat */
+.ai-synthesis__extra-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+}
+
+/* Libellé du champ d'indications supplémentaires */
+.ai-synthesis__extra-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Champ d'indications libres facultatives injectées dans le prompt système */
+.ai-synthesis__extra {
+    width: 100%;
+    max-width: 640px;
+    padding: 9px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--neutral-bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+.ai-synthesis__extra:focus {
+    outline: none;
+    border-color: var(--primary-border);
+}
+
+/* Bouton de génération (état initial) */
+.ai-synthesis__btn {
+    cursor: pointer;
+    padding: 9px 16px;
+    border: 1px solid var(--primary-border);
+    border-radius: var(--radius);
+    background: var(--primary-bg);
+    color: var(--primary-dark);
+    font-weight: 600;
+    transition: background var(--transition);
+}
+.ai-synthesis__btn:hover { background: #e0f2fe; }
+
+/* Loader : spinner + texte, réutilise l'animation `spin` ci-dessus */
+.ai-synthesis__loader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+.ai-synthesis__spinner {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(14, 165, 233, 0.15);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+/* Message d'erreur (IA indisponible, timeout...) */
+.ai-synthesis__error {
+    padding: 10px 14px;
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius);
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    font-size: 0.88rem;
+}
+
+/* Texte de la synthèse : conserve les sauts de ligne du modèle */
+.ai-synthesis__text {
+    white-space: pre-line;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0 0 14px;
+}
+
+/* Champ d'indications en vue résultat : espace avant la ligne de méta/régénérer */
+.ai-synthesis__result .ai-synthesis__extra-field {
+    margin-bottom: 14px;
+}
+
+/* Ligne de métadonnées sous la synthèse (cache, modèle, régénérer) */
+.ai-synthesis__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.ai-synthesis__model {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+.ai-synthesis__regen {
+    cursor: pointer;
+    padding: 6px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--neutral-bg);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    transition: background var(--transition);
+}
+.ai-synthesis__regen:hover { background: var(--border); }
+
+/* ============================================================
+ * Bouton « Remonter en haut » (présent sur toutes les pages)
+ * ============================================================ */
+/* Sélecteur préfixé `button` pour l'emporter sur `button[type="button"]` (fond
+   transparent par défaut), de spécificité supérieure à une simple classe. */
+button.back-to-top {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: rgba(14, 165, 233, 0.8);   /* bleu sky-500 — 80% par défaut */
+    color: #fff;
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+    z-index: 200;
+}
+button.back-to-top:hover {
+    transform: translateY(-2px);
+    background: rgb(14, 165, 233);          /* bleu sky-500 — 100% au survol */
+}
+button.back-to-top--visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ============================================================
+ * 20. RESPONSIVE
+ * ============================================================ */
+@media (max-width: 900px) {
+    .timeline-grid    { flex-direction: column; }
+    .meta-line-info   { flex-wrap: wrap; }
+    .meta-line-metrics { flex-direction: column; }
+    .vsm-layout       { flex-direction: column; }
+    .vsm-text         { width: 100%; }
+    .vsm-chart        { min-width: 0; width: 100%; }
+    .input-large      { width: 100%; }
+    .feature-self-metrics-grid { flex-direction: column; }
+}
+
+/* ============================================================
+   Métriques préférées
+   (config.phtml : sélection ; sprint.phtml / team-metrics.phtml : masquage + CTA)
+   ============================================================ */
+
+/* Groupe de cases à cocher (ex. « Cartes », « Sections ») dans la page config. */
+.config-metric-group {
+    margin-bottom: 14px;
+}
+.config-metric-group__title {
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+/* Élément masqué car non préféré (carte .metric ou section .card). */
+.metric-hidden {
+    display: none !important;
+}
+
+/* Toggle « Vue simplifiée / Vue complète » (pages Sprint & Métriques d'équipe).
+   Posé juste après projectRecap, avant le bloc de sélection de sprint(s) : `float` le sort du flux et
+   le cale à droite de la ligne du sélecteur, dont la mise en page reste inchangée.
+   `margin-top` aligné sur celui de .jira-search__block (16px) pour que les deux démarrent au même Y. */
+.metric-view-toggle {
+    float: right;
+    margin-top: 16px;
+    margin-left: 16px;
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    background: var(--neutral-bg);
+}
+/* Obligatoire : `display: inline-flex` ci-dessus est une règle auteur, elle l'emporterait sur le
+   `[hidden] { display: none }` de la feuille du navigateur. */
+.metric-view-toggle[hidden] {
+    display: none;
+}
+/* Sélecteur préfixé `button` pour l'emporter sur `button[type="button"]` (fond transparent par
+   défaut), qui a une spécificité supérieure à une simple classe. */
+button.metric-view-toggle__btn {
+    margin: 0;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+button.metric-view-toggle__btn:hover {
+    background: var(--primary-bg);
+    color: var(--primary-dark);
+}
+button.metric-view-toggle__btn--active {
+    background: var(--primary);
+    color: #fff;
+}
+button.metric-view-toggle__btn--active:hover {
+    background: var(--primary-dark);
+    color: #fff;
+}
+
+/* ============================================================
+   Page d'accueil & contenu de bienvenue
+   (home.phtml / components/onboardingContent.phtml)
+   ============================================================ */
+.onboarding__title {
+    margin: 0 0 4px;
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.onboarding__subtitle {
+    margin: 0 0 18px;
+    font-size: 1rem;
+    color: var(--text-light);
+}
+.onboarding__intro {
+    max-width: 1920px;
+    margin: 0 0 24px;
+    font-size: 1.02rem;
+    line-height: 1.55;
+}
+
+/* Grille de fonctionnalités : cartes cliquables vers chaque page. */
+.onboarding__features {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.onboarding__feature {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 10px);
+    background: var(--card);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+.onboarding__feature:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-sm, 0 2px 8px rgba(15,23,42,0.08));
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+.onboarding__feature-icon {
+    grid-row: 1 / 3;
+    align-self: center;
+    font-size: 1.5rem;
+}
+.onboarding__feature-label {
+    font-weight: 600;
+    color: var(--text);
+}
+.onboarding__feature-desc {
+    font-size: 0.86rem;
+    color: var(--text-light);
+}
+
+/* Zone d'action : CTA principal + (en popin) lien discret « Ignorer ». */
+.onboarding__cta {
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.onboarding__configure {
+    text-decoration: none;
+    display: inline-block;
+}
+.onboarding__configure:hover {
+    text-decoration: none;
+}
+
+/* Popin d'onboarding (components/onboardingModal.phtml) : réutilise .modal-overlay /
+   .modal-content, avec fond fortement flouté et une boîte occupant 80% de l'écran. */
+.onboarding-overlay {
+    align-items: center;        /* centré verticalement (la base aligne en haut) */
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    background: rgba(15, 23, 42, 0.65);
+}
+.onboarding-modal {
+    width: 80vw;
+    max-width: 80vw;
+    height: 80vh;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 48px 56px;         /* marge intérieure : décolle le contenu des bords */
+}
+/* CTA centrés (uniquement en popin ; l'accueil garde son alignement à gauche). */
+.onboarding-modal .onboarding__cta {
+    justify-content: center;
+}
+/* Lien discret « Ignorer » : ne ferme la popin que volontairement. */
+.onboarding-skip {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+.onboarding-skip:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+
+/* ============================================================
+   Infobulles de métriques (src/View/MetricTooltips.php)
+   Icône ⓘ après un titre de métrique/carte ; bulle multi-lignes au survol et
+   au focus clavier (définition + origine Scrum/Lean + cas d'usage).
+   ============================================================ */
+.metric-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 5px;
+    vertical-align: middle;
+    cursor: help;
+}
+/* Icône SVG (cercle + « i ») : nette à toute taille, dimensionnée en em pour
+   suivre la taille du titre voisin. La couleur pilote currentColor du tracé. */
+.metric-help__icon {
+    width: 1em;
+    height: 1em;
+    display: block;
+    color: var(--text-light);
+    transition: color var(--transition);
+}
+.metric-help:hover .metric-help__icon,
+.metric-help:focus .metric-help__icon {
+    color: var(--primary);
+}
+.metric-help__bubble {
+    position: absolute;
+    top: calc(100% + 8px);     /* s'ouvre vers le bas : évite le rognage par le haut des cartes */
+    left: 0;                   /* ancrée à gauche de l'icône : ne sort plus par la gauche de la page */
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: max-content;
+    max-width: min(320px, 80vw);
+    padding: 10px 12px;
+    background: #0f172a;        /* slate-900 — fond plus sombre pour un meilleur contraste */
+    color: #e2e8f0;            /* slate-200 — texte clair par défaut */
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.35);
+    font-size: 0.78rem;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: left;
+    /* Réinitialise la casse/l'espacement hérités d'un <th> (text-transform:uppercase) :
+       la bulle doit respecter la casse du texte source (metric_tooltips.json). */
+    text-transform: none;
+    letter-spacing: normal;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.12s ease, visibility 0.12s ease;
+}
+.metric-help:hover .metric-help__bubble,
+.metric-help:focus .metric-help__bubble {
+    opacity: 1;
+    visibility: visible;
+}
+/* Sélecteurs préfixés par .metric-help__bubble : priment sur la couleur héritée
+   du contexte (.metric-title / strong) qui rendait le texte sombre sur sombre. */
+.metric-help__bubble .metric-help__title {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 2px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+.metric-help__bubble .metric-help__def    { color: #e2e8f0; }   /* slate-200 */
+.metric-help__bubble .metric-help__origin { color: #cbd5e1; }   /* slate-300 */
+.metric-help__bubble .metric-help__use    { color: #bae6fd; }   /* sky-200 */
+
+
+/* ============================================================
+   Sélecteurs Jira (jira-project-search) — helpers de mise en page
+   (extraits des styles inline des formulaires select*.phtml)
+   ============================================================ */
+.jira-search__block       { margin-top: 16px; }
+.jira-search__loading     { margin-top: 12px; }
+.jira-search__select      { min-width: 360px; }
+.jira-search__selected    { margin-top: 8px; font-size: 14px; }
+.jira-search__reset       { font-size: 12px; cursor: pointer; }
+.jira-search__option      { padding: 8px 12px; cursor: pointer; }
+.jira-search__note        { font-style: italic; color: var(--text-muted); margin-top: 6px; }
+.jira-search__empty       { margin-top: 16px; font-style: italic; color: #ff0000; }
+.jira-search__input-sm    { width: 80px; }
+.jira-search__clear       { margin-left: 8px; font-size: 12px; cursor: pointer; }
+.jira-search__inline-warn { margin-left: 8px; color: #ff0000; font-size: 13px; }
+
+/* Loader de soumission (common/form/submitLoader.phtml — pages Release & Feature) :
+   bouton « Stopper le chargement » qui interrompt le POST d'analyse en cours. */
+.submit-loader__stop {
+    margin-top: 12px;
+    text-align: center;
+}
+.submit-loader__stop-btn {
+    background: transparent;
+    border: 1px solid var(--danger-text);
+    color: var(--danger-text);
+    cursor: pointer;
+}
+.submit-loader__stop-btn:hover {
+    opacity: 0.8;
+}
+
+
+/* ============================================================
+   Primitives UI partagées (déplacées depuis config.css / team-metrics.css)
+   Règles utilisées par des composants présents sur PLUSIEURS pages (popin
+   d'onboarding via topNavigation, bandeau projectRecap, filtres du camembert
+   Sprint), donc à charger globalement.
+   ============================================================ */
+
+/* Alpine.js : masque les éléments x-cloak tant que le composant n'est pas initialisé. */
+[x-cloak] { display: none !important; }
+
+/* --- Encart d'information générique (accueil, scatter d'équipe…) --- */
+.info-note {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: var(--info-bg);
+    border-left: 3px solid var(--info-border);
+    border-radius: var(--radius-sm);
+    color: var(--info-text);
+}
+
+/* --- Boutons génériques (modale workflow, CTA d'onboarding) --- */
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: 1px solid var(--primary-dark);
+    border-radius: var(--radius-sm);
+    padding: 9px 18px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-secondary {
+    background: var(--neutral-bg);
+    color: var(--neutral-text);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 9px 18px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.btn-secondary:hover { background: #fff; }
+
+/* --- Titre de carte avec action alignée à droite (export du prompt IA) --- */
+.card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+/* La marge basse du titre passe sur la ligne entière, sinon l'action se décale verticalement. */
+.card-title-row h2 {
+    margin-bottom: 0;
+}
+.card-title-row + * {
+    margin-top: 12px;
+}
+
+/* --- Export du prompt IA (pages /sprint et /team-metrics) --- */
+.export-prompt {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+/* Rendu bouton sur une balise <a> : annule le soulignement et centre l'icône avec le libellé. */
+.export-prompt__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+}
+/* Aide réservée au survol (ou au focus clavier) : le bouton reste seul et aligné à droite au repos.
+   `order: -1` la place à gauche du bouton, qui garde ainsi sa position quand elle apparaît. */
+.export-prompt__hint {
+    order: -1;
+    font-size: 13px;
+    color: var(--text-light);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease;
+}
+/* Déclenchement sur le bouton lui-même (et non toute la ligne, qui occupe la largeur de la carte). */
+.export-prompt:has(.export-prompt__btn:hover) .export-prompt__hint,
+.export-prompt:focus-within .export-prompt__hint {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- Overlay & boîte modale génériques (popin onboarding + modale workflow) --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+.modal-content {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 1080px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 80px);
+}
+
+/* --- Déclencheur de configuration (bouton sur /config, lien sur projectRecap) --- */
+.wf-trigger {
+    background: var(--neutral-bg);
+    color: var(--neutral-text);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+}
+.wf-trigger:hover { background: #fff; border-color: var(--primary); color: var(--primary-dark); }
+/* Variante lien (pages hors /config) : même apparence, rendue par un <a>. */
+.wf-trigger--link { display: inline-block; text-decoration: none; }
+.wf-trigger--link:hover { text-decoration: none; }
+
+/* --- Bandeau « rappel projet + board » (Sprint / Planification / Métriques) --- */
+.project-recap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text);
+}
+.project-recap__item { display: inline-flex; align-items: center; gap: 4px; }
+.project-recap__sep { color: var(--text-light); }
+/* Pousse le CTA en bout de ligne, séparé du rappel. */
+.project-recap__cta { margin-left: auto; }
+.project-recap--empty { color: var(--warning-text); background: var(--warning-bg); border-color: var(--warning-border); }
+.project-recap__empty-text { display: inline-flex; align-items: center; }
+
+/* --- Filtres en pilule (camembert Sprint + nuage de points Métriques) --- */
+.team-scatter__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+/* Sélecteurs préfixés `button` pour l'emporter sur `button[type="button"]` (fond
+   transparent par défaut), de spécificité supérieure à une simple classe. */
+button.team-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    padding: 5px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--neutral-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+        box-shadow 0.15s ease, transform 0.15s ease;
+}
+button.team-filter:hover { background: var(--info-bg); }
+button.team-filter--active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+}
+button.team-filter--active:hover { background: var(--primary-dark); }
+.team-filter__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.team-filter__count { opacity: 0.75; font-size: 0.78rem; }
+.alert {
+    color: var(--danger-text);
+    font-weight: bold;
+}
+
+/* --- Bandeau « version issue du cache » (pages Sprint et Release) ---
+   Signale que les chiffres affichés proviennent d'une projection mémorisée, et non d'une lecture Jira
+   fraîche, avec sa date de génération et le moyen de forcer un rechargement. */
+.cache-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+.cache-banner__refresh { margin: 0; }
+.cache-banner__refresh button { cursor: pointer; }
+
+/* CTA « Rafraîchir la liste » des sélecteurs de board/sprint (BoardCacheService, TTL 12 h).
+   Partagé par /sprint, /team-metrics, /planification, /capacity et /config, d'où sa place ici plutôt
+   que dans une feuille de page. Action de recours : volontairement discrète, pour ne pas concurrencer
+   le bouton principal de chaque page. Mêmes tons que .team-sprints__refresh. */
+.list-refresh { margin: 8px 0 0; }
+.list-refresh button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85em;
+}
+.list-refresh button:disabled { cursor: not-allowed; opacity: 0.6; }

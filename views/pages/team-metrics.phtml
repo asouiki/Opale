@@ -1,0 +1,1338 @@
+﻿<?php
+
+/** @var \App\Controller\TeamMetricsController $this */
+/** @var \App\View\TeamMetricsView|null $view */
+/** @var string|null $error */
+/** @var bool $llmEnabled */
+$currentPage = 'team_metrics';
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Métriques d'équipe</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/team-metrics.css">
+    <!-- Composant Alpine partagé des onglets Releases & Features (défini avant l'init d'Alpine). -->
+    <script src="/js/piEntitiesTab.js"></script>
+    <!-- Composant Alpine partagé des cartes compteur Releases & Features de l'onglet Sprints. -->
+    <script src="/js/piCountCard.js"></script>
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <?php if ($view): ?><script>window.__teamMetricsAnalyzed = true;</script><?php endif; ?>
+    <!-- L'onglet mémorisé est revalidé, pas seulement celui de l'URL : un utilisateur ayant quitté la page
+         sur l'ex-onglet « capacity » (devenu la page /capacity) se retrouverait sinon sans aucun onglet
+         affiché. Toute valeur inconnue retombe sur « sprints ». -->
+    <div x-data="{ tab: (function () {
+            const allowed = ['sprints', 'releases', 'features'];
+            const requested = new URLSearchParams(location.search).get('tab');
+            if (allowed.includes(requested)) {
+                return requested;
+            }
+            const remembered = localStorage.getItem('teamMetricsTab');
+            return allowed.includes(remembered) ? remembered : 'sprints';
+        })() }"
+        x-init="localStorage.setItem('teamMetricsTab', tab);
+            $watch('tab', v => localStorage.setItem('teamMetricsTab', v));
+            $nextTick(() => {
+                if (tab === 'sprints') window.dispatchEvent(new CustomEvent('load-pi-counts'));
+                if (tab === 'releases') window.dispatchEvent(new CustomEvent('load-pi-releases'));
+                if (tab === 'features') window.dispatchEvent(new CustomEvent('load-pi-features'));
+            })">
+
+        <!-- ============ BARRE D'ONGLETS ============ -->
+        <div class="card team-tabs">
+            <!-- Le 1ᵉʳ affichage déclenche le chargement paresseux des cartes compteur (Releases/Features). -->
+            <button type="button"
+                class="team-tab"
+                :class="{ 'team-tab--active': tab === 'sprints' }"
+                @click="tab = 'sprints'; window.dispatchEvent(new CustomEvent('load-pi-counts'))">
+                📊 Sprints
+            </button>
+            <!-- Le 1ᵉʳ clic déclenche le chargement paresseux (événement écouté par le composant). -->
+            <button type="button"
+                class="team-tab"
+                :class="{ 'team-tab--active': tab === 'releases' }"
+                @click="tab = 'releases'; window.dispatchEvent(new CustomEvent('load-pi-releases'))">
+                🚀 Releases
+            </button>
+            <!-- Le 1ᵉʳ clic déclenche le chargement paresseux des Features (événement écouté par le composant). -->
+            <button type="button"
+                class="team-tab"
+                :class="{ 'team-tab--active': tab === 'features' }"
+                @click="tab = 'features'; window.dispatchEvent(new CustomEvent('load-pi-features'))">
+                ⭐ Features
+            </button>
+        </div>
+
+        <!-- ============ ONGLET 1 : SPRINTS ============ -->
+        <div x-show="tab === 'sprints'">
+
+            <div class="card">
+                <?php include __DIR__ . '/../components/team-metrics/form/selectTeamSprints.phtml'; ?>
+            </div>
+
+            <?php include __DIR__ . '/../common/errorMessage.phtml'; ?>
+
+            <?php if ($view): ?>
+                <?php
+                $stats   = $view->getStats();
+                $sprints = $view->getSprints();
+                $errors  = $view->getErrors();
+
+                // Période couverte : du démarrage le plus ancien à la clôture la
+                // plus récente parmi les sprints analysés.
+                $starts = array_filter(array_column($sprints, 'startDate'));
+                $ends   = array_filter(array_map(
+                    static fn (array $s): ?string => $s['completeDate'] ?: $s['endDate'],
+                    $sprints
+                ));
+                $periodStart = $starts ? min($starts) : null;
+                $periodEnd   = $ends ? max($ends) : null;
+
+                // Ordre chronologique des sprints (indices de $sprints triés du plus
+                // ancien au plus récent), pour tracer la courbe de vélocité dans
+                // l'ordre du temps comme les autres graphes d'évolution.
+                $chronoIndices = array_keys($sprints);
+                usort($chronoIndices, static function (int $a, int $b) use ($sprints): int {
+                    $keyA = $sprints[$a]['completeDate'] ?: ($sprints[$a]['endDate'] ?: '');
+                    $keyB = $sprints[$b]['completeDate'] ?: ($sprints[$b]['endDate'] ?: '');
+                    return strcmp((string) $keyA, (string) $keyB);
+                });
+
+                // État initial du composant Alpine de saisie jours/homme : une
+                // entrée par sprint (id, SP terminés, jours/homme déjà saisis), plus
+                // l'ordre et les libellés chronologiques pour la courbe de vélocité.
+                $velocityConfig = [
+                    'projectKey' => $view->getProjectKey(),
+                    'rows'       => array_map(static fn (array $s): array => [
+                        'id'             => (string) $s['id'],
+                        'doneSp'         => (float) $s['doneStoryPoints'],
+                        'manDays'        => $s['manDays'],
+                        // Jours/homme pilotés par la grille de la page Capacité (qui fait foi) → lecture seule.
+                        'manDaysFromCapacity' => (bool) $s['manDaysFromCapacity'],
+                        'businessDays'   => (float) $s['businessDays'],
+                        // Capacité en points saisie et total SP du sprint, pour le
+                        // delta de capacité réactif (carte + tableau).
+                        'capacityPoints' => $s['capacityPoints'],
+                        'totalSp'        => (float) $s['totalStoryPoints'],
+                    ], $sprints),
+                    // Indices de `rows` triés chronologiquement et labels associés.
+                    'chrono'     => array_values($chronoIndices),
+                    'labels'     => array_map(static fn (int $i): string => $sprints[$i]['name'], $chronoIndices),
+                    // Page /sprint de chaque point de la courbe (même ordre que labels), ouverte au clic.
+                    'urls'       => array_map(static fn (int $i): string => $view->getSprintPageUrl((string) $sprints[$i]['id']), $chronoIndices),
+                ];
+                ?>
+
+                <!-- ============ SYNTHÈSE IA D'ÉQUIPE ============ -->
+                <?php if ($llmEnabled): ?>
+                    <?php
+                    // Liste des IDs des sprints sélectionnés, transmise au composant Alpine.
+                    $sprintIdList = array_values(array_map(
+                        static fn (array $s): string => (string) $s['id'],
+                        $sprints
+                    ));
+                    $aiConfig = [
+                        'projectKey' => $view->getProjectKey(),
+                        'sprintIds'  => $sprintIdList,
+                        'analysis'   => $aiAnalysis['analysis'] ?? '',
+                        'model'      => $aiAnalysis['model'] ?? '',
+                        'fromCache'  => $aiAnalysis !== null,
+                        'cachedAt'    => $aiAnalysis !== null ? date('d/m/Y à H:i', $aiAnalysis['cached_at']) : '',
+                        'extraPrompt' => $aiAnalysis['extraPrompt'] ?? '',
+                    ];
+                    ?>
+                    <script>
+                        /**
+                         * Composant Alpine de la synthèse IA des métriques d'équipe.
+                         * Appelle l'endpoint d'analyse à la demande (sélection de sprints)
+                         * et affiche le texte généré. Défini sans defer pour être prêt
+                         * avant l'initialisation d'Alpine.
+                         *
+                         * Une analyse mémorisée (sélection 100 % clôturée) est injectée via
+                         * config.analysis pour s'afficher directement au chargement, sans reclic.
+                         *
+                         * @param {{projectKey:string, sprintIds:string[], analysis:string, model:string, fromCache:boolean, cachedAt:string, extraPrompt:string}} config
+                         */
+                        window.teamAiAnalysis = function (config) {
+                            return {
+                                projectKey:  config.projectKey,
+                                sprintIds:   config.sprintIds,
+                                loading:     false,
+                                analysis:    config.analysis || '',
+                                error:       '',
+                                fromCache:   !!config.fromCache,
+                                cachedAt:    config.cachedAt || '',
+                                model:       config.model || '',
+                                // Indications de la dernière génération : repeuplées pour ne pas perdre le contexte.
+                                extraPrompt: config.extraPrompt || '',
+
+                                // Lance la génération. refresh=true ignore le cache (« Régénérer »).
+                                run(refresh) {
+                                    this.loading = true;
+                                    this.error   = '';
+                                    const params = new URLSearchParams();
+                                    this.sprintIds.forEach(id => params.append('sprintIds[]', id));
+                                    if (refresh) {
+                                        params.append('refresh', '1');
+                                    }
+                                    if (this.extraPrompt.trim() !== '') {
+                                        params.append('extraPrompt', this.extraPrompt.trim());
+                                    }
+                                    fetch(
+                                        '/api/internal/projects/' + encodeURIComponent(this.projectKey)
+                                        + '/team-metrics/analysis',
+                                        {
+                                            method:  'POST',
+                                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                            body:    params.toString()
+                                        }
+                                    )
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            this.error    = data.error;
+                                            this.analysis = '';
+                                        } else {
+                                            this.analysis  = data.analysis || '';
+                                            this.fromCache = !!data.fromCache;
+                                            this.cachedAt  = '';
+                                            this.model     = data.model || '';
+                                            // Synthèse servie depuis le cache : on restitue ses indications d'origine.
+                                            if (data.fromCache) {
+                                                this.extraPrompt = data.extraPrompt || '';
+                                            }
+                                        }
+                                    })
+                                    .catch(() => { this.error = 'Impossible de contacter le service IA.'; })
+                                    .finally(() => { this.loading = false; });
+                                }
+                            };
+                        };
+                    </script>
+                    <div class="card ai-synthesis" x-data="teamAiAnalysis(<?= htmlspecialchars(json_encode($aiConfig), ENT_QUOTES) ?>)">
+                        <h2>🤖 Synthèse IA des sprints sélectionnés</h2>
+                        <p class="ai-synthesis__disclaimer">
+                            ⚠️ Générée par une IA <b>locale, fermée et non connectée à Internet</b>, à partir des métriques agrégées — à relire et valider par le Scrum Master.
+                        </p>
+
+                        <!-- État initial : champ d'indications libres + bouton de génération -->
+                        <div class="ai-synthesis__actions" x-show="!loading && !analysis" x-cloak>
+                            <div class="ai-synthesis__extra-field">
+                                <label class="ai-synthesis__extra-label" for="team-ai-extra">
+                                    Indications supplémentaires (facultatif)
+                                </label>
+                                <textarea id="team-ai-extra" class="ai-synthesis__extra" x-model="extraPrompt"
+                                    rows="3" placeholder="Contexte (absences, changement de ressource…) ou directive d'analyse (focus sur une métrique, angle particulier)…"></textarea>
+                            </div>
+                            <button type="button" class="ai-synthesis__btn" @click="run(false)">
+                                ✨ Générer la synthèse
+                            </button>
+                        </div>
+
+                        <!-- Loader pendant l'appel au modèle (peut durer plusieurs dizaines de secondes) -->
+                        <div class="ai-synthesis__loader" x-show="loading" x-cloak>
+                            <span class="ai-synthesis__spinner" aria-hidden="true"></span>
+                            <span>⏳ Analyse en cours… le modèle local peut prendre quelques dizaines de secondes.</span>
+                        </div>
+
+                        <!-- Erreur -->
+                        <div class="ai-synthesis__error" x-show="error && !loading" x-cloak x-text="error"></div>
+
+                        <!-- Synthèse générée -->
+                        <div class="ai-synthesis__result" x-show="analysis && !loading" x-cloak>
+                            <p class="ai-synthesis__text" x-text="analysis"></p>
+                            <div class="ai-synthesis__extra-field">
+                                <label class="ai-synthesis__extra-label" for="team-ai-extra-regen">
+                                    Indications supplémentaires (facultatif)
+                                </label>
+                                <textarea id="team-ai-extra-regen" class="ai-synthesis__extra" x-model="extraPrompt"
+                                    rows="3" placeholder="Contexte (absences, changement de ressource…) ou directive d'analyse (focus sur une métrique, angle particulier)…"></textarea>
+                            </div>
+                            <div class="ai-synthesis__meta">
+                                <span class="badge grey" x-show="fromCache"
+                                    x-text="cachedAt ? ('🗄️ Issu du cache — généré le ' + cachedAt) : '🗄️ Issu du cache'"></span>
+                                <span class="ai-synthesis__model" x-text="model ? ('Modèle : ' + model) : ''"></span>
+                                <button type="button" class="ai-synthesis__regen" @click="run(true)">🔄 Régénérer</button>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- ============ CARTES COMPTEUR DU PI (Releases & Features) ============ -->
+                <?php
+                // Fenêtre du PI, mêmes bornes que les onglets Releases/Features, normalisées en Y-m-d.
+                $countFrom = $periodStart ? (new \DateTime($periodStart))->format('Y-m-d') : '';
+                $countTo   = $periodEnd ? (new \DateTime($periodEnd))->format('Y-m-d') : '';
+                ?>
+                <?php if ($countFrom && $countTo): ?>
+                    <?php
+                    // Config commune aux deux cartes ; seule la ressource (endpoint) les distingue.
+                    $countConfig = [
+                        'projectKey' => $view->getProjectKey(),
+                        'from'       => $countFrom,
+                        'to'         => $countTo,
+                    ];
+                    $releasesCountConfig = $countConfig + ['resource' => 'pi-releases'];
+                    $featuresCountConfig = $countConfig + ['resource' => 'pi-features'];
+
+                    // Bornes explicitées dans le libellé : lève l'ambiguïté sur la période réellement couverte.
+                    $countPeriodLabel = 'sur la période des sprints sélectionnés : du '
+                        . $view->formatDate($periodStart) . ' au ' . $view->formatDate($periodEnd);
+                    ?>
+                    <div class="card pi-count-card"
+                        x-data="piCountCard(<?= htmlspecialchars(json_encode($releasesCountConfig), ENT_QUOTES) ?>)"
+                        @load-pi-counts.window="load()">
+                        <span class="pi-count-card__icon">🚀</span>
+                        <div class="pi-count-card__body">
+                            <span class="pi-count-card__value">
+                                <span x-show="loading" x-cloak>…</span>
+                                <span x-show="!loading && error" x-cloak>—</span>
+                                <b x-show="!loading && !error" x-cloak x-text="count"></b>
+                            </span>
+                            <span class="pi-count-card__label">Releases &amp; Versions <?= htmlspecialchars($countPeriodLabel) ?></span>
+                        </div>
+                        <!-- Bascule vers l'onglet Releases (et déclenche son chargement paresseux). -->
+                        <button type="button" class="pi-count-card__link"
+                            @click="tab = 'releases'; window.dispatchEvent(new CustomEvent('load-pi-releases'))">
+                            Voir l'onglet Releases pour les stats détaillées →
+                        </button>
+                    </div>
+                    <div class="card pi-count-card"
+                        x-data="piCountCard(<?= htmlspecialchars(json_encode($featuresCountConfig), ENT_QUOTES) ?>)"
+                        @load-pi-counts.window="load()">
+                        <span class="pi-count-card__icon">⭐</span>
+                        <div class="pi-count-card__body">
+                            <span class="pi-count-card__value">
+                                <span x-show="loading" x-cloak>…</span>
+                                <span x-show="!loading && error" x-cloak>—</span>
+                                <b x-show="!loading && !error" x-cloak x-text="count"></b>
+                            </span>
+                            <span class="pi-count-card__label">Features <?= htmlspecialchars($countPeriodLabel) ?></span>
+                        </div>
+                        <!-- Bascule vers l'onglet Features (et déclenche son chargement paresseux). -->
+                        <button type="button" class="pi-count-card__link"
+                            @click="tab = 'features'; window.dispatchEvent(new CustomEvent('load-pi-features'))">
+                            Voir l'onglet Features pour les stats détaillées →
+                        </button>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Wrapper réactif : la saisie des jours/homme met à jour en direct
+                     les vélocités par ligne et l'agrégat, et persiste via l'API. -->
+                <div x-data="manDaysVelocity(<?= htmlspecialchars(json_encode($velocityConfig), ENT_QUOTES) ?>)">
+
+                <!-- ============ EN-TÊTE / CONTEXTE ============ -->
+                <div class="card">
+                    <div class="card-title-row">
+                        <h2>📊 Métriques moyennes de l'équipe</h2>
+                        <div class="export-prompt">
+                            <a class="btn-secondary export-prompt__btn" href="<?= htmlspecialchars($view->getExportPromptUrl()) ?>">
+                                📄 Exporter les métriques.
+                            </a>
+                            <span class="export-prompt__hint">
+                                Télécharge un .txt (prompt + métriques anonymes) à coller dans Copilot, Claude, ChatGPT, Gemini…
+                            </span>
+                        </div>
+                    </div>
+                    <div class="meta-line meta-line-info">
+                        <span>🗂️ <strong><?= $view->getSprintCount() ?></strong> sprints clôturés analysés</span>
+                        <?php if ($periodStart && $periodEnd): ?>
+                            <span>📅 Du <strong><?= $view->formatDate($periodStart) ?></strong>
+                                au <strong><?= $view->formatDate($periodEnd) ?></strong></span>
+                        <?php endif; ?>
+                        <span>🛠️ <strong><?= $view->formatDays($stats['totalBusinessDays']) ?></strong> ouvrés cumulés</span>
+                    </div>
+
+                    <?php if (!empty($errors)): ?>
+                        <p class="team-metrics__warning">
+                            ⚠️ <?= count($errors) ?> sprint(s) ignoré(s) (non chargeable(s)) :
+                            <?= htmlspecialchars(implode(' / ', $errors)) ?>
+                        </p>
+                    <?php endif; ?>
+                </div>
+
+                <!-- ============ MOYENNES PAR SPRINT ============ -->
+                <div class="card" data-metric-collapse>
+                    <h2>📈 Moyennes par sprint</h2>
+
+                    <div class="meta-line meta-line-metrics" data-metric-collapse>
+                        <h3>Production</h3>
+                        <div class="metric" data-metric-toggle="team.sprintLanding">
+                            <span class="metric-title">🛬 Atterrissage moyen / sprint<?= \App\View\MetricTooltips::render('sprint_landing') ?></span>
+                            <div class="metric-kv-line">
+                                <span class="metric-kv-line__label">✅ Tickets terminés :</span>
+                                <span><b><?= $view->formatNumber($stats['avgDoneTickets']) ?></b></span>
+                            </div>
+                            <div class="metric-kv-line">
+                                <span class="metric-kv-line__label">✂️ Story Points terminés :</span>
+                                <span><b><?= $view->formatNumber($stats['avgDoneStoryPoints']) ?></b></span>
+                            </div>
+                            <div class="metric-kv-line">
+                                <span class="metric-kv-line__label">📊 Delta moyen (total SP − capa) :</span>
+                                <?php
+                        // Icône d'état (fallback no-JS) : au-dessus (rouge), égal (orange),
+                        // en-dessous (vert). Recalculée en direct via capacityDeltaIcon().
+                        $avgDelta     = $stats['avgCapacityDelta'];
+                $avgDeltaIcon = $avgDelta === null
+                    ? ''
+                    : ($avgDelta > 0 ? '🔴' : ($avgDelta < 0 ? '🟢' : '🟠'));
+                ?>
+                                <span>
+                                    <span x-text="capacityDeltaIcon()"><?= $avgDeltaIcon ?></span>
+                                    <b x-text="fmtDelta(avgCapacityDelta())"><?= $view->formatNumber($avgDelta) ?></b>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.velocity">
+                            <span class="metric-title">⚡ Vélocité moyenne<?= \App\View\MetricTooltips::render('velocity') ?></span>
+                            <div class="metric-kv-line">
+                                <span class="metric-kv-line__label">Points terminés :</span><br/>
+                                <span>par jours/homme = <b x-text="fmt(aggregateVelocity())"><?= $view->formatNumber($stats['velocityPerManDay']) ?></b><em class="metric-median">médiane <span x-text="fmt(medianOf('spPerManDay'))">—</span></em></span><br/>
+                                <span>par jour ouvrés = <b><?= $view->formatNumber($stats['velocityPerDay']) ?></b><em class="metric-median">médiane <span x-text="fmt(medianOf('spPerDay'))">—</span></em></span>
+                            </div>
+                            <div class="metric-kv-line">
+                                <span class="metric-kv-line__label">Jours pour terminer 1 SP :</span><br/>
+                                <span>par jours/homme = <b x-text="fmt(aggregateManDaysPerSp())"><?= $view->formatNumber($stats['manDaysPerSp']) ?></b><em class="metric-median">médiane <span x-text="fmt(medianOf('manDaysPerSp'))">—</span></em></span><br/>
+                                <span>par jour ouvrés = <b><?= $view->formatNumber($stats['daysPerSp']) ?></b><em class="metric-median">médiane <span x-text="fmt(medianOf('daysPerSp'))">—</span></em></span>
+                            </div>
+                            <div class="metric-kv-line">
+                                <span class="metric-kv-line__label">SP terminés par personne :</span>
+                                <span><b x-text="fmt(aggregateSpPerPerson())"><?= $view->formatNumber($stats['avgSpPerPerson']) ?></b><em class="metric-median">médiane <span x-text="fmt(medianOf('spPerPerson'))">—</span></em></span>
+                            </div>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.avgBusinessDays">
+                            <span class="metric-title">📆 Durée moyenne (jours ouvrés)<?= \App\View\MetricTooltips::render('sprint_duration') ?></span>
+                            <span class="metric-value"><?= $view->formatDays($stats['avgBusinessDays']) ?></span>
+                            <span class="metric-detail">👥 Jours/Homme moyen :
+                                <b x-text="fmt(aggregateManDaysAvg())"><?= $view->formatNumber($stats['avgManDays']) ?></b>
+                                <em>(min <span x-text="fmt(manDaysMin())"><?= $view->formatNumber($stats['minManDays']) ?></span>
+                                    – max <span x-text="fmt(manDaysMax())"><?= $view->formatNumber($stats['maxManDays']) ?></span>)</em>
+                            </span>
+                            <span class="metric-detail"><em>(effectif estimé = jours-homme / jours ouvrés)</em></span>
+                            <span class="metric-detail">💡<em><b>Jours/homme</b> = ceux de la Capacité à faire (Dév + BA + QA, donc hors PO et SM) du sprint. Renseignés via la page Capacité, ou à la main si absent.</em></span>
+                        </div>
+                    </div>
+
+                    <div class="meta-line meta-line-metrics" data-metric-collapse>
+                        <h3>Périmètre &amp; prédictibilité</h3>
+                        <div class="metric" data-metric-toggle="team.avgPredictability">
+                            <span class="metric-title">🎯 Prédictibilité moyenne<?= \App\View\MetricTooltips::render('predictability') ?></span>
+                            <span class="metric-value"><?= $view->formatPercent($stats['avgPredictability']) ?> (points terminés / planifiés)</span>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.avgEngagement">
+                            <span class="metric-title">🤝 Engagement moyen<?= \App\View\MetricTooltips::render('engagement') ?></span>
+                            <span class="metric-value"><?= $view->formatPercent($stats['avgEngagement']) ?> (tickets planifiés terminés / planifiés)</span>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.avgAddedTickets">
+                            <span class="metric-title">➕ Tickets ajoutés / sprint<?= \App\View\MetricTooltips::render('added_during_sprint') ?></span>
+                            <span class="metric-value">
+                                <?= $view->formatNumber($stats['avgAddedTickets']) ?>
+                                <span class="metric-detail">(<?= $view->formatNumber($stats['avgAddedStoryPoints']) ?> SP)</span>
+                            </span>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.avgScopeGrowth">
+                            <span class="metric-title">⛑️ Changement de périmètre moyen<?= \App\View\MetricTooltips::render('scope_change') ?></span>
+                            <span class="metric-value">+<?= $view->formatPercent($stats['avgScopeGrowthPercent']) ?> points</span>
+                            <span class="metric-detail">🚨 dont « nouvelle_prio » : <?= $view->formatPercent($stats['avgnewPrioPercent']) ?> points </span>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.avgReliquat">
+                            <span class="metric-title">📦 Reliquat moyen / sprint<?= \App\View\MetricTooltips::render('reliquat') ?></span>
+                            <span class="metric-value">
+                                <?= $view->formatNumber($stats['avgReliquatTickets']) ?> tickets
+                                <span class="metric-detail">(<?= $view->formatNumber($stats['avgReliquatStoryPoints']) ?> SP) non terminés</span>
+                            </span>
+                            <?php if (!empty($stats['hasReliquatRemaining'])): ?>
+                                <span class="metric-detail">dont <?= $view->formatNumber($stats['avgReliquatRemainingSp']) ?> SP « reste à faire »</span>
+                            <?php endif; ?>
+                            <span class="metric-detail">Part moyenne non terminée :
+                                <b><?= $view->formatPercent($stats['reliquatTicketSharePercent']) ?> des tickets</b>
+                                (<?= $view->formatPercent($stats['reliquatSpSharePercent']) ?> des SP)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="meta-line meta-line-metrics" data-metric-collapse>
+                        <h3>Temps de traversée (tickets terminés)</h3>
+                        <div class="metric" data-metric-toggle="team.leadTime">
+                            <span class="metric-title">🏗️ Lead time<?= \App\View\MetricTooltips::render('lead_time') ?></span>
+                            <span class="metric-value">Moyen : <?= $view->formatDays($stats['avgLeadTime']) ?></span>
+                            <span class="metric-value">Médian : <?= $view->formatDays($stats['medianLeadTime']) ?></span>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.cycleTime">
+                            <span class="metric-title">⏱️ Cycle time<?= \App\View\MetricTooltips::render('cycle_time') ?></span>
+                            <span class="metric-value">Moyen : <?= $view->formatDays($stats['avgCycleTime']) ?></span>
+                            <span class="metric-value">Médian : <?= $view->formatDays($stats['medianCycleTime']) ?></span>
+                        </div>
+                        <div class="metric" data-metric-toggle="team.waitingTime">
+                            <span class="metric-title">⌛ Waiting time<?= \App\View\MetricTooltips::render('waiting_time') ?></span>
+                            <span class="metric-value">Moyen : <?= $view->formatDays($stats['avgWaitingTime']) ?></span>
+                            <span class="metric-value">Médian : <?= $view->formatDays($stats['medianWaitingTime']) ?></span>
+                        </div>
+
+                        <!-- Causes d'attente cumulées sur les sprints sélectionnés (repliable, iso /sprint).
+                             Même id de métrique que la carte « Waiting time » : le détail des causes n'a pas
+                             de sens sans elle, les deux s'affichent et se masquent donc ensemble. -->
+                        <?php $waitingTimes = $view->getAggregatedWaitingTimes(); ?>
+                        <?php if (!empty($waitingTimes)): ?>
+                            <details class="team-scatter-help__more team-waiting-causes" data-metric-toggle="team.waitingTime">
+                                <summary>Causes d'attente</summary>
+                                <ul class="team-waiting-list">
+                                    <?php foreach ($waitingTimes as $cause => $days): ?>
+                                        <li>
+                                            <span class="badge <?= $view->getCategoryBadgeClass($view->getStatusCategory($cause)); ?>">
+                                                <?= $view->getWaitingCauseIcon($cause); ?><?= htmlspecialchars($view->normalizeStatusName($cause)); ?>
+                                            </span>
+                                            <strong><?= round($days, 1); ?> jours</strong>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <span class="sprint-section-sub"><em>(cumul sur les sprints sélectionnés ; au sein d'un sprint, un jour recouvert par plusieurs causes n'est compté qu'une fois)</em></span>
+                            </details>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Clic sur le point d'un sprint (courbe principale, dataset 0) des graphiques d'évolution : ouvre sa
+                     page /sprint dans un nouvel onglet. Les lignes cible / moyenne / médiane ne sont pas cliquables. -->
+                <script>
+                    window.teamChartSprintLink = function (urls) {
+                        const pointAt = (elements) => elements.find(e => e.datasetIndex === 0 && urls[e.index]);
+                        return {
+                            onClick: (evt, elements) => {
+                                const point = pointAt(elements);
+                                if (point) window.open(urls[point.index], '_blank', 'noopener');
+                            },
+                            onHover: (evt, elements) => {
+                                evt.native.target.style.cursor = pointAt(elements) ? 'pointer' : 'default';
+                            },
+                        };
+                    };
+                </script>
+
+                <!-- ============ ÉVOLUTION DE LA PRÉDICTIBILITÉ ============ -->
+                <?php
+                $trend  = $view->getPredictabilityTrend();
+                $target = $stats['predictabilityTarget'];
+                ?>
+                <div class="card" data-metric-toggle="team.predictabilityChart">
+                    <h2>📈 Évolution de la prédictibilité<?= \App\View\MetricTooltips::render('predictability') ?></h2>
+                    <p class="sprint-section-sub">
+                        Prédictibilité (Story Points terminés / engagés au démarrage) au fil des
+                        sprints sélectionnés, du plus ancien au plus récent. Ligne pointillée : cible
+                        <?= $view->formatNumber($target) ?> %. Cliquez sur un point pour ouvrir le sprint dans un nouvel onglet.
+                    </p>
+                    <div class="team-chart">
+                        <canvas id="predictabilityChart"></canvas>
+                    </div>
+
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script>
+                        (function() {
+                            const labels = <?= json_encode($trend['labels'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+                            const values = <?= json_encode($trend['values'], JSON_HEX_TAG) ?>;
+                            const urls = <?= json_encode($trend['urls'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+                            const target = <?= json_encode((float) $target) ?>;
+                            const average = <?= json_encode((float) $stats['avgPredictability']) ?>;
+
+                            // Points verts si la cible est atteinte, rouges sinon.
+                            const pointColors = values.map(v => v >= target ? '#10b981' : '#ef4444');
+
+                            const ctx = document.getElementById('predictabilityChart').getContext('2d');
+                            new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [
+                                        {
+                                            label: 'Prédictibilité (%)',
+                                            data: values,
+                                            borderColor: '#2563eb',
+                                            backgroundColor: '#2563eb22',
+                                            pointBackgroundColor: pointColors,
+                                            pointRadius: 5,
+                                            pointHoverRadius: 7,
+                                            tension: 0.25,
+                                            fill: true
+                                        },
+                                        {
+                                            // Cible constante, tracée en pointillés sans points.
+                                            label: 'Cible (' + target + ' %)',
+                                            data: labels.map(() => target),
+                                            borderColor: '#6b7280',
+                                            borderDash: [6, 6],
+                                            pointRadius: 0,
+                                            fill: false
+                                        },
+                                        {
+                                            // Prédictibilité moyenne sur les sprints sélectionnés.
+                                            label: 'Moyenne (' + average + ' %)',
+                                            data: labels.map(() => average),
+                                            borderColor: '#10b981',
+                                            borderWidth: 2,
+                                            pointRadius: 0,
+                                            fill: false
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    ...window.teamChartSprintLink(urls),
+                                    plugins: {
+                                        legend: { display: true },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: (c) => c.dataset.label + ' : ' + c.parsed.y + ' %'
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            // Axe jusqu'à 100 % au moins ; s'étend au-delà si dépassé.
+                                            suggestedMax: 100,
+                                            title: { display: true, text: 'Prédictibilité (%)' }
+                                        },
+                                        x: {
+                                            title: { display: true, text: 'Sprint' }
+                                        }
+                                    }
+                                }
+                            });
+                        })();
+                    </script>
+                </div>
+
+                <!-- ============ ÉVOLUTION DE L'ENGAGEMENT ============ -->
+                <?php $engagementTrend = $view->getEngagementTrend(); ?>
+                <div class="card" data-metric-toggle="team.engagementChart">
+                    <h2>🤝 Évolution de l'engagement<?= \App\View\MetricTooltips::render('engagement') ?></h2>
+                    <p class="sprint-section-sub">
+                        Engagement (tickets du périmètre initial terminés / planifiés au démarrage)
+                        au fil des sprints sélectionnés, du plus ancien au plus récent. Ligne pointillée :
+                        cible <?= $view->formatNumber($target) ?> %. Cliquez sur un point pour ouvrir le sprint dans un nouvel onglet.
+                    </p>
+                    <div class="team-chart">
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+
+                    <script>
+                        (function() {
+                            const labels = <?= json_encode($engagementTrend['labels'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+                            const values = <?= json_encode($engagementTrend['values'], JSON_HEX_TAG) ?>;
+                            const urls = <?= json_encode($engagementTrend['urls'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+                            const target = <?= json_encode((float) $target) ?>;
+                            const average = <?= json_encode((float) $stats['avgEngagement']) ?>;
+
+                            // Points verts si la cible est atteinte, rouges sinon.
+                            const pointColors = values.map(v => v >= target ? '#10b981' : '#ef4444');
+
+                            const ctx = document.getElementById('engagementChart').getContext('2d');
+                            new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [
+                                        {
+                                            label: 'Engagement (%)',
+                                            data: values,
+                                            borderColor: '#2563eb',
+                                            backgroundColor: '#2563eb22',
+                                            pointBackgroundColor: pointColors,
+                                            pointRadius: 5,
+                                            pointHoverRadius: 7,
+                                            tension: 0.25,
+                                            fill: true
+                                        },
+                                        {
+                                            // Cible constante, tracée en pointillés sans points.
+                                            label: 'Cible (' + target + ' %)',
+                                            data: labels.map(() => target),
+                                            borderColor: '#6b7280',
+                                            borderDash: [6, 6],
+                                            pointRadius: 0,
+                                            fill: false
+                                        },
+                                        {
+                                            // Engagement moyen sur les sprints sélectionnés.
+                                            label: 'Moyenne (' + average + ' %)',
+                                            data: labels.map(() => average),
+                                            borderColor: '#10b981',
+                                            borderWidth: 2,
+                                            pointRadius: 0,
+                                            fill: false
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    ...window.teamChartSprintLink(urls),
+                                    plugins: {
+                                        legend: { display: true },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: (c) => c.dataset.label + ' : ' + c.parsed.y + ' %'
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            // Axe jusqu'à 100 % au moins ; s'étend au-delà si dépassé.
+                                            suggestedMax: 100,
+                                            title: { display: true, text: 'Engagement (%)' }
+                                        },
+                                        x: {
+                                            title: { display: true, text: 'Sprint' }
+                                        }
+                                    }
+                                }
+                            });
+                        })();
+                    </script>
+                </div>
+
+                <!-- ============ ÉVOLUTION DE LA VÉLOCITÉ ============ -->
+                <div class="card" data-metric-toggle="team.velocityChart">
+                    <h2>📈 Évolution de la vélocité<?= \App\View\MetricTooltips::render('velocity') ?></h2>
+                    <p class="sprint-section-sub">
+                        Évolution au fil des sprints sélectionnés, du plus ancien au plus récent. Choisissez le calcul à afficher. 
+                        La courbe et sa moyenne (ligne pleine) se mettent à jour en direct quand vous modifiez les jours/homme dans le tableau ci-dessous. 
+                        Les sprints sans la donnée requise sont laissés vides. Cliquez sur un point pour ouvrir le sprint dans un nouvel onglet.
+                    </p>
+                    <div class="team-scatter__filters">
+                        <template x-for="[key, def] in Object.entries(metricDefs)" :key="key">
+                            <button type="button" class="team-filter"
+                                :class="{ 'team-filter--active': velocityMetric === key }"
+                                @click="setVelocityMetric(key)"
+                                x-text="def.label"></button>
+                        </template>
+                    </div>
+                    <div class="team-chart">
+                        <canvas id="velocityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- ============ DÉTAIL PAR SPRINT ============ -->
+                <div class="card" data-metric-toggle="team.sprintDetail">
+                    <h2>🗂️ Détail par sprint</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sprint</th>
+                                <th>Clôturé le</th>
+                                <th class="text-center">Jours ouvrés</th>
+                                <th class="text-center">Jours/Homme</th>
+                                <th class="text-center">Capacité (pts)</th>
+                                <th class="text-center">Vélocité (SP/j-h)</th>
+                                <th class="text-center">Vélocité (JH/1SP)</th>
+                                <th class="text-center">Tickets terminés</th>
+                                <th class="text-center">SP terminés</th>
+                                <th class="text-center">Reste à faire</th>
+                                <th class="text-center">Tickets ajoutés</th>
+                                <th class="text-center">Prédictibilité</th>
+                                <th class="text-center">Engagement</th>
+                                <th class="text-center">Waiting time moyen</th>
+                                <th class="text-center">Reliquat (nb de tickets)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($sprints as $i => $s): ?>
+                                <tr>
+                                    <td>
+                                        <a href="<?= $s['analysisUrl'] ?>" target=_blank>
+                                            <strong><?= htmlspecialchars($s['name']) ?></strong>
+                                        </a>
+                                        <?php if (!empty($s['fromCache'])): ?>
+                                            <span class="badge grey" title="Données issues du cache — sprint clôturé">🗄️</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= $view->formatDate($s['completeDate'] ?: $s['endDate']) ?></td>
+                                    <td class="text-center"><?= $view->formatDays($s['businessDays']) ?></td>
+                                    <td class="text-center">
+                                        <input type="number" min="0" step="0.5" class="mandays-input"
+                                            x-model="rows[<?= $i ?>].manDays"
+                                            @input="save(<?= $i ?>)"
+                                            placeholder="—"
+                                            :readonly="rows[<?= $i ?>].manDaysFromCapacity"
+                                            :title="rows[<?= $i ?>].manDaysFromCapacity ? 'Valeur calculée par la page Capacité équipe' : ''">
+                                        <span class="mandays-source" x-show="rows[<?= $i ?>].manDaysFromCapacity" x-cloak>
+                                            🔒 page Capacité
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="number" min="0" step="1" class="mandays-input"
+                                            x-model="rows[<?= $i ?>].capacityPoints"
+                                            @input="saveCapacity(<?= $i ?>)"
+                                            placeholder="—">
+                                    </td>
+                                    <td class="text-center" x-text="fmt(rowVelocity(<?= $i ?>))"><?= $view->formatNumber($s['velocityPerManDay']) ?></td>
+                                    <td class="text-center" x-text="fmt(rowManDaysPerSp(<?= $i ?>))"><?= $view->formatNumber($s['manDays'] && $s['doneStoryPoints'] > 0 ? round($s['manDays'] / $s['doneStoryPoints'], 2) : null) ?></td>
+                                    <td class="text-center"><?= $s['doneCount'] ?></td>
+                                    <td class="text-center"><?= $view->formatNumber($s['doneStoryPoints']) ?></td>
+                                    <td class="text-center"><?= $view->formatNumber($s['totalRemainingStoryPoints']) ?></td>
+                                    <td class="text-center"><?= $s['addedCount'] ?></td>
+                                    <td class="text-center"><?= $view->formatPercent($s['predictabilityPercent']) ?></td>
+                                    <td class="text-center"><?= $view->formatPercent($s['engagementPercent']) ?></td>
+                                    <td class="text-center"><?= $view->formatDays($s['avgWaitingTime']) ?></td>
+                                    <td class="text-center"><?= $s['reliquatCount'] ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        <tfoot>
+                            <tr class="sprint-tfoot-total">
+                                <td>Moyenne</td>
+                                <td></td>
+                                <td class="text-center"><?= $view->formatDays($stats['avgBusinessDays']) ?></td>
+                                <td class="text-center" x-text="fmt(totalManDays())" title="Total jours/homme saisis"><?= $view->formatNumber($stats['totalManDays']) ?></td>
+                                <td class="text-center" x-text="fmt(avgCapacityPoints())" title="Capacité moyenne saisie (pts)"><?= $view->formatNumber($stats['avgCapacityPoints']) ?></td>
+                                <td class="text-center" x-text="fmt(aggregateVelocity())" title="Vélocité globale SP/jours-homme"><?= $view->formatNumber($stats['velocityPerManDay']) ?></td>
+                                <td class="text-center" x-text="fmt(aggregateManDaysPerSp())" title="Jours-homme pour terminer 1 SP (global)"><?= $view->formatNumber($stats['manDaysPerSp']) ?></td>
+                                <td class="text-center"><?= $view->formatNumber($stats['avgDoneTickets']) ?></td>
+                                <td class="text-center"><?= $view->formatNumber($stats['avgDoneStoryPoints']) ?></td>
+                                <td class="text-center" title="Reste à faire moyen / sprint"><?= $view->formatNumber($stats['avgRemainingStoryPoints']) ?></td>
+                                <td class="text-center"><?= $view->formatNumber($stats['avgAddedTickets']) ?></td>
+                                <td class="text-center"><?= $view->formatPercent($stats['avgPredictability']) ?></td>
+                                <td class="text-center"><?= $view->formatPercent($stats['avgEngagement']) ?></td>
+                                <td class="text-center"><?= $view->formatDays($stats['avgWaitingTime']) ?></td>
+                                <td class="text-center"><?= $view->formatNumber($stats['avgReliquatTickets']) ?></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- ============ CYCLE TIME PAR ESTIMATION ============ -->
+                <?php $distribution = $view->getCycleTimeBySp(); ?>
+                <div class="card" data-metric-toggle="team.cycleTimeBySp">
+                    <h2>🎯 Cycle time par estimation<?= \App\View\MetricTooltips::render('cycle_time') ?></h2>
+                    <p class="sprint-section-sub">
+                        Pour chaque valeur de Story Points, temps de cycle (en cours → terminé,
+                        en jours ouvrés) réellement observé sur les tickets terminés. Permet de
+                        voir à combien de jours équivaut chaque estimation.
+                    </p>
+
+                    <?php if (empty($distribution)): ?>
+                        <p><em>Aucun ticket terminé estimé avec un cycle time mesurable sur ces sprints.</em></p>
+                    <?php else: ?>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Estimation (SP)</th>
+                                    <th class="text-center">Nb tickets terminés</th>
+                                    <th class="text-center">Cycle time moyen</th>
+                                    <th class="text-center">Médian</th>
+                                    <th class="text-center">Min</th>
+                                    <th class="text-center">Max</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($distribution as $row): ?>
+                                    <tr>
+                                        <td><span class="badge blue"><?= $view->formatNumber($row['storyPoints']) ?> SP</span></td>
+                                        <td class="text-center"><?= $row['count'] ?></td>
+                                        <td class="text-center"><?= $view->formatDays($row['average']) ?></td>
+                                        <td class="text-center"><?= $view->formatDays($row['median']) ?></td>
+                                        <td class="text-center"><?= $view->formatDays($row['min']) ?></td>
+                                        <td class="text-center"><?= $view->formatDays($row['max']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+
+                        <h3 class="team-scatter-title">Points d'effort VS temps de cycle</h3>
+                        <div class="sprint-section-sub team-scatter-help">
+                            <p>Cette vue aide à analyser la relation entre l'estimation (Story Points) et le temps de cycle réel observé.</p>
+
+                            <p class="info-note">ℹ️ Ce graphique n'a pas vocation à évaluer la performance des individus ni même de l'équipe. Elle aide l'équipe à <b>mieux comprendre son système de travail</b> afin d'<b>améliorer sa prédictibilité</b> et d'<b>identifier des leviers d'amélioration continue</b> fondés sur des données factuelles plutôt qu'un ressenti.</p>
+
+                            <details class="team-scatter-help__more">
+                                <summary>❓ Comment interpréter ce graphique ?</summary>
+
+                                <p class="team-scatter-help__lead">Une faible dispersion traduit généralement une meilleure homogénéité du travail et une meilleure prédictibilité du flux.</p>
+
+                                <p class="team-scatter-help__lead">Une forte dispersion, ou un grand écart min-max, peut révéler des opportunités d'amélioration concernant :</p>
+                                <ul>
+                                    <li>le découpage des tickets ;</li>
+                                    <li>l'anticipation des dépendances et des blocages ;</li>
+                                    <li>la catégorisation des types de travail ;</li>
+                                    <li>l'harmonisation des pratiques d'estimation au sein de l'équipe.</li>
+                                </ul>
+
+                                <p class="team-scatter-help__lead">Un écart important entre les valeurs minimales et maximales pour une même estimation traduit une <b>forte variabilité du travail observé</b>. Celle-ci peut être liée à des différences de découpage, à des dépendances, à des blocages ou à des cas atypiques <b>méritant une analyse complémentaire</b>.</p>
+
+                                <br/>
+
+                                <p class="team-scatter-help__subtitle">Questions puissantes à explorer avec l'équipe :</p>
+                                <ul>
+                                    <li>Les tickets associés à cette estimation étaient-ils <b>réellement comparables</b> entre eux ?</li>
+                                    <li>Certains tickets auraient-ils mérité d'être <b>découpés davantage</b> ?</li>
+                                    <li><b>Quels facteurs ont le plus contribué</b> aux écarts observés ?</li>
+                                    <li>Des <b>dépendances ou validations externes ont-elles ralenti</b> certains tickets ? Comment <b>mieux les anticiper</b> à l'avenir ?</li>
+                                    <li>Certains tickets ont-ils <b>changé de périmètre</b> en cours de réalisation ?</li>
+                                    <li>Mélangeons-nous différentes <b>natures de travail</b> sous une même estimation (US, Tâches, Spikes, Bugs...) ?</li>
+                                    <li>Notre <b>étalon d'estimation est-il bien compris</b> de la même manière par tous ? Est-il <b>mis à jour suffisament régulièrement</b> ?</li>
+                                    <li><b>Quels enseignements pouvons-nous tirer</b> des tickets les plus rapides et des plus lents ?</li>
+                                </ul>
+                            </details>
+                        </div>
+                        <p class="sprint-section-sub">
+                            Chaque <span class="team-scatter-legend team-scatter-legend--point">×</span> est un ticket
+                            terminé (estimation × cycle time réel), <strong>coloré par type</strong>.
+                            <br/>Utilisez les boutons pour isoler un type de ticket.
+                            <br/>
+                            💡 Cliquez sur un <span class="team-scatter-legend team-scatter-legend--point">×</span>
+                            pour ouvrir le ticket correspondant dans Jira (nouvel onglet).
+                        </p>
+                        <p class="sprint-section-sub team-scatter-scope">
+                            ℹ️ Périmètre : uniquement les tickets <strong>terminés</strong>, <strong>estimés</strong>
+                            (Story Points &gt; 0) et au <strong>cycle time mesurable</strong> (un premier passage
+                            « en cours » a été tracé). « Tout » = tous les <strong>types</strong> réunis, pas tous les
+                            tickets dans l'absolu.
+                        </p>
+                        <?php include __DIR__ . '/../components/team-metrics/cycleTimeScatterChart.phtml'; ?>
+                    <?php endif; ?>
+                </div>
+
+                </div><!-- /x-data manDaysVelocity -->
+
+                <script>
+                    /**
+                     * Composant Alpine de saisie des jours/homme par sprint.
+                     * Calcule en direct la vélocité SP/jours-homme (par ligne et agrégée),
+                     * persiste chaque saisie via l'API (debounce) et alimente la courbe
+                     * d'évolution de la vélocité (mise à jour en direct à chaque saisie),
+                     * sans recharger la page.
+                     *
+                     * @param {{projectKey:string, rows:Array<{id:string,doneSp:number,manDays:?number}>, chrono:number[], labels:string[], urls:string[]}} config
+                     */
+                    window.manDaysVelocity = function (config) {
+                        // Instance Chart.js conservée HORS de l'état réactif Alpine : Alpine
+                        // encapsule les propriétés de données dans un Proxy, or Chart.js v4
+                        // utilise des champs privés (#) inaccessibles via Proxy — ce qui
+                        // casserait chart.update(). On la garde donc en variable de closure.
+                        let velocityChart = null;
+
+                        return {
+                            projectKey: config.projectKey,
+                            rows: config.rows,
+                            // Ordre et libellés chronologiques pour la courbe de vélocité.
+                            chrono: config.chrono,
+                            labels: config.labels,
+                            // Page /sprint de chaque point (même ordre que labels), ouverte au clic sur le point.
+                            urls: config.urls,
+                            timers: {},
+                            capacityTimers: {},
+
+                            // Calcul affiché par le graphe d'évolution (switch de la carte).
+                            velocityMetric: 'spPerManDay',
+                            // Calculs disponibles : libellé du bouton/série, unité (pour la
+                            // moyenne) et titre de l'axe Y.
+                            metricDefs: {
+                                spPerManDay:  { label: 'Points terminés par jours/homme', unit: 'SP/j-h',  y: 'SP / jour-homme' },
+                                spPerDay:     { label: 'Points terminés par jour ouvré',  unit: 'SP/j',    y: 'SP / jour ouvré' },
+                                manDaysPerSp: { label: 'Jours pour 1 SP par jours/homme', unit: 'j-h/SP',  y: 'jours-homme / SP' },
+                                daysPerSp:    { label: 'Jours pour 1 SP par jour ouvré',  unit: 'j/SP',    y: 'jours ouvrés / SP' },
+                                spPerPerson:  { label: 'SP terminés par personne',        unit: 'SP/pers', y: 'SP / personne' },
+                            },
+
+                            // Crée le graphe au démarrage du composant. Les mises à jour en
+                            // direct sont déclenchées depuis save(i), appelé à chaque saisie.
+                            init() {
+                                this.initVelocityChart();
+                            },
+
+                            // Bascule le calcul affiché par le graphe puis le redessine.
+                            setVelocityMetric(key) {
+                                this.velocityMetric = key;
+                                this.refreshVelocityChart();
+                            },
+
+                            // Valeur d'une ligne pour un calcul donné (null si donnée requise
+                            // absente : la courbe laisse alors un vide sur ce sprint).
+                            rowMetricFor(i, metric) {
+                                const r = this.rows[i];
+                                const md = parseFloat(r.manDays);
+                                const bd = r.businessDays;
+                                const sp = r.doneSp;
+                                switch (metric) {
+                                    case 'spPerManDay':  return md > 0 ? Math.round((sp / md) * 100) / 100 : null;
+                                    case 'spPerDay':     return bd > 0 ? Math.round((sp / bd) * 100) / 100 : null;
+                                    case 'manDaysPerSp': return (md > 0 && sp > 0) ? Math.round((md / sp) * 100) / 100 : null;
+                                    case 'daysPerSp':    return (bd > 0 && sp > 0) ? Math.round((bd / sp) * 100) / 100 : null;
+                                    case 'spPerPerson':  return (md > 0 && bd > 0) ? Math.round(((sp * bd) / md) * 100) / 100 : null;
+                                }
+                                return null;
+                            },
+
+                            // Valeur d'une ligne pour le calcul courant (délègue à rowMetricFor).
+                            rowMetric(i) {
+                                return this.rowMetricFor(i, this.velocityMetric);
+                            },
+
+                            // Médiane des valeurs d'un calcul sur les sprints sélectionnés.
+                            // Les sprints sans la donnée requise (null) sont exclus ; null si
+                            // aucune valeur exploitable.
+                            medianOf(metric) {
+                                const values = this.rows
+                                    .map((_, i) => this.rowMetricFor(i, metric))
+                                    .filter((v) => v !== null)
+                                    .sort((a, b) => a - b);
+                                if (values.length === 0) return null;
+                                const mid = Math.floor(values.length / 2);
+                                // Nombre pair : moyenne des deux valeurs centrales ; impair : centrale.
+                                const med = values.length % 2 === 0
+                                    ? (values[mid - 1] + values[mid]) / 2
+                                    : values[mid];
+                                return Math.round(med * 100) / 100;
+                            },
+
+                            // Médiane du calcul actuellement affiché par le graphe.
+                            medianMetric() {
+                                return this.medianOf(this.velocityMetric);
+                            },
+
+                            // Moyenne agrégée du calcul courant (réutilise les agrégats des
+                            // cartes pour rester cohérent ; null si donnée insuffisante).
+                            aggregateMetric() {
+                                switch (this.velocityMetric) {
+                                    case 'spPerManDay':  return this.aggregateVelocity();
+                                    case 'manDaysPerSp': return this.aggregateManDaysPerSp();
+                                    case 'spPerPerson':  return this.aggregateSpPerPerson();
+                                    case 'spPerDay':
+                                    case 'daysPerSp': {
+                                        let sp = 0, bd = 0;
+                                        for (const r of this.rows) {
+                                            if (r.businessDays > 0) { sp += r.doneSp; bd += r.businessDays; }
+                                        }
+                                        if (this.velocityMetric === 'spPerDay') {
+                                            return bd > 0 ? Math.round((sp / bd) * 100) / 100 : null;
+                                        }
+                                        return sp > 0 ? Math.round((bd / sp) * 100) / 100 : null;
+                                    }
+                                }
+                                return null;
+                            },
+
+                            // Série du calcul courant en ordre chronologique.
+                            velocitySeries() {
+                                return this.chrono.map((i) => this.rowMetric(i));
+                            },
+
+                            // Libellé de la ligne de moyenne, valeur et unité incluses ;
+                            // « Moyenne » seul tant que la valeur est indéfinie.
+                            velocityAvgLabel() {
+                                const v = this.aggregateMetric();
+                                return v === null
+                                    ? 'Moyenne'
+                                    : 'Moyenne (' + v + ' ' + this.metricDefs[this.velocityMetric].unit + ')';
+                            },
+
+                            // Libellé de la ligne médiane, valeur et unité incluses ;
+                            // « Médiane » seul tant que la valeur est indéfinie.
+                            velocityMedianLabel() {
+                                const v = this.medianMetric();
+                                return v === null
+                                    ? 'Médiane'
+                                    : 'Médiane (' + v + ' ' + this.metricDefs[this.velocityMetric].unit + ')';
+                            },
+
+                            // Construit la courbe d'évolution : vélocité par sprint + ligne
+                            // horizontale de la vélocité moyenne agrégée.
+                            initVelocityChart() {
+                                const def = this.metricDefs[this.velocityMetric];
+                                const ctx = document.getElementById('velocityChart').getContext('2d');
+                                velocityChart = new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: this.labels,
+                                        datasets: [
+                                            {
+                                                label: def.label,
+                                                data: this.velocitySeries(),
+                                                borderColor: '#2563eb',
+                                                backgroundColor: '#2563eb22',
+                                                pointBackgroundColor: '#2563eb',
+                                                pointRadius: 5,
+                                                pointHoverRadius: 7,
+                                                tension: 0.25,
+                                                spanGaps: true, // relie par-dessus les sprints sans saisie
+                                                fill: true
+                                            },
+                                            {
+                                                // Vélocité moyenne agrégée (recalculée en direct).
+                                                label: this.velocityAvgLabel(),
+                                                data: this.labels.map(() => this.aggregateVelocity()),
+                                                borderColor: '#10b981',
+                                                borderWidth: 2,
+                                                pointRadius: 0,
+                                                fill: false
+                                            },
+                                            {
+                                                // Médiane du calcul courant (barre horizontale, recalculée en direct).
+                                                label: this.velocityMedianLabel(),
+                                                data: this.labels.map(() => this.medianMetric()),
+                                                borderColor: '#f59e0b',
+                                                borderWidth: 2,
+                                                borderDash: [6, 4],
+                                                pointRadius: 0,
+                                                fill: false
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        ...window.teamChartSprintLink(this.urls),
+                                        plugins: {
+                                            legend: { display: true },
+                                            tooltip: {
+                                                callbacks: {
+                                                    // Titre = nom du sprint (label X) ; corps = vélocité.
+                                                    label: (c) => c.dataset.label + ' : ' + c.parsed.y
+                                                }
+                                            }
+                                        },
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                title: { display: true, text: def.y }
+                                            },
+                                            x: {
+                                                title: { display: true, text: 'Sprint' }
+                                            }
+                                        }
+                                    }
+                                });
+                            },
+
+                            // Réinjecte les séries recalculées (vélocités + moyenne) dans le
+                            // graphe et le redessine. Appelé à chaque saisie de jours/homme.
+                            refreshVelocityChart() {
+                                if (!velocityChart) return;
+                                const def = this.metricDefs[this.velocityMetric];
+                                velocityChart.data.datasets[0].data = this.velocitySeries();
+                                velocityChart.data.datasets[0].label = def.label;
+                                velocityChart.data.datasets[1].data = this.labels.map(() => this.aggregateMetric());
+                                velocityChart.data.datasets[1].label = this.velocityAvgLabel();
+                                velocityChart.data.datasets[2].data = this.labels.map(() => this.medianMetric());
+                                velocityChart.data.datasets[2].label = this.velocityMedianLabel();
+                                velocityChart.options.scales.y.title.text = def.y;
+                                velocityChart.update();
+                            },
+
+                            // Vélocité d'une ligne : SP terminés / jours-homme (null si non saisi).
+                            rowVelocity(i) {
+                                const md = parseFloat(this.rows[i].manDays);
+                                if (!md || md <= 0) return null;
+                                return Math.round((this.rows[i].doneSp / md) * 100) / 100;
+                            },
+
+                            // Inverse d'une ligne : jours-homme pour terminer 1 SP (jours-homme /
+                            // SP terminés). Null si jours-homme non saisi ou aucun SP terminé.
+                            rowManDaysPerSp(i) {
+                                const md = parseFloat(this.rows[i].manDays);
+                                if (!md || md <= 0 || this.rows[i].doneSp <= 0) return null;
+                                return Math.round((md / this.rows[i].doneSp) * 100) / 100;
+                            },
+
+                            // Vélocité agrégée : Σ SP / Σ jours-homme, sur les seuls sprints saisis.
+                            aggregateVelocity() {
+                                let sp = 0, md = 0;
+                                for (const r of this.rows) {
+                                    const v = parseFloat(r.manDays);
+                                    if (v && v > 0) { sp += r.doneSp; md += v; }
+                                }
+                                return md > 0 ? Math.round((sp / md) * 100) / 100 : null;
+                            },
+
+                            // Inverse de la vélocité jours-homme : Σ jours-homme / Σ SP terminés,
+                            // sur les seuls sprints saisis (null si aucune saisie ou aucun SP).
+                            aggregateManDaysPerSp() {
+                                let sp = 0, md = 0;
+                                for (const r of this.rows) {
+                                    const v = parseFloat(r.manDays);
+                                    if (v && v > 0) { sp += r.doneSp; md += v; }
+                                }
+                                return sp > 0 ? Math.round((md / sp) * 100) / 100 : null;
+                            },
+
+                            // SP par personne et par sprint (moyenne ; effectif moyen estimé
+                            // = jours-homme / jours ouvrés, donc SP × jours ouvrés / jours-homme).
+                            // Moyenne sur les seuls sprints saisis (null si aucun).
+                            aggregateSpPerPerson() {
+                                let sum = 0, n = 0;
+                                for (const r of this.rows) {
+                                    const v = parseFloat(r.manDays);
+                                    if (v && v > 0 && r.businessDays > 0) {
+                                        sum += (r.doneSp * r.businessDays) / v;
+                                        n++;
+                                    }
+                                }
+                                return n > 0 ? Math.round((sum / n) * 100) / 100 : null;
+                            },
+
+                            // Jours-homme saisis (> 0), pour la moyenne et la fourchette.
+                            manDaysList() {
+                                return this.rows
+                                    .map((r) => parseFloat(r.manDays))
+                                    .filter((v) => v && v > 0);
+                            },
+
+                            // Moyenne des jours-homme saisis (null si aucune saisie).
+                            aggregateManDaysAvg() {
+                                const list = this.manDaysList();
+                                if (list.length === 0) return null;
+                                const sum = list.reduce((a, b) => a + b, 0);
+                                return Math.round((sum / list.length) * 10) / 10;
+                            },
+
+                            // Jours-homme minimum saisi (null si aucune saisie).
+                            manDaysMin() {
+                                const list = this.manDaysList();
+                                return list.length ? Math.round(Math.min(...list) * 10) / 10 : null;
+                            },
+
+                            // Jours-homme maximum saisi (null si aucune saisie).
+                            manDaysMax() {
+                                const list = this.manDaysList();
+                                return list.length ? Math.round(Math.max(...list) * 10) / 10 : null;
+                            },
+
+                            // Total des jours-homme saisis (pied de tableau).
+                            totalManDays() {
+                                let md = 0;
+                                for (const r of this.rows) {
+                                    const v = parseFloat(r.manDays);
+                                    if (v && v > 0) md += v;
+                                }
+                                return md > 0 ? Math.round(md * 10) / 10 : null;
+                            },
+
+                            // Affichage : tiret si null/indéfini, sinon la valeur telle quelle.
+                            fmt(value) {
+                                return (value === null || value === undefined || value === '') ? '—' : String(value);
+                            },
+
+                            // Affichage d'un écart signé : tiret si null, « + » explicite si positif.
+                            fmtDelta(value) {
+                                if (value === null || value === undefined || value === '') return '—';
+                                return value > 0 ? '+' + value : String(value);
+                            },
+
+                            // Capacités en points saisies (> 0), pour la moyenne et le delta.
+                            capacityList() {
+                                return this.rows
+                                    .map((r) => parseFloat(r.capacityPoints))
+                                    .filter((v) => v && v > 0);
+                            },
+
+                            // Capacité moyenne saisie (null si aucune saisie) — pied de tableau.
+                            avgCapacityPoints() {
+                                const list = this.capacityList();
+                                if (list.length === 0) return null;
+                                const sum = list.reduce((a, b) => a + b, 0);
+                                return Math.round((sum / list.length) * 10) / 10;
+                            },
+
+                            // Delta moyen (total SP − capacité) sur les seuls sprints avec
+                            // une capacité saisie (> 0). Null si aucun.
+                            avgCapacityDelta() {
+                                let sum = 0, n = 0;
+                                for (const r of this.rows) {
+                                    const cap = parseFloat(r.capacityPoints);
+                                    if (cap && cap > 0) {
+                                        sum += (r.totalSp - cap);
+                                        n++;
+                                    }
+                                }
+                                return n > 0 ? Math.round((sum / n) * 10) / 10 : null;
+                            },
+
+                            // Icône d'état du delta moyen : au-dessus (rouge), égal (orange),
+                            // en-dessous (vert). Chaîne vide si aucune capacité saisie.
+                            capacityDeltaIcon() {
+                                const d = this.avgCapacityDelta();
+                                if (d === null) return '';
+                                return d > 0 ? '🔴' : (d < 0 ? '🟢' : '🟠');
+                            },
+
+                            // Persiste la saisie d'une ligne (debounce 700ms) ; vide/<=0 => effacement.
+                            // Corps en urlencoded : l'app ne parse pas le JSON (pas de BodyParsingMiddleware).
+                            save(i) {
+                                const row = this.rows[i];
+                                // Jours/homme pilotés par la page Capacité : champ verrouillé, aucune écriture.
+                                if (row.manDaysFromCapacity) return;
+                                // Mise à jour immédiate de la courbe (hors debounce de l'API).
+                                this.refreshVelocityChart();
+                                clearTimeout(this.timers[i]);
+                                this.timers[i] = setTimeout(() => {
+                                    const raw = row.manDays;
+                                    const manDays = (raw === '' || raw === null || parseFloat(raw) <= 0)
+                                        ? '' : parseFloat(raw);
+                                    fetch(
+                                        '/api/internal/projects/' + encodeURIComponent(this.projectKey)
+                                        + '/sprints/' + encodeURIComponent(row.id) + '/man-days',
+                                        {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                            body: 'manDays=' + encodeURIComponent(manDays)
+                                        }
+                                    ).catch(() => {});
+                                }, 700);
+                            },
+
+                            // Persiste la capacité en points d'une ligne (debounce 700ms) ;
+                            // vide/<=0 => effacement. Le delta moyen de capacité se met à
+                            // jour en direct (x-text), sans recharger la page.
+                            saveCapacity(i) {
+                                const row = this.rows[i];
+                                clearTimeout(this.capacityTimers[i]);
+                                this.capacityTimers[i] = setTimeout(() => {
+                                    const raw = row.capacityPoints;
+                                    const value = (raw === '' || raw === null || parseFloat(raw) <= 0)
+                                        ? '' : parseFloat(raw);
+                                    fetch(
+                                        '/api/internal/projects/' + encodeURIComponent(this.projectKey)
+                                        + '/sprints/' + encodeURIComponent(row.id) + '/capacity-points',
+                                        {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                            body: 'capacityPoints=' + encodeURIComponent(value)
+                                        }
+                                    ).catch(() => {});
+                                }, 700);
+                            }
+                        };
+                    };
+                </script>
+            <?php endif; ?>
+        </div>
+
+        <?php include __DIR__ . '/../components/team-metrics/team-metrics-releases.phtml'; ?>
+
+        <?php include __DIR__ . '/../components/team-metrics/team-metrics-features.phtml'; ?>
+    </div>
+
+    <!-- Applique le mode de vue courant (simplifiée / complète) et câble son toggle en haut de page. -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            window.MetricPrefs.apply('team_metrics');
+        });
+    </script>
+
+    <?php include __DIR__ . '/../footer.phtml'; ?>
+</body>
+
+</html>
+

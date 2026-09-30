@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * Publie la hauteur du bandeau collant de la page dans la variable CSS `--sticky-bar-h`.
+ *
+ * Consommée par la règle globale `thead th { top: var(--sticky-bar-h, 0px) }` : sans elle, les en-têtes de
+ * tableaux collants se figeraient à top:0, donc DERRIÈRE le bandeau (qui a un z-index supérieur).
+ *
+ * Mesure continue (ResizeObserver) et non valeur figée : la hauteur du bandeau varie au repli responsive
+ * et selon son contenu (messages de retour, éléments conditionnels).
+ *
+ * À inclure sur toute page portant un élément `.sticky-bar`, après celui-ci.
+ */
+?>
+<script>
+    (function () {
+        const bar = document.querySelector('.sticky-bar');
+        if (!bar || typeof ResizeObserver === 'undefined') {
+            return;
+        }
+        const publishHeight = function () {
+            document.documentElement.style.setProperty('--sticky-bar-h', bar.offsetHeight + 'px');
+        };
+        new ResizeObserver(publishHeight).observe(bar);
+        publishHeight();
+    })();
+</script>

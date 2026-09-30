@@ -1,0 +1,224 @@
+/* ============================================================
+   DOCS — Manuel utilisateur (/docs)
+   ============================================================ */
+.docs-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 40px;
+}
+.docs-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+.docs-subtitle {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 16px;
+}
+.docs-intro {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+.docs-intro--note {
+    background: var(--bg-secondary, #f8fafc);
+    border-left: 3px solid var(--primary);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin-bottom: 24px;
+}
+
+/* Sommaire */
+.docs-toc {
+    background: var(--bg-secondary, #f8fafc);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 36px;
+}
+.docs-toc__title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-bottom: 10px;
+}
+.docs-toc__list {
+    margin: 0;
+    padding-left: 20px;
+    line-height: 2;
+}
+.docs-toc__list a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.93rem;
+}
+.docs-toc__list a:hover { text-decoration: underline; }
+
+/* Sections */
+.docs-section {
+    margin-bottom: 44px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+}
+.docs-section:last-child { border-bottom: none; }
+.docs-section h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+.docs-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 20px 0 8px;
+}
+.docs-section p, .docs-section ul, .docs-section ol {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.docs-section li { margin-bottom: 4px; }
+.docs-note {
+    background: var(--bg-secondary, #f8fafc);
+    border-left: 3px solid var(--primary);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.87rem;
+    color: var(--text-light);
+    margin-top: 12px;
+}
+
+/* Grille config */
+.docs-config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+.docs-config-item {
+    background: var(--bg-secondary, #f8fafc);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.docs-config-item h3 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    margin-top: 0;
+    color: var(--text);
+}
+.docs-config-item p {
+    font-size: 0.87rem;
+    color: var(--text-light);
+    margin: 0 0 6px;
+    line-height: 1.5;
+}
+
+/* Grille métriques */
+.docs-metrics-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+.docs-metric-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: var(--bg-secondary, #f8fafc);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+.docs-metric-card__icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    width: 32px;
+    text-align: center;
+    margin-top: 2px;
+}
+.docs-metric-card strong {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+.docs-metric-card p {
+    font-size: 0.87rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    margin: 0 0 4px;
+}
+.docs-metric-level {
+    font-size: 0.8rem !important;
+    font-weight: 600;
+    color: var(--text-light) !important;
+    opacity: 0.75;
+}
+
+/* Grille Lean */
+.docs-lean-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+}
+.docs-lean-card {
+    background: var(--bg-secondary, #f8fafc);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.docs-lean-card h3 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    margin-top: 0;
+    color: var(--text);
+}
+.docs-lean-card p {
+    font-size: 0.87rem;
+    color: var(--text-light);
+    margin: 0 0 6px;
+    line-height: 1.5;
+}
+
+/* FAQ */
+.docs-faq {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+}
+.docs-faq-item {
+    border-left: 3px solid var(--border);
+    padding-left: 14px;
+    margin-top: 10px;
+}
+.docs-faq-item h3 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 4px;
+}
+.docs-faq-item p {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin: 0;
+    line-height: 1.55;
+}
+.docs-faq-item a {
+    color: var(--primary);
+}
+

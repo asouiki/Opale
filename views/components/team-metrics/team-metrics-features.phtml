@@ -1,0 +1,299 @@
+<?php
+
+/**
+ * Onglet « Features » de la page Métriques d'équipe.
+ *
+ * Liste les Features (issues de type Feature) du « PI en cours » — fenêtre temporelle déduite des
+ * sprints sélectionnés — avec, par Feature, ses Lead/Cycle/Waiting Time cumulés sur ses tickets
+ * enfants, son efficacité du flow et un lien d'analyse vers /feature. En tête : moyennes et médianes
+ * agrégées. Données chargées paresseusement via /api/internal/projects/{key}/pi-features (au 1ᵉʳ
+ * affichage de l'onglet). Réutilise le composant Alpine et les styles de l'onglet Releases (seul
+ * l'endpoint et le rendu du badge diffèrent).
+ *
+ * @var \App\View\TeamMetricsView|null $view Fournie par le scope du template parent (team-metrics.phtml).
+ *                                           Null si aucun sprint n'a encore été analysé.
+ */
+
+// Sans analyse de sprints, l'onglet reste utilisable : la période est alors saisie au calendrier
+// (cf. bloc « Période » ci-dessous), et le projet est relu côté client de la sélection persistée.
+// Fenêtre du « PI en cours » = du démarrage du sprint le plus ancien à la clôture du plus récent
+// (mêmes bornes que l'en-tête de l'onglet Sprints), normalisées en Y-m-d.
+$featSprints = $view ? $view->getSprints() : [];
+$featStarts  = array_filter(array_column($featSprints, 'startDate'));
+$featEnds    = array_filter(array_map(
+    static fn (array $s): ?string => $s['completeDate'] ?: $s['endDate'],
+    $featSprints
+));
+$featFromRaw = $featStarts ? min($featStarts) : null;
+$featToRaw   = $featEnds ? max($featEnds) : null;
+
+// Sprint dont le startDate est le plus ancien → libellé affiché dans le texte.
+$featFirstSprint = $featFromRaw ? array_reduce($featSprints, static function (?array $carry, array $s) use ($featFromRaw): array {
+    if (($s['startDate'] ?? '') === $featFromRaw) {
+        return $s;
+    }
+    return $carry ?? $s;
+}) : null;
+
+// Sprint dont la date de fin est la plus récente → libellé affiché dans le texte.
+$featLastSprint = $featToRaw ? array_reduce($featSprints, static function (?array $carry, array $s) use ($featToRaw): array {
+    $end = $s['completeDate'] ?: $s['endDate'];
+    if ($end === $featToRaw) {
+        return $s;
+    }
+    return $carry ?? $s;
+}) : null;
+
+$featConfig = [
+    // Vide sans analyse : le composant Alpine le résout alors depuis la sélection de projet persistée.
+    'projectKey'      => $view ? $view->getProjectKey() : '',
+    'from'            => $featFromRaw ? (new \DateTime($featFromRaw))->format('Y-m-d') : '',
+    'to'              => $featToRaw ? (new \DateTime($featToRaw))->format('Y-m-d') : '',
+    'firstSprintName' => $featFirstSprint['name'] ?? '',
+    'lastSprintName'  => $featLastSprint['name'] ?? '',
+    // Segment d'API consommé par le composant partagé piEntitiesTab (cf. /js/piEntitiesTab.js).
+    'resource'        => 'pi-features',
+];
+?>
+
+<!-- ============ ONGLET 3 : FEATURES ============ -->
+<!-- Chargement paresseux : le fetch (coûteux côté Jira) n'est déclenché qu'au 1ᵉʳ affichage de
+     l'onglet, via l'événement « load-pi-features » émis par le bouton d'onglet. -->
+<div x-show="tab === 'features'"
+    x-data="piEntitiesTab(<?= htmlspecialchars(json_encode($featConfig), ENT_QUOTES) ?>)"
+    @load-pi-features.window="loadOnce()">
+
+    <div class="card">
+        <div class="pi-releases__head">
+            <h2>🧩 Features sur la période sélectionnée (<em x-text="from + ' → ' + to"></em>)</h2>
+            <p class="sprint-section-sub">
+                Périmètre : Features (projet actif + projet parent, filtrées sur l'équipe) <strong>travaillées</strong> pendant la période analysée — mises en chantier, poursuivies ou terminées
+                (<strong x-text="firstSprintName || from || '—'"></strong> → <strong x-text="extended ? 'aujourd\'hui' : (lastSprintName || to || '—')"></strong>
+                · <em x-text="from + ' → ' + to"></em>).
+            </p>
+            <p class="sprint-section-sub">
+                Dépliez une ligne (▸) pour le détail de la Feature : total des Story Points, bugs rattachés et répartition
+                par type de ticket. Ce détail ne retient que la <strong>contribution de l'équipe</strong> (tickets du projet
+                analysé), et se limite aux types de ticket comptés dans les métriques.
+            </p>
+            <p class="sprint-section-sub">
+                Les Features terminées sont mises en cache permanent. Les autres sont mises en cache pour une heure.
+                Pour resynchroniser avec Jira, <strong>cochez les lignes voulues</strong> puis utilisez le bouton Recalculer :
+                c'est le seul moyen de rafraîchir une Feature terminée, dont le détail (Story Points, étiquettes de bugs)
+                reste modifiable après la clôture.
+            </p>
+        </div>
+
+        <!-- Actions SŒURS de l'en-tête, jamais dans son flux : placées ici, elles restent entre le texte
+             et les cartes de synthèse, que le bouton « jusqu'à aujourd'hui » soit affiché ou non. -->
+        <div class="pi-releases__actions">
+            <!-- Période analysée : pré-remplie par les sprints analysés, librement modifiable ici. -->
+            <div class="pi-period">
+                <label class="pi-period__field">Du <input type="date" x-model="from" min="2000-01-01" :max="todayYmd()" :disabled="loading"></label>
+                <label class="pi-period__field">au <input type="date" x-model="to" min="2000-01-01" :max="todayYmd()" :disabled="loading"></label>
+                <button type="button" class="btn-secondary" @click="applyDates()"
+                    :disabled="loading || from === ''"
+                    :title="from === '' ? 'Renseignez d\'abord une date de début' : 'Fin laissée vide : la période ira jusqu\'à aujourd\'hui'">
+                    📅 Appliquer la période
+                </button>
+            </div>
+            <button type="button" class="btn-secondary"
+                @click="refreshSelection()" :disabled="loading || !items.some((r) => isSelected(r))"
+                title="Resynchronise avec Jira les seules Features cochées, terminées ou non">
+                🔄 Recalculer la sélection depuis Jira
+            </button>
+            <button type="button" class="btn-secondary" x-show="loaded && canExtendToToday"
+                @click="extendToToday()" :disabled="loading">
+                ➕ Ajouter les Features jusqu'à aujourd'hui
+            </button>
+        </div>
+
+        <!-- Aucune période exploitable : aucun appel Jira n'est lancé, on explique quoi faire. -->
+        <div x-show="!loaded && !loading && !error && !notice" class="pi-releases__state">
+            📊 Renseignez une <strong>période</strong> ci-dessus, ou analysez des sprints dans l'onglet
+            <strong>Sprints</strong> pour la pré-remplir automatiquement.
+        </div>
+
+        <!-- Avancement : chiffré dès que le chargement se fait par lots (batchTotal renseigné), sinon
+             repli sur le compteur indicatif. Une fenêtre chargée par lots peut durer : sans progression
+             visible, l'attente est indiscernable d'un blocage. -->
+        <div x-show="loading" aria-busy="true" class="pi-releases__state"
+            x-text="batchTotal > 0
+                ? '⏳ Chargement des Features… ' + batchDone + ' / ' + batchTotal
+                : (expectedCount !== null
+                    ? '⏳ Chargement de ' + expectedCount + ' Features…'
+                    : '⏳ Chargement des Features…')"></div>
+
+        <div x-show="loading && batchTotal > 0" x-cloak class="pi-batch-progress">
+            <div class="pi-batch-progress__bar" :style="'width:' + Math.round(batchDone / batchTotal * 100) + '%'"></div>
+        </div>
+
+        <!-- Bouton d'interruption HORS du bloc aria-busy (pointer-events:none) pour rester cliquable. -->
+        <div x-show="loading" x-cloak class="team-sprints__stop">
+            <button type="button" @click="stopLoading()" class="team-sprints__stop-btn">
+                ✋ Stopper le chargement
+            </button>
+        </div>
+
+        <div x-show="error" class="pi-releases__state pi-releases__state--error" x-text="error"></div>
+        <div x-show="notice" class="pi-releases__state" x-text="notice"></div>
+
+        <template x-if="loaded && !loading && !error">
+            <div>
+                <!-- ===== Moyennes / médianes d'en-tête ===== -->
+                <div class="pi-releases__stats">
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Terminées / Total<?= \App\View\MetricTooltips::render('pi_releases_done') ?></span>
+                        <span class="pi-stat__value">
+                            <span x-text="stats.nbDone ?? 0"></span> / <span x-text="stats.total ?? 0"></span>
+                        </span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Lead Time (moy / méd)<?= \App\View\MetricTooltips::render('lead_time') ?></span>
+                        <span class="pi-stat__value"
+                            x-text="fmtDays(stats.lead?.avg) + ' / ' + fmtDays(stats.lead?.median)"></span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Cycle Time (moy / méd)<?= \App\View\MetricTooltips::render('cycle_time') ?></span>
+                        <span class="pi-stat__value"
+                            x-text="fmtDays(stats.cycle?.avg) + ' / ' + fmtDays(stats.cycle?.median)"></span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Waiting Time (moy / méd)<?= \App\View\MetricTooltips::render('waiting_time') ?></span>
+                        <span class="pi-stat__value"
+                            x-text="fmtDays(stats.waiting?.avg) + ' / ' + fmtDays(stats.waiting?.median)"></span>
+                        <span class="pi-stat__line">Maximum : <b x-text="fmtDays(stats.waiting?.maxTotal)"></b></span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Efficacité du Flux<?= \App\View\MetricTooltips::render('pi_flow_efficiency') ?></span>
+                        <span class="pi-stat__line">Part de réalisation réelle (moy) :
+                            <b x-text="fmtDays(stats.realisation?.avgDays) + ' / ' + fmtPct(stats.realisation?.avgPct)"></b></span>
+                        <span class="pi-stat__line">Efficacité totale (moy) :
+                            <b x-text="fmtDays(stats.efficacite?.avgDays) + ' / ' + fmtPct(stats.efficacite?.avgPct)"></b></span>
+                    </div>
+                </div>
+
+                <div x-show="items.length === 0" class="pi-releases__state">
+                    Aucune Feature dans cette fenêtre.
+                </div>
+
+                <!-- ===== Tableau détaillé ===== -->
+                <div class="table-scroll" x-show="items.length > 0">
+                    <table class="pi-releases__table">
+                        <thead>
+                            <tr>
+                                <th class="pi-releases__check" title="Inclure / exclure tout des cumuls">
+                                    <input type="checkbox" @change="toggleAll()" :checked="allSelected"
+                                        x-effect="$el.indeterminate = someSelected" aria-label="Tout cocher / décocher">
+                                </th>
+                                <th class="pi-releases__expand" title="Déplier le détail de la Feature"></th>
+                                <th class="pi-sortable" @click="sortBy('key')">Key<span x-text="sortIndicator('key')"></span></th>
+                                <th class="pi-sortable pi-releases__name" @click="sortBy('name')">Nom<span x-text="sortIndicator('name')"></span></th>
+                                <th class="pi-sortable" @click="sortBy('status')">Statut<span x-text="sortIndicator('status')"></span></th>
+                                <th class="pi-sortable" @click="sortBy('startDate')">Démarrage<span x-text="sortIndicator('startDate')"></span></th>
+                                <th class="pi-sortable" @click="sortBy('closeDate')">Clôture<span x-text="sortIndicator('closeDate')"></span></th>
+                                <th>Lead</th>
+                                <th>Cycle</th>
+                                <th>Waiting<br><small>tot / moy / méd</small></th>
+                                <th>Efficacité tot.<br><small>j · %</small></th>
+                                <th>Analyse</th>
+                            </tr>
+                        </thead>
+                        <!-- Un <tbody> par Feature : la ligne de synthèse et sa ligne de détail dépliable
+                             forment un seul bloc, ce qu'un <template x-for> ne permet pas dans un <tbody>
+                             unique (Alpine exige une racine unique par itération). -->
+                        <template x-for="row in sortedItems()" :key="row.type + ':' + row.key">
+                            <tbody>
+                                <tr :class="{ 'pi-releases__row--excluded': !isSelected(row) }">
+                                    <td class="pi-releases__check">
+                                        <input type="checkbox" :checked="isSelected(row)" @change="toggle(row)"
+                                            aria-label="Inclure dans les cumuls">
+                                    </td>
+                                    <td class="pi-releases__expand">
+                                        <!-- Pas de chevron sans ticket d'équipe rattaché : il n'y aurait rien à déplier. -->
+                                        <button type="button" class="pi-expand"
+                                            x-show="row.breakdown && row.breakdown.issuesCount > 0"
+                                            @click="toggleExpand(row)"
+                                            :aria-expanded="isExpanded(row)"
+                                            :aria-label="(isExpanded(row) ? 'Replier' : 'Déplier') + ' le détail de ' + row.key"
+                                            x-text="isExpanded(row) ? '▾' : '▸'"></button>
+                                    </td>
+                                    <td>
+                                        <span class="pi-badge pi-badge--feature">F</span>
+                                        <span x-text="row.key"></span>
+                                    </td>
+                                    <td class="pi-releases__name">
+                                        <a :href="row.url" target="_blank" rel="noopener" x-text="row.name"></a>
+                                    </td>
+                                    <td x-text="row.status || '—'"></td>
+                                    <td x-text="fmtDate(row.startDate)"></td>
+                                    <td x-text="fmtDate(row.closeDate)"></td>
+                                    <td x-text="fmtDays(row.leadTime)"></td>
+                                    <td x-text="fmtDays(row.cycleTime)"></td>
+                                    <td x-text="fmtDays(row.waitingTotal) + ' / ' + fmtDays(row.waitingAvg) + ' / ' + fmtDays(row.waitingMedian)"></td>
+                                    <td x-text="fmtDays(row.efficaciteDays) + ' · ' + fmtPct(row.efficacitePct)"></td>
+                                    <td>
+                                        <a :href="row.analyseUrl" class="pi-releases__analyse">Analyse →</a>
+                                    </td>
+                                </tr>
+
+                                <!-- ===== Détail dépliable : volume, qualité, nature du travail ===== -->
+                                <tr class="pi-detail" x-show="isExpanded(row)">
+                                    <td colspan="12">
+                                        <div class="pi-detail__grid">
+                                            <div class="pi-stat">
+                                                <span class="pi-stat__label">✂️ Total Story Points</span>
+                                                <span class="pi-stat__value" x-text="fmtNum(row.breakdown.totalStoryPoints)"></span>
+                                                <span class="pi-stat__note"
+                                                    x-text="row.breakdown.issuesCount + ' ticket(s) de l\'équipe, tous types confondus'"></span>
+                                            </div>
+
+                                            <div class="pi-stat">
+                                                <span class="pi-stat__label">🐞 Bugs rattachés à la Feature</span>
+                                                <!-- Poids des bugs dans la contribution de l'équipe : une ligne par unité
+                                                     (tickets, puis Story Points). Deux <span> frères suffisent à les empiler,
+                                                     .pi-stat étant déjà un flex en colonne. -->
+                                                <span class="pi-stat__value" x-show="row.breakdown.bugCount > 0"
+                                                    x-text="row.breakdown.bugCount + ' ticket(s)'
+                                                        + pctOfTotal(row.breakdown.bugCount, row.breakdown.issuesCount)"></span>
+                                                <span class="pi-stat__value" x-show="row.breakdown.bugCount > 0"
+                                                    x-text="fmtNum(row.breakdown.bugStoryPoints) + ' SP'
+                                                        + pctOfTotal(row.breakdown.bugStoryPoints, row.breakdown.totalStoryPoints)"></span>
+                                                <!-- Ventilation par étiquette « bug ». Un bug peut en porter plusieurs, et tous
+                                                     n'en portent pas : ce détail n'est donc pas une partition de bugCount. -->
+                                                <span class="pi-stat__note" x-show="bugLabels(row).length > 0">dont</span>
+                                                <template x-for="entry in bugLabels(row)" :key="entry.label">
+                                                    <span class="pi-stat__line">
+                                                        <b x-text="entry.count"></b> <span x-text="entry.label"></span>
+                                                    </span>
+                                                </template>
+                                                <span class="pi-stat__note" x-show="row.breakdown.bugCount === 0">
+                                                    Aucun bug sur la contribution de l'équipe.
+                                                </span>
+                                            </div>
+
+                                            <div class="pi-detail__chart-wrap">
+                                                <div class="team-scatter__filters" :data-pie-filters="row.type + ':' + row.key">
+                                                    <button type="button" class="team-filter team-filter--active" data-metric="count">🎫 Nb de tickets</button>
+                                                    <button type="button" class="team-filter" data-metric="storyPoints">✂️ Story Points</button>
+                                                </div>
+                                                <div class="pi-detail__chart">
+                                                    <canvas :data-pie="row.type + ':' + row.key"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </template>
+                    </table>
+                </div>
+            </div>
+        </template>
+    </div>
+
+</div>
+
+<!-- Camemberts du détail dépliable : construits à la demande par piEntitiesTab (cf. renderPie). -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/issueTypePie.js"></script>

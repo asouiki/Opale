@@ -1,0 +1,39 @@
+﻿<?php
+
+/**
+ * Page d'accueil OPALE (racine « / »).
+ *
+ * Affiche inline le contenu de bienvenue mutualisé (cf. onboardingContent.phtml), puis
+ * marque l'onboarding comme « déjà vu » : l'utilisateur ayant vu ce contenu ici, la popin
+ * ne s'affichera pas ensuite sur les autres pages.
+ */
+$currentPage = 'home';
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Accueil</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <div class="card">
+        <?php $onboardingMode = 'page'; include __DIR__ . '/../common/onboardingContent.phtml'; ?>
+    </div>
+
+    <!-- L'accueil montre déjà le contenu inline : on marque l'onboarding comme « déjà vu ». -->
+    <script>localStorage.setItem('opale_onboarding_seen', '1');</script>
+
+    <?php include __DIR__ . '/../footer.phtml'; ?>
+</body>
+
+</html>
+

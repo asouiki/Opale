@@ -1,0 +1,9 @@
+/* ============================================================
+   Page Métriques du PI (/pi)
+   (extraits des styles inline de pi.phtml)
+   ============================================================ */
+.pi-form-row { margin-top: 16px; }
+.pi-features-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.pi-features-table th { text-align: left; }
+.pi-num { text-align: right; }
+.pi-features-table__total { font-weight: bold; border-top: 2px solid #333; }

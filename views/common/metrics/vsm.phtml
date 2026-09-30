@@ -1,0 +1,27 @@
+<?php
+
+/** @var App\View\VersionView $view */
+$vsmSteps = $view->getVsmSteps();
+?>
+
+<h4>📚 Value Stream Map par statut</h4>
+
+<div class="vsm-timeline">
+    <?php foreach ($vsmSteps as $index => $step): ?>
+        <div class="vsm-step vsm-timeline-<?= htmlspecialchars($step['category']) ?>">
+            <div class="vsm-timeline-label">
+                <?= htmlspecialchars($step['label']) ?>
+            </div>
+
+            <?php if ($step['average_days'] > 0): ?>
+                <div class="vsm-timeline-metric">
+                    Moyenne <?= $step['average_days'] ?> jours /ticket
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($index < count($vsmSteps) - 1): ?>
+            <div class="vsm-arrow">→</div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+</div>

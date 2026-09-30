@@ -1,0 +1,870 @@
+﻿<?php
+
+/** @var \App\Controller\PlanificationController $this */
+/** @var \App\View\PlanificationView|null $view */
+/** @var string|null $error */
+/** @var array{projectKey:string, margin:int, suggestion:array{sprintId:string, sprintName:string, capaTotal:float|null, avgVelocity:float|null, suggestedCapacity:float|null}|null} $planningConfig */
+$currentPage = 'planification';
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Support à la planification</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/planification.css">
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <?php if ($view): ?><script>window.__planificationAnalyzed = true;</script><?php endif; ?>
+    <div class="card">
+        <?php include __DIR__ . '/../components/planification/form/selectPlanification.phtml'; ?>
+    </div>
+
+    <?php include __DIR__ . '/../common/errorMessage.phtml'; ?>
+
+    <?php if ($view): ?>
+
+        <?php
+        // Liste à plat de tous les tickets de la page (clé + Story Points), dans
+        // l'ordre exact de rendu. Sert d'état initial au composant Alpine : chaque
+        // ligne s'y rattache via son index global, et la clé permet à la
+        // persistance localStorage de retrouver l'état (coché / reste à faire)
+        // d'un ticket déjà rencontré lors d'une session précédente.
+        $pageTickets = [];
+        $collectPageTicket = static function (array $t, bool $fromCurrentSprint): array {
+            // `null` distingue « non estimé Jira » d'un « estimé à 0 SP » (volontaire) :
+            // les sujets à 0 SP sont normaux (ils ne consomment pas de capacité),
+            // alors qu'un Story Points absent indique un ticket à estimer.
+            return [
+                'key'         => $t['key'],
+                'sp'          => $t['storyPoints'] === null ? null : (float) $t['storyPoints'],
+                'spFinal'     => ($t['spFinal'] ?? null)     === null ? null : (float) $t['spFinal'],
+                'spRemaining' => ($t['spRemaining'] ?? null) === null ? null : (float) $t['spRemaining'],
+                // Origine du ticket : seul le reliquat du sprint EN COURS est à risque lors d'un
+                // déplacement vers le prochain sprint (cf. l'avertissement d'assignSprintModal.phtml).
+                // Porté par ticket et non par un drapeau global de page : l'alerte dépend de la
+                // SÉLECTION courante, qui change à chaque case cochée.
+                'fromCurrentSprint' => $fromCurrentSprint,
+            ];
+        };
+        foreach ($view->getCurrentSprintReliquat()['issues'] as $pageTicket) {
+            $pageTickets[] = $collectPageTicket($pageTicket, true);
+        }
+        foreach ($view->getBacklogSprints() as $pageBacklog) {
+            foreach ($pageBacklog['planned']['issues'] as $pageTicket) {
+                $pageTickets[] = $collectPageTicket($pageTicket, false);
+            }
+        }
+        // Contexte du garde-fou « déplacement avant clôture » : construit ici (et non dans
+        // $planningConfig) car PlanificationController::buildPlanningConfig() est appelé hors du
+        // try/catch et ne connaît pas la Planification.
+        $currentSprintGuard = [
+            'active' => $view->isCurrentSprintActive(),
+            'name'   => $view->getCurrentSprintName(),
+        ];
+        // Compteur de lignes global, incrémenté par planificationIssuesTable.phtml.
+        $rowIndex = 0;
+        ?>
+
+        <script>
+            /**
+             * Compteur dynamique de l'aide à la planification.
+             *
+             * État persisté dans localStorage (clé `jira_planification_totals`) :
+             *   - capacité brute saisie à la main, et l'ID du sprint auquel elle se rapporte ;
+             *   - état (coché / reste à faire) par CLÉ de ticket (PROJ-123) — ainsi
+             *     un ticket retrouvé d'une session à l'autre conserve son réglage.
+             * La marge, elle, vit désormais dans la config d'équipe (réglage partagé, pas une
+             * préférence de navigateur) : elle arrive par `planningConfig` et repart par l'API.
+             *
+             * @param {{key:string, sp:number|null, spFinal:number|null, spRemaining:number|null, fromCurrentSprint:boolean}[]} pageTickets  Tickets de la page dans l'ordre de rendu
+             * @param {{projectKey:string, margin:number, suggestion:Object|null}} planningConfig  Réglages serveur : marge + suggestion de capacité
+             * @param {{active:boolean, name:string}} currentSprintGuard  Sprint en cours : état réel + nom, pour l'avertissement de déplacement
+             */
+            window.planificationTotals = function(pageTickets, planningConfig, currentSprintGuard) {
+                var STORAGE_KEY = 'jira_planification_totals';
+
+                // Hydratation initiale depuis localStorage.
+                var saved = {};
+                try {
+                    saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {};
+                } catch (e) {
+                    saved = {};
+                }
+                var savedTickets = (saved && typeof saved.tickets === 'object' && saved.tickets) || {};
+
+                var cfg = planningConfig || { projectKey: '', margin: 20, suggestion: null };
+                var suggestion = cfg.suggestion || null;
+                // null si la grille de capacité du sprint ou la vélocité d'équipe manque : on sait alors
+                // QUOI il manque (la notice le dit), mais aucune valeur ne peut être proposée.
+                var suggested = suggestion && typeof suggestion.suggestedCapacity === 'number' ? suggestion.suggestedCapacity : null;
+                var suggestedSprintId = suggestion ? String(suggestion.sprintId) : '';
+
+                // Une capacité saisie à la main fait foi, mais seulement pour le sprint où elle a été
+                // saisie : dès que le prochain sprint détecté change, la suggestion reprend la main
+                // (sinon une valeur d'il y a trois sprints resterait figée).
+                var savedRaw = typeof saved.capacityRaw === 'number' ? saved.capacityRaw : null;
+                var savedSprintId = typeof saved.capacitySprintId === 'string' ? saved.capacitySprintId : '';
+                var manualWins = savedRaw !== null && savedSprintId !== '' && savedSprintId === suggestedSprintId;
+
+                return {
+                    tickets: pageTickets.map(function(t) {
+                        var prev = savedTickets[t.key] || {};
+                        // `sp`, `spFinal` et `spRemaining` peuvent être null : « non renseigné » dans Jira.
+                        // 0 SP est une valeur estimée valide (ticket sans charge).
+                        var sp = typeof t.sp === 'number' ? t.sp : null;
+                        var spFinal = typeof t.spFinal === 'number' ? t.spFinal : null;
+                        var spRemaining = typeof t.spRemaining === 'number' ? t.spRemaining : null;
+                        // Références Jira pour les alertes « Delta avec Jira » et les valeurs par défaut.
+                        // null = champ non renseigné dans Jira : c'est une référence à part entière
+                        // (« vide »), pas une absence de référence — saisir une valeur crée donc bien
+                        // un delta à synchroniser.
+                        var jiraRemaining = spRemaining !== null ? spRemaining : sp; // Reste à faire
+                        var jiraReestimated = spFinal !== null ? spFinal : sp; // Points rééstimés
+                        return {
+                            key: t.key,
+                            sp: sp,
+                            spFinal: spFinal,
+                            spRemaining: spRemaining,
+                            jiraRemaining: jiraRemaining,
+                            jiraReestimated: jiraReestimated,
+                            // Reliquat du sprint en cours : à risque lors d'un déplacement avant clôture.
+                            fromCurrentSprint: t.fromCurrentSprint === true,
+                            checked: typeof prev.checked === 'boolean' ? prev.checked : true,
+                            // `!== undefined` (et non `typeof === 'number'`) pour restaurer
+                            // une valeur volontairement vidée (null persisté) entre 2 sessions.
+                            // À défaut, la valeur locale part de la valeur Jira, null compris : un
+                            // ticket non estimé affiche un champ VIDE (et non 0), sans quoi ce 0
+                            // automatique se lirait comme un delta permanent avec Jira.
+                            remaining: prev.remaining !== undefined ? prev.remaining : jiraRemaining,
+                            reestimated: prev.reestimated !== undefined ? prev.reestimated : jiraReestimated,
+                            // État transitoire de synchronisation Jira (non persisté).
+                            syncing: false, // requête PUT en cours
+                            synced: false, // dernière synchro réussie (affiche « ✅ Jira mis à jour »)
+                            syncError: '', // message d'erreur de la dernière tentative
+                        };
+                    }),
+                    capacityRaw: manualWins ? savedRaw : (suggested !== null ? suggested : (savedRaw !== null ? savedRaw : 0)),
+                    // Sprint auquel se rattache la capacité saisie à la main ('' = valeur suggérée en place).
+                    capacitySprintId: manualWins ? savedSprintId : '',
+                    margin: typeof cfg.margin === 'number' ? cfg.margin : 20,
+
+                    // Réglages serveur en lecture seule : alimentent la notice, le bouton de
+                    // réinitialisation et la modale d'affectation au prochain sprint.
+                    planning: {
+                        projectKey: cfg.projectKey || '',
+                        suggestion: suggestion,
+                        suggestedCapacity: suggested,
+                    },
+                    // Prochain sprint détecté côté serveur — source unique, partagée avec le CTA d'affectation.
+                    nextSprint: suggestion ? { id: String(suggestion.sprintId), name: suggestion.sprintName } : null,
+
+                    // Sprint en cours analysé : son état réel conditionne l'avertissement de déplacement.
+                    currentSprint: {
+                        active: !!(currentSprintGuard && currentSprintGuard.active),
+                        name: (currentSprintGuard && currentSprintGuard.name) || '',
+                    },
+
+                    // Modale de confirmation des actions de synchro Jira (anti miss-click).
+                    // action : 'push' (envoyer vers Jira) ou 'pull' (récupérer depuis Jira).
+                    confirm: { open: false, action: null, index: null },
+
+                    // ===== Totaux dynamiques =====
+                    // Boucles `for` (et non `.filter().reduce()`) pour garantir que
+                    // chaque accès `tickets[i].xxx` passe par le proxy réactif
+                    // Alpine et déclenche bien la mise à jour à chaque modification.
+                    get checkedCount() {
+                        var count = 0;
+                        for (var i = 0; i < this.tickets.length; i++) {
+                            if (this.tickets[i].checked) {
+                                count++;
+                            }
+                        }
+                        return count;
+                    },
+                    /**
+                     * Nb de tickets cochés non estimés dans Jira (Story Points absent).
+                     * Un ticket explicitement estimé à 0 SP n'est PAS « non estimé » :
+                     * c'est une valeur intentionnelle (sujet sans consommation de capacité).
+                     */
+                    get checkedUnestimated() {
+                        var count = 0;
+                        for (var i = 0; i < this.tickets.length; i++) {
+                            var t = this.tickets[i];
+                            if (t.checked && t.sp === null) {
+                                count++;
+                            }
+                        }
+                        return count;
+                    },
+                    /**
+                     * Nb de tickets cochés issus du reliquat du sprint EN COURS.
+                     * Les déplacer avant la clôture fausse ses métriques : alimente l'avertissement
+                     * contextuel de la modale et le bouton de décochage rapide.
+                     */
+                    get checkedFromCurrentSprint() {
+                        var count = 0;
+                        for (var i = 0; i < this.tickets.length; i++) {
+                            var t = this.tickets[i];
+                            if (t.checked && t.fromCurrentSprint) {
+                                count++;
+                            }
+                        }
+                        return count;
+                    },
+                    get checkedStoryPoints() {
+                        var sum = 0;
+                        for (var i = 0; i < this.tickets.length; i++) {
+                            var t = this.tickets[i];
+                            if (t.checked) {
+                                sum += Number(t.sp) || 0;
+                            }
+                        }
+                        return Math.round(sum * 100) / 100;
+                    },
+                    /** Somme des « Reste à faire » des tickets cochés. */
+                    get checkedRemaining() {
+                        var sum = 0;
+                        for (var i = 0; i < this.tickets.length; i++) {
+                            var t = this.tickets[i];
+                            if (t.checked) {
+                                sum += Number(t.remaining) || 0;
+                            }
+                        }
+                        return Math.round(sum * 100) / 100;
+                    },
+                    /**
+                     * Somme des « Reste à faire » des lignes d'un tableau (plage [start, end[),
+                     * indépendamment de l'état coché : total de colonne affiché en pied de CE
+                     * tableau, pendant du total « Story Points » statique.
+                     */
+                    sumRemaining: function(start, end) {
+                        var sum = 0;
+                        for (var i = start; i < end; i++) {
+                            sum += Number(this.tickets[i].remaining) || 0;
+                        }
+                        return Math.round(sum * 100) / 100;
+                    },
+
+                    // ===== Capacité =====
+                    /**
+                     * Capacité nette après marge, arrondie au 0,5 le plus proche : la planification se
+                     * raisonne en demi-points, pas en centièmes (13 × 0,7 = 9,1 → 9).
+                     * Un demi exact est tranché vers le BAS (9,25 → 9), comme la capacité suggérée
+                     * côté serveur : sur un engagement de sprint, on retient la borne prudente.
+                     */
+                    get capacityWithMargin() {
+                        var raw = Number(this.capacityRaw) || 0;
+                        var margin = Number(this.margin) || 0;
+                        return Math.ceil(raw * (1 - margin / 100) * 2 - 0.5) / 2;
+                    },
+
+                    /** Coefficient appliqué par la marge (30 % → 0.7), affiché dans le détail du calcul. */
+                    get marginFactor() {
+                        var margin = Number(this.margin) || 0;
+                        return Math.round((100 - margin)) / 100;
+                    },
+
+                    /**
+                     * true si la capacité affichée est une saisie manuelle qui s'écarte de la valeur
+                     * suggérée pour le sprint détecté. Pilote l'activation du bouton de réinitialisation.
+                     */
+                    get isManualCapacity() {
+                        return this.capacitySprintId !== ''
+                            && this.planning.suggestedCapacity !== null
+                            && Number(this.capacityRaw) !== this.planning.suggestedCapacity;
+                    },
+
+                    /**
+                     * Rattache la capacité saisie au sprint détecté : elle primera sur la suggestion
+                     * tant que ce sprint reste le prochain.
+                     */
+                    onCapacityEdited: function() {
+                        this.capacitySprintId = this.nextSprint ? this.nextSprint.id : '';
+                        this.save();
+                    },
+
+                    /** Réapplique la capacité suggérée et lève le verrou de saisie manuelle. */
+                    resetToSuggestion: function() {
+                        if (this.planning.suggestedCapacity === null) {
+                            return;
+                        }
+                        this.capacityRaw = this.planning.suggestedCapacity;
+                        this.capacitySprintId = '';
+                        this.save();
+                    },
+
+                    /**
+                     * Borne la marge à 0..100 puis la persiste dans la config d'équipe (réglage partagé,
+                     * plus de localStorage). Échec silencieux : la valeur reste juste à l'écran, seule
+                     * sa mémorisation est perdue — une bannière d'erreur serait disproportionnée.
+                     */
+                    onMarginChanged: function() {
+                        var m = Math.min(100, Math.max(0, Math.round(Number(this.margin) || 0)));
+                        this.margin = m;
+                        if (!this.planning.projectKey) {
+                            return;
+                        }
+
+                        var body = new URLSearchParams();
+                        body.set('margin', String(m));
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.planning.projectKey) + '/planning-margin', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: body.toString(),
+                            })
+                            .catch(function(e) { console.warn('Marge non persistée', e); });
+                    },
+
+                    // ===== Deltas =====
+                    /** Delta « Story Points cochés » vs capacité avec marge. */
+                    get capacityDelta() {
+                        return Math.round((this.checkedStoryPoints - this.capacityWithMargin) * 100) / 100;
+                    },
+                    get deltaClass() {
+                        return this._classifyDelta(this.checkedStoryPoints);
+                    },
+                    get deltaLabel() {
+                        var d = this.capacityDelta;
+                        return (d > 0 ? '+' : '') + d + ' SP';
+                    },
+
+                    /** Delta « Reste à faire » vs capacité avec marge. */
+                    get remainingDelta() {
+                        return Math.round((this.checkedRemaining - this.capacityWithMargin) * 100) / 100;
+                    },
+                    get remainingDeltaClass() {
+                        return this._classifyDelta(this.checkedRemaining);
+                    },
+                    get remainingDeltaLabel() {
+                        var d = this.remainingDelta;
+                        return (d > 0 ? '+' : '') + d + ' SP';
+                    },
+
+                    /**
+                     * Catégorise une charge vis-à-vis de la capacité :
+                     *  - grey   : pas de capacité saisie ;
+                     *  - red    : charge > capacité brute ;
+                     *  - green  : charge < capacité avec marge (sous la marge) ;
+                     *  - orange : entre la capacité avec marge et la capacité brute.
+                     */
+                    _classifyDelta: function(load) {
+                        var raw = Number(this.capacityRaw) || 0;
+                        if (raw <= 0) {
+                            return 'grey';
+                        }
+                        if (load > raw) {
+                            return 'red';
+                        }
+                        if (load < this.capacityWithMargin) {
+                            return 'green';
+                        }
+                        return 'orange';
+                    },
+
+                    // ===== Sélection en bloc par tableau =====
+                    allChecked: function(start, end) {
+                        for (var i = start; i < end; i++) {
+                            if (!this.tickets[i].checked) {
+                                return false;
+                            }
+                        }
+                        return end > start;
+                    },
+                    someChecked: function(start, end) {
+                        for (var i = start; i < end; i++) {
+                            if (this.tickets[i].checked) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    },
+                    toggleRange: function(start, end, value) {
+                        for (var i = start; i < end; i++) {
+                            this.tickets[i].checked = value;
+                        }
+                        this.save();
+                    },
+
+                    // ===== Synchronisation Jira (par ticket) =====
+                    /**
+                     * Convertit la saisie brute d'un champ numérique : un champ vidé
+                     * (chaîne vide) devient null (= valeur à effacer dans Jira), sinon
+                     * le nombre saisi.
+                     *
+                     * @param {string} raw Valeur brute de l'input
+                     * @returns {number|null}
+                     */
+                    parseFieldValue: function(raw) {
+                        return raw === '' ? null : Number(raw);
+                    },
+
+                    /**
+                     * Indique si au moins une des deux valeurs saisies (« Reste à faire »
+                     * ou « Points rééstimés ») diffère de sa référence Jira. Sert à
+                     * afficher le bouton de mise à jour sur la ligne.
+                     *
+                     * null (champ non renseigné dans Jira, ou vidé localement) participe à la
+                     * comparaison : renseigner un ticket non estimé, ou effacer une valeur
+                     * existante, est un delta à pousser vers Jira comme un autre.
+                     *
+                     * @param {{remaining:number|null, reestimated:number|null, jiraRemaining:number|null, jiraReestimated:number|null}} t
+                     * @returns {boolean}
+                     */
+                    hasJiraDelta: function(t) {
+                        return t.remaining !== t.jiraRemaining || t.reestimated !== t.jiraReestimated;
+                    },
+
+                    /**
+                     * Réinitialise l'état de synchro d'un ticket dès que l'utilisateur
+                     * modifie une de ses valeurs : le « ✅ Jira mis à jour » disparaît
+                     * et les alertes de delta peuvent réapparaître.
+                     *
+                     * @param {number} i Index global du ticket
+                     */
+                    markEdited: function(i) {
+                        this.tickets[i].synced = false;
+                        this.tickets[i].syncError = '';
+                    },
+
+                    /**
+                     * Pousse les deux valeurs du ticket vers Jira (API PUT) en AJAX,
+                     * sans rechargement de page. En cas de succès, aligne les références
+                     * Jira locales (les deltas se résolvent) et bascule l'affichage sur
+                     * « ✅ Jira mis à jour ».
+                     *
+                     * @param {number} i Index global du ticket
+                     */
+                    updateJira: function(i) {
+                        var t = this.tickets[i];
+                        t.syncing = true;
+                        t.syncError = '';
+
+                        // null (champ vidé) → paramètre vide : le backend l'interprète
+                        // comme « effacer la valeur Jira » (et non « 0 »).
+                        var body = new URLSearchParams();
+                        body.set('remaining', t.remaining === null ? '' : t.remaining);
+                        body.set('reestimated', t.reestimated === null ? '' : t.reestimated);
+
+                        fetch('/api/internal/issues/' + encodeURIComponent(t.key) + '/planning', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: body.toString(),
+                            })
+                            .then(function(r) {
+                                return r.json().then(function(res) {
+                                    if (!r.ok || !res || res.success !== true) {
+                                        throw new Error((res && res.error) || ('Échec de la mise à jour (HTTP ' + r.status + ')'));
+                                    }
+                                    return res;
+                                });
+                            })
+                            .then(function() {
+                                // Les valeurs Jira reflètent désormais les valeurs locales.
+                                t.jiraRemaining = t.remaining;
+                                t.jiraReestimated = t.reestimated;
+                                t.synced = true;
+                            })
+                            .catch(function(e) {
+                                t.syncError = e.message;
+                            })
+                            .finally(function() {
+                                t.syncing = false;
+                            });
+                    },
+
+                    /**
+                     * Écrase les valeurs locales du ticket par celles de Jira (pull) :
+                     * utilisé quand la valeur persistée diverge de Jira et que l'on veut
+                     * faire de Jira la source de vérité. Persiste pour que le storage
+                     * reflète désormais Jira.
+                     *
+                     * @param {number} i Index global du ticket
+                     */
+                    resetToJira: function(i) {
+                        var t = this.tickets[i];
+                        t.remaining = t.jiraRemaining;
+                        t.reestimated = t.jiraReestimated;
+                        t.synced = false;
+                        t.syncError = '';
+                        this.save();
+                    },
+
+                    // ===== Confirmation (anti miss-click) =====
+                    /** Ouvre la modale pour un envoi vers Jira (push). */
+                    askUpdateJira: function(i) {
+                        this.confirm.index = i;
+                        this.confirm.action = 'push';
+                        this.confirm.open = true;
+                    },
+                    /** Ouvre la modale pour une récupération depuis Jira (pull). */
+                    askResetToJira: function(i) {
+                        this.confirm.index = i;
+                        this.confirm.action = 'pull';
+                        this.confirm.open = true;
+                    },
+                    /** Message contextuel affiché dans la modale. */
+                    confirmMessage: function() {
+                        var t = this.tickets[this.confirm.index];
+                        var key = t ? t.key : '';
+                        if (this.confirm.action === 'pull') {
+                            return 'Récupérer les valeurs de Jira pour ' + key +
+                                ' ? Vos valeurs locales (Reste à faire et SP final) seront écrasées.';
+                        }
+                        return 'Mettre à jour Jira pour ' + key +
+                            ' avec vos valeurs (Reste à faire et SP final) ?';
+                    },
+                    /** Exécute l'action confirmée puis ferme la modale. */
+                    confirmAction: function() {
+                        var i = this.confirm.index;
+                        var action = this.confirm.action;
+                        this.confirm.open = false;
+                        if (action === 'pull') {
+                            this.resetToJira(i);
+                        } else {
+                            this.updateJira(i);
+                        }
+                    },
+                    /** Ferme la modale sans rien faire. */
+                    cancelConfirm: function() {
+                        this.confirm.open = false;
+                    },
+
+                    // ===== Ajout au prochain sprint =====
+                    /**
+                     * État de la modale d'affectation au prochain sprint détecté.
+                     * `acknowledged` : case « J'ai compris » du garde-fou, remise à zéro à chaque ouverture.
+                     */
+                    assignSprint: { open: false, loading: false, error: '', successMessage: '', sprint: null, acknowledged: false },
+
+                    /**
+                     * Le garde-fou doit-il s'afficher ? 
+                     * Uniquement si la SÉLECTION contient du reliquat d'un sprint réellement actif : sur un sprint déjà clôturé le déplacement est sans
+                     * conséquence, et alerter alors redonnerait un message permanent que l'on n'apprend plus à lire.
+                     */
+                    get needsCurrentSprintAck() {
+                        return this.currentSprint.active && this.checkedFromCurrentSprint > 0;
+                    },
+
+                    /** Décoche d'un clic tout le reliquat du sprint en cours (sortie offerte par le garde-fou). */
+                    uncheckCurrentSprintTickets: function() {
+                        for (var i = 0; i < this.tickets.length; i++) {
+                            if (this.tickets[i].fromCurrentSprint) {
+                                this.tickets[i].checked = false;
+                            }
+                        }
+                        this.save();
+                    },
+
+                    /** Clés des tickets actuellement cochés, tous tableaux confondus. */
+                    checkedKeys: function() {
+                        return this.tickets.filter(function(t) { return t.checked; }).map(function(t) { return t.key; });
+                    },
+
+                    /**
+                     * Ouvre la modale de confirmation sur le prochain sprint, détecté côté serveur au
+                     * rendu de la page (même sprint que celui de la capacité suggérée : une seule règle,
+                     * donc jamais de divergence entre la suggestion affichée et le déplacement réel).
+                     */
+                    askAssignNextSprint: function() {
+                        if (this.checkedCount === 0) return;
+                        this.assignSprint.error = '';
+                        this.assignSprint.successMessage = '';
+                        // Acquittement à redonner à CHAQUE ouverture : la sélection a pu changer entre deux clics.
+                        this.assignSprint.acknowledged = false;
+
+                        if (!this.nextSprint) {
+                            this.assignSprint.error = 'Aucun sprint à venir avec une date de début future n\'a été détecté — relancez l\'analyse.';
+                            return;
+                        }
+
+                        this.assignSprint.sprint = this.nextSprint;
+                        this.assignSprint.open = true;
+                    },
+
+                    /** Ferme la modale d'affectation au prochain sprint sans rien faire. */
+                    cancelAssignSprint: function() {
+                        this.assignSprint.open = false;
+                        this.assignSprint.error = '';
+                    },
+
+                    /** Déplace les tickets cochés vers le sprint détecté et pousse un commentaire de trace. */
+                    confirmAssignSprint: function() {
+                        this.assignSprint.loading = true;
+                        this.assignSprint.error = '';
+
+                        var body = new URLSearchParams();
+                        var keys = this.checkedKeys();
+                        keys.forEach(function(k) { body.append('issueKeys[]', k); });
+                        body.set('sprintId', this.assignSprint.sprint.id);
+                        body.set('sprintName', this.assignSprint.sprint.name);
+
+                        var self = this;
+                        fetch('/api/internal/issues/assign-sprint', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: body.toString(),
+                            })
+                            .then(function(r) {
+                                return r.json().catch(function() { return null; }).then(function(res) {
+                                    if (!r.ok || !res || res.success !== true) {
+                                        throw new Error((res && res.error) || ('Échec de l\'affectation (HTTP ' + r.status + ')'));
+                                    }
+                                });
+                            })
+                            .then(function() {
+                                self.assignSprint.open = false;
+                                self.assignSprint.successMessage = '✅ ' + keys.length + ' ticket(s) affecté(s) au sprint « ' + self.assignSprint.sprint.name + ' ».';
+                            })
+                            .catch(function(e) { self.assignSprint.error = e.message; })
+                            .finally(function() { self.assignSprint.loading = false; });
+                    },
+
+                    /**
+                     * Persiste la capacité brute (et le sprint auquel elle se rapporte) ainsi que
+                     * l'état par CLÉ de ticket. Fusionne avec l'existant pour préserver l'état des
+                     * tickets absents de la page courante.
+                     * La marge n'est PAS persistée ici : c'est un réglage d'équipe, écrit côté serveur.
+                     */
+                    save: function() {
+                        try {
+                            var existing = {};
+                            try {
+                                existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {};
+                            } catch (e) {
+                                existing = {};
+                            }
+                            var ticketMap = (existing && typeof existing.tickets === 'object' && existing.tickets) || {};
+                            this.tickets.forEach(function(t) {
+                                ticketMap[t.key] = {
+                                    checked: t.checked,
+                                    remaining: t.remaining,
+                                    reestimated: t.reestimated,
+                                };
+                            });
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                                capacityRaw: this.capacityRaw,
+                                capacitySprintId: this.capacitySprintId,
+                                tickets: ticketMap,
+                            }));
+                        } catch (e) {
+                            console.warn('Persistance planification indisponible', e);
+                        }
+                    },
+                };
+            };
+        </script>
+
+        <div x-data="planificationTotals(<?= htmlspecialchars(json_encode($pageTickets, JSON_THROW_ON_ERROR), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($planningConfig, JSON_THROW_ON_ERROR), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode($currentSprintGuard, JSON_THROW_ON_ERROR), ENT_QUOTES) ?>)">
+
+            <!-- ============ TOTAL DE LA SÉLECTION ============ -->
+            <!-- Sentinelle de détection du mode collé (voir le script en bas de page) : ne doit porter
+                 aucune taille ni marge, sa seule fonction est de matérialiser la position d'origine
+                 du bandeau, juste avant qu'il ne devienne `position: sticky`. -->
+            <div class="planif-summary__sentinel" aria-hidden="true"></div>
+            <div class="card planif-summary sticky-bar">
+                <h2 class="planif-summary__title">🧮 Aide à la Planification de Sprint<?= \App\View\MetricTooltips::render('planning_help') ?></h2>
+
+                <!-- Rendu aéré (bandeau non collé) : masqué en mode collé, remplacé par les 2 lignes compactes ci-dessous. -->
+                <div class="planif-capacity">
+                    <label class="planif-capacity__field">
+                        <span>Capacité totale brute<?= \App\View\MetricTooltips::render('planning_capacity_suggestion') ?></span>
+                        <div class="planif-capacity__input-row">
+                            <input type="number" min="0" step="0.5"
+                                x-model.number="capacityRaw" @change="onCapacityEdited()">
+                            <span>points</span>
+                        </div>
+                    </label>
+                    <label class="planif-capacity__field">
+                        <span><b>-</b> % Marge</span>
+                        <input type="number" min="0" max="100" step="1"
+                            x-model.number="margin" @change="onMarginChanged()">
+                    </label>
+                    <div class="planif-capacity__field">
+                        <span><b>=</b> Capacité avec marge</span>
+                        <div class="planif-capacity__input-row">
+                            <strong class="planif-capacity__value" x-text="capacityWithMargin"></strong>
+                            <span><strong>points</strong></span>
+                        </div>
+                    </div>
+                    <button type="button" class="planif-capacity__reset" x-cloak
+                        x-show="planning.suggestedCapacity !== null"
+                        :disabled="!isManualCapacity"
+                        @click="resetToSuggestion()">↺ Réinitialiser aux valeurs suggérées</button>
+                </div>
+
+                <?php include __DIR__ . '/../components/planification/capacitySuggestionNotice.phtml'; ?>
+
+                <div class="planif-summary__essentials">
+                    <div class="meta-line meta-line-info">
+                        <span>✅ <strong x-text="checkedCount"></strong> ticket(s) sélectionné(s)</span>
+                        <span x-show="checkedUnestimated > 0" class="alert">🚫 <strong x-text="checkedUnestimated"></strong> non estimé(s)</span>
+                    </div>
+                    <div class="meta-line meta-line-info">
+                        <span>✂️ <strong x-text="checkedStoryPoints"></strong> Story Points</span>
+                        <span>📦 <strong x-text="checkedRemaining"></strong> Reste à faire</span>
+                    </div>
+                </div>
+
+                <div class="planif-summary__deltas meta-line meta-line-info">
+                    <span>
+                        ⚖️ Delta capacité vs Story Points initiaux :
+                        <span class="badge" :class="deltaClass" x-text="deltaLabel"></span>
+                    </span>
+                    <span>
+                        ⚖️ Delta capacité vs Reste à faire :
+                        <span class="badge" :class="remainingDeltaClass" x-text="remainingDeltaLabel"></span>
+                    </span>
+                </div>
+
+                <div class="planif-summary__actions">
+                    <?php include __DIR__ . '/../components/planification/assignNextSprintCta.phtml'; ?>
+                </div>
+
+                <!-- Rendu compact (bandeau collé) : capacité sur 1 ligne (sans le bouton de réinitialisation),
+                     puis tout le reste sur 1 ligne aérée sur toute la largeur. La modale d'affectation au
+                     prochain sprint (déclenchée par le CTA masqué ci-dessus) reste accessible depuis le
+                     rendu aéré : on ne l'ouvre donc qu'en remontant en haut de page. -->
+                <div class="planif-summary__compact-capacity">
+                    <span>Capacité totale brute :</span>
+                    <input type="number" min="0" step="0.5" class="planif-capacity__input--inline"
+                        x-model.number="capacityRaw" @change="onCapacityEdited()">
+                    <span>points -</span>
+                    <input type="number" min="0" max="100" step="1" class="planif-capacity__input--inline"
+                        x-model.number="margin" @change="onMarginChanged()">
+                    <span>% marge = <strong x-text="capacityWithMargin"></strong> points</span>
+                </div>
+
+                <div class="planif-summary__compact meta-line-info">
+                    <span>
+                        ✅ <strong x-text="checkedCount"></strong> ticket(s) sélectionné(s)
+                        <span x-show="checkedUnestimated > 0" class="alert">&nbsp; 🚫 <strong x-text="checkedUnestimated"></strong> non estimé(s)</span>
+                    </span>
+                    <span>✂️ <strong x-text="checkedStoryPoints"></strong> Story Points</span>
+                    <span>📦 <strong x-text="checkedRemaining"></strong> Reste à faire</span>
+                    <span>⚖️ Delta total <span class="badge" :class="deltaClass" x-text="deltaLabel"></span></span>
+                    <span>⚖️ Delta reste à faire <span class="badge" :class="remainingDeltaClass" x-text="remainingDeltaLabel"></span></span>
+                </div>
+            </div>
+
+            <!-- ============ RELIQUAT DU SPRINT EN COURS ============ -->
+            <div class="card">
+                <h2>📦 Reliquat du sprint en cours<?= \App\View\MetricTooltips::render('reliquat') ?></h2>
+                <p>Tickets non terminés du sprint en cours.</p>
+                <?php
+                $bucket          = $view->getCurrentSprintReliquat();
+        $tableTitle      = $view->getCurrentSprintName();
+        $emptyMessage    = '🎉 Aucun reliquat : tous les sujets du sprint en cours sont terminés.';
+        $defaultSortKey  = 'status'; // Reliquat : tri par défaut sur Statut.
+        include __DIR__ . '/../components/planification/planificationIssuesTable.phtml';
+        ?>
+            </div>
+
+            <!-- ============ BACKLOG DES SPRINTS À VENIR ============ -->
+            <?php $backlogSprints = $view->getBacklogSprints(); ?>
+            <div class="card">
+                <h2>📥 Backlog des sprints à venir<?= \App\View\MetricTooltips::render('backlog') ?></h2>
+
+                <?php if (empty($backlogSprints)): ?>
+                    <p>
+                        <em> Aucun sprint à venir sélectionné. Cochez un ou plusieurs sprints non démarrés dans le formulaire ci-dessus pour afficher leur backlog.</em>
+                    </p>
+                <?php else: ?>
+                    <?php
+            $totals = $view->getBacklogTotals();
+                    $readiness = $view->getBacklogReadiness();
+                    ?>
+                    <p>
+                        Tickets planifiés dans <strong><?= count($backlogSprints) ?></strong> sprint(s) à venir —
+                        total : <strong><?= $totals['count'] ?></strong> sujet(s),
+                        <strong><?= $view->formatSp($totals['storyPoints']) ?></strong> Story Points
+                        <?php if ($readiness['percent'] !== null): ?>
+                            — <span class="badge <?= $view->getReadinessBadgeClass($readiness['percent']) ?>"><?= $view->formatPercent($readiness['percent']) ?> prêt</span>
+                            <?php if ($readiness['total'] - $readiness['ready'] > 0): ?>
+                                (<?= $readiness['total'] - $readiness['ready'] ?> sujet(s) à affiner)
+                            <?php endif; ?>
+                            <?= \App\View\MetricTooltips::render('backlog_readiness') ?>
+                        <?php endif; ?>.
+                    </p>
+
+                    <?php foreach ($backlogSprints as $backlog): ?>
+                        <br/>
+                        <?php
+                        // Le nom du sprint et son cumul ne sont plus rendus en h3 : ils sont passés au tableau,
+                        // qui les affiche en 1re ligne de son en-tête collant (donc toujours visibles au
+                        // défilement, sans doublon à l'écran). Idem pour le % de préparation.
+                        $bucket         = $backlog['planned'];
+                        $tableTitle     = $backlog['name'];
+                        $tableReadiness = $backlog['readiness'];
+                        $emptyMessage   = 'Aucun sujet planifié dans ce sprint à venir.';
+                        $defaultSortKey = 'parent'; // Backlog : tri par défaut sur Parent.
+                        include __DIR__ . '/../components/planification/planificationIssuesTable.phtml';
+                        ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- ============ MODALE DE CONFIRMATION (anti miss-click) ============ -->
+            <div class="planif-modal" x-cloak
+                x-show="confirm.open"
+                @keydown.escape.window="cancelConfirm()">
+                <div class="planif-modal__backdrop" @click="cancelConfirm()"></div>
+                <div class="planif-modal__dialog" role="dialog" aria-modal="true">
+                    <p class="planif-modal__text" x-text="confirmMessage()"></p>
+                    <div class="planif-modal__actions">
+                        <button type="button" class="planif-modal__btn planif-modal__btn--cancel"
+                            @click="cancelConfirm()">❌ Annuler</button>
+                        <button type="button" class="planif-modal__btn planif-modal__btn--ok"
+                            @click="confirmAction()">✅ Confirmer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ MODALE : AJOUT AU PROCHAIN SPRINT ============ -->
+            <?php include __DIR__ . '/../components/planification/assignSprintModal.phtml'; ?>
+
+        </div>
+
+        <?php include __DIR__ . '/../common/stickyBarScript.phtml'; ?>
+
+        <script>
+            /**
+             * Bascule `.is-stuck` sur le bandeau d'aide à la planification dès qu'il devient
+             * réellement collé en haut de la fenêtre, pour en compacter l'affichage (titre et notice
+             * masqués, essentiels sur une seule ligne — cf. planification.css).
+             *
+             * `position: sticky` n'expose aucun état « collé » en CSS pur : on le déduit via une
+             * sentinelle invisible juste avant le bandeau — tant qu'elle est visible, le bandeau est
+             * encore à sa place naturelle ; dès qu'elle sort du haut de la fenêtre, il est collé.
+             * Scoped à cette page (et non au script générique `stickyBarScript.phtml`, partagé avec
+             * /sprint) : seule /planification a besoin de ce rendu compact.
+             */
+            (function () {
+                var bar = document.querySelector('.planif-summary');
+                var sentinel = document.querySelector('.planif-summary__sentinel');
+                if (!bar || !sentinel || typeof IntersectionObserver === 'undefined') {
+                    return;
+                }
+
+                new IntersectionObserver(function(entries) {
+                    bar.classList.toggle('is-stuck', !entries[0].isIntersecting);
+                }, { threshold: 0 }).observe(sentinel);
+            })();
+        </script>
+
+        <?php include __DIR__ . '/../common/sortableTableScript.phtml'; ?>
+
+    <?php endif; ?>
+
+    <?php include __DIR__ . '/../footer.phtml'; ?>
+</body>
+
+</html>

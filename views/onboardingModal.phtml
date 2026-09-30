@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * Popin d'onboarding OPALE.
+ *
+ * Incluse globalement via topNavigation.phtml (donc présente sur toutes les pages). Elle
+ * réutilise le contenu de bienvenue mutualisé (onboardingContent.phtml, mode 'popin') et
+ * les classes de modale existantes (.modal-overlay / .modal-content).
+ *
+ * Auto-affichage géré côté client (onboardingModal()) : ouverture seulement si
+ *  - $onboardingAutoShow est vrai (toutes les pages SAUF l'accueil), ET
+ *  - le flag « déjà vu » (localStorage) est absent, ET
+ *  - l'URL n'est pas un lien profond (projectKey + boardId + sprintId).
+ *
+ * Fermeture : les deux CTA (« Configurer mon projet » / « Ignorer »), ou un clic hors de la
+ * modale (@click.outside sur .modal-content, même pattern que workflowConfigModal.phtml).
+ * Un clic hors zone équivaut à « Ignorer » (dismiss() pose aussi le flag « déjà vu »).
+ *
+ * Alpine.js n'est pas chargé ici : chaque page disposant du header charge déjà Alpine via
+ * son composant sélecteur ; l'accueil le charge dans home.phtml.
+ *
+ * @var bool $onboardingAutoShow true sur toutes les pages sauf l'accueil.
+ */
+$onboardingAutoShow = $onboardingAutoShow ?? false;
+?>
+<div x-data="onboardingModal({ autoShow: <?= $onboardingAutoShow ? 'true' : 'false' ?> })"
+    @open-onboarding.window="open = true">
+
+    <div class="modal-overlay onboarding-overlay" x-show="open" x-cloak>
+        <div class="modal-content onboarding-modal" @click.outside="dismiss()">
+            <?php $onboardingMode = 'popin'; include __DIR__ . '/common/onboardingContent.phtml'; ?>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Composant Alpine de la popin d'onboarding.
+     *
+     * @param {{autoShow: boolean}} config autoShow = vrai partout sauf sur l'accueil.
+     * @returns {object} État et actions Alpine de la popin.
+     */
+    window.onboardingModal = function (config) {
+        return {
+            /** Clé localStorage marquant l'onboarding comme « déjà vu ». */
+            STORAGE_KEY: 'opale_onboarding_seen',
+
+            /** true quand la popin est affichée. */
+            open: false,
+
+            /**
+             * Décide de l'ouverture automatique : page éligible, flag absent et accès
+             * hors lien profond.
+             */
+            init() {
+                this.open = config.autoShow
+                    && !localStorage.getItem(this.STORAGE_KEY)
+                    && !this.hasDeepLink();
+            },
+
+            /**
+             * Détecte un lien profond complet (partage externe vers un sprint précis) :
+             * même condition que selectSprint.phtml::applyDeepLink().
+             *
+             * @returns {boolean} true si projectKey, boardId et sprintId sont tous présents.
+             */
+            hasDeepLink() {
+                const p = new URLSearchParams(window.location.search);
+                return !!(p.get('projectKey') && p.get('boardId') && p.get('sprintId'));
+            },
+
+            /** Marque l'onboarding comme « déjà vu » (clic « Configurer mon projet »). */
+            markSeen() {
+                localStorage.setItem(this.STORAGE_KEY, '1');
+            },
+
+            /** Ferme la popin et pose le flag (lien « Ignorer »). */
+            dismiss() {
+                this.markSeen();
+                this.open = false;
+            },
+        };
+    };
+</script>

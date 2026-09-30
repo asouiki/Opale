@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * Script de tri client des tableaux de tickets (pages Sprint & Planification).
+ *
+ * S'applique à tout <table> contenant des en-têtes `th.col-sortable`.
+ * Chaque <tr> de données doit porter `data-sort-<clé>` pour chaque clé triable
+ * (ex. data-sort-parent, data-sort-priority) ; chaque en-tête triable porte
+ * `data-sort-key="<clé>"`.
+ *
+ * Le tri réordonne les <tr> dans le DOM : les liaisons Alpine éventuelles
+ * (cases à cocher liées à un index figé) suivent leur ligne, les compteurs
+ * restent donc exacts. Tri par défaut au chargement : colonne « parent ».
+ */
+?>
+<script>
+    (function () {
+        function sortValue(row, key) {
+            return row.getAttribute('data-sort-' + key) || '';
+        }
+
+        function compare(a, b, key, dir) {
+            var va = sortValue(a, key);
+            var vb = sortValue(b, key);
+
+            // Valeurs vides toujours en bas, quel que soit le sens du tri.
+            if (va === '' && vb === '') return 0;
+            if (va === '') return 1;
+            if (vb === '') return -1;
+
+            // Clés numériques (rang) : priority = id Jira, status = position dans le workflow,
+            // origin = rang Planifié(0)/Ajouté(1)/nouvelle_prio(2).
+            var numericKey = (key === 'priority' || key === 'status' || key === 'origin');
+            var result = numericKey
+                ? Number(va) - Number(vb)
+                : va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' });
+
+            return dir === 'desc' ? -result : result;
+        }
+
+        function sortTable(table, key, dir) {
+            var tbody = table.tBodies[0];
+            if (!tbody) return;
+
+            // Sépare les lignes principales des lignes de détail déployables
+            // (data-detail-for) afin que ces dernières restent collées à leur
+            // ligne principale (data-row-key) après le tri. Un même ticket peut
+            // porter PLUSIEURS lignes de détail (sprints affectés, détail attente)
+            // → on les regroupe dans un tableau par clé.
+            var detailByKey = {};
+            var mainRows = [];
+            Array.prototype.slice.call(tbody.rows).forEach(function (row) {
+                var detailFor = row.getAttribute('data-detail-for');
+                if (detailFor !== null) {
+                    (detailByKey[detailFor] = detailByKey[detailFor] || []).push(row);
+                } else {
+                    mainRows.push(row);
+                }
+            });
+
+            mainRows.sort(function (a, b) { return compare(a, b, key, dir); });
+            mainRows.forEach(function (row) {
+                tbody.appendChild(row);
+                var rowKey = row.getAttribute('data-row-key');
+                if (rowKey !== null && detailByKey[rowKey]) {
+                    detailByKey[rowKey].forEach(function (detailRow) {
+                        tbody.appendChild(detailRow);
+                    });
+                }
+            });
+
+            table.querySelectorAll('th.col-sortable').forEach(function (th) {
+                th.classList.remove('col-sortable--asc', 'col-sortable--desc');
+                if (th.getAttribute('data-sort-key') === key) {
+                    th.classList.add('col-sortable--' + dir);
+                }
+            });
+            table.setAttribute('data-sort-key', key);
+            table.setAttribute('data-sort-dir', dir);
+        }
+
+        function init() {
+            document.querySelectorAll('table').forEach(function (table) {
+                var headers = table.querySelectorAll('th.col-sortable');
+                if (!headers.length) return;
+
+                headers.forEach(function (th) {
+                    th.addEventListener('click', function () {
+                        var key = th.getAttribute('data-sort-key');
+                        var dir = (table.getAttribute('data-sort-key') === key &&
+                                   table.getAttribute('data-sort-dir') === 'asc')
+                            ? 'desc' : 'asc';
+                        sortTable(table, key, dir);
+                    });
+                });
+
+                // Tri par défaut : « parent » (sauf override via l'attribut `data-default-sort`).
+                var defaultKey = table.getAttribute('data-default-sort') || 'parent';
+                sortTable(table, defaultKey, 'asc');
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</script>

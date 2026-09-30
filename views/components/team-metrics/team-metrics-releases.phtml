@@ -1,0 +1,227 @@
+<?php
+
+/**
+ * Onglet « Releases » de la page Métriques d'équipe.
+ *
+ * Liste les Releases (tickets) et Versions Jira du « PI en cours » — fenêtre temporelle déduite des
+ * sprints sélectionnés — avec, par entité, ses Lead/Cycle/Waiting Time, son efficacité du flow et un
+ * lien d'analyse. En tête : moyennes et médianes agrégées. Les données sont chargées paresseusement
+ * via l'endpoint /api/internal/projects/{key}/pi-releases (au 1ᵉʳ affichage de l'onglet).
+ *
+ * @var \App\View\TeamMetricsView|null $view Fournie par le scope du template parent (team-metrics.phtml).
+ *                                           Null si aucun sprint n'a encore été analysé.
+ */
+
+// Sans analyse de sprints, l'onglet reste utilisable : la période est alors saisie au calendrier
+// (cf. bloc « Période » ci-dessous), et le projet est relu côté client de la sélection persistée.
+// Fenêtre du « PI en cours » = du démarrage du sprint le plus ancien à la clôture du plus récent
+// (mêmes bornes que l'en-tête de l'onglet Sprints), normalisées en Y-m-d.
+$piSprints = $view ? $view->getSprints() : [];
+$piStarts  = array_filter(array_column($piSprints, 'startDate'));
+$piEnds    = array_filter(array_map(
+    static fn (array $s): ?string => $s['completeDate'] ?: $s['endDate'],
+    $piSprints
+));
+$piFromRaw = $piStarts ? min($piStarts) : null;
+$piToRaw   = $piEnds ? max($piEnds) : null;
+
+// Sprint dont le startDate est le plus ancien → libellé affiché dans le texte.
+$piFirstSprint = $piFromRaw ? array_reduce($piSprints, static function (?array $carry, array $s) use ($piFromRaw): array {
+    if (($s['startDate'] ?? '') === $piFromRaw) {
+        return $s;
+    }
+    return $carry ?? $s;
+}) : null;
+
+// Sprint dont la date de fin est la plus récente → libellé affiché dans le texte.
+$piLastSprint = $piToRaw ? array_reduce($piSprints, static function (?array $carry, array $s) use ($piToRaw): array {
+    $end = $s['completeDate'] ?: $s['endDate'];
+    if ($end === $piToRaw) {
+        return $s;
+    }
+    return $carry ?? $s;
+}) : null;
+
+$piConfig  = [
+    // Vide sans analyse : le composant Alpine le résout alors depuis la sélection de projet persistée.
+    'projectKey'      => $view ? $view->getProjectKey() : '',
+    'from'            => $piFromRaw ? (new \DateTime($piFromRaw))->format('Y-m-d') : '',
+    'to'              => $piToRaw ? (new \DateTime($piToRaw))->format('Y-m-d') : '',
+    'firstSprintName' => $piFirstSprint['name'] ?? '',
+    'lastSprintName'  => $piLastSprint['name'] ?? '',
+    // Segment d'API consommé par le composant partagé piEntitiesTab (cf. /js/piEntitiesTab.js).
+    'resource'        => 'pi-releases',
+];
+?>
+
+<!-- ============ ONGLET 2 : RELEASES ============ -->
+<!-- Chargement paresseux : le fetch (coûteux côté Jira) n'est déclenché qu'au 1ᵉʳ affichage de
+     l'onglet, via l'événement « load-pi-releases » émis par le bouton d'onglet. -->
+<div x-show="tab === 'releases'"
+    x-data="piEntitiesTab(<?= htmlspecialchars(json_encode($piConfig), ENT_QUOTES) ?>)"
+    @load-pi-releases.window="loadOnce()">
+
+    <div class="card">
+        <div class="pi-releases__head">
+            <h2>🚀 Releases &amp; Versions sur la période sélectionnée (<em x-text="from + ' → ' + to"></em>)</h2>
+            <p class="sprint-section-sub">
+                Périmètre : Releases (tickets) et Versions Jira <strong>démarrées ou terminées</strong> dans la période analysée
+                (<strong x-text="firstSprintName || from || '—'"></strong> → <strong x-text="extended ? 'aujourd\'hui' : (lastSprintName || to || '—')"></strong>
+                · <em x-text="from + ' → ' + to"></em>).
+            </p>
+            <p class="sprint-section-sub">
+                Les items terminés sont mis en cache permanent. Les autres sont mis en cache pour une heure.
+                Pour resynchroniser avec Jira, <strong>cochez les lignes voulues</strong> puis utilisez le bouton Recalculer :
+                c'est le seul moyen de rafraîchir un item terminé.
+            </p>
+        </div>
+
+        <!-- Actions SŒURS de l'en-tête, jamais dans son flux : placées ici, elles restent entre le texte
+             et les cartes de synthèse, que le bouton « jusqu'à aujourd'hui » soit affiché ou non. -->
+        <div class="pi-releases__actions">
+            <!-- Période analysée : pré-remplie par les sprints analysés, librement modifiable ici. -->
+            <div class="pi-period">
+                <label class="pi-period__field">Du <input type="date" x-model="from" min="2000-01-01" :max="todayYmd()" :disabled="loading"></label>
+                <label class="pi-period__field">au <input type="date" x-model="to" min="2000-01-01" :max="todayYmd()" :disabled="loading"></label>
+                <button type="button" class="btn-secondary" @click="applyDates()"
+                    :disabled="loading || from === ''"
+                    :title="from === '' ? 'Renseignez d\'abord une date de début' : 'Fin laissée vide : la période ira jusqu\'à aujourd\'hui'">
+                    📅 Appliquer la période
+                </button>
+            </div>
+            <button type="button" class="btn-secondary"
+                @click="refreshSelection()" :disabled="loading || !items.some((r) => isSelected(r))"
+                title="Resynchronise avec Jira les seuls items cochés, terminés ou non">
+                🔄 Recalculer la sélection depuis Jira
+            </button>
+            <button type="button" class="btn-secondary" x-show="loaded && canExtendToToday"
+                @click="extendToToday()" :disabled="loading">
+                ➕ Ajouter les Releases &amp; Versions jusqu'à aujourd'hui
+            </button>
+        </div>
+
+        <!-- Aucune période exploitable : aucun appel Jira n'est lancé, on explique quoi faire. -->
+        <div x-show="!loaded && !loading && !error && !notice" class="pi-releases__state">
+            📊 Renseignez une <strong>période</strong> ci-dessus, ou analysez des sprints dans l'onglet
+            <strong>Sprints</strong> pour la pré-remplir automatiquement.
+        </div>
+
+        <!-- Avancement : chiffré dès que le chargement se fait par lots (batchTotal renseigné), sinon
+             repli sur le compteur indicatif. Une fenêtre chargée par lots peut durer : sans progression
+             visible, l'attente est indiscernable d'un blocage. -->
+        <div x-show="loading" aria-busy="true" class="pi-releases__state"
+            x-text="batchTotal > 0
+                ? '⏳ Chargement des Releases / Versions… ' + batchDone + ' / ' + batchTotal
+                : (expectedCount !== null
+                    ? '⏳ Chargement de ' + expectedCount + ' Releases / Versions…'
+                    : '⏳ Chargement des Releases / Versions…')"></div>
+
+        <div x-show="loading && batchTotal > 0" x-cloak class="pi-batch-progress">
+            <div class="pi-batch-progress__bar" :style="'width:' + Math.round(batchDone / batchTotal * 100) + '%'"></div>
+        </div>
+
+        <!-- Bouton d'interruption HORS du bloc aria-busy (pointer-events:none) pour rester cliquable. -->
+        <div x-show="loading" x-cloak class="team-sprints__stop">
+            <button type="button" @click="stopLoading()" class="team-sprints__stop-btn">
+                ✋ Stopper le chargement
+            </button>
+        </div>
+
+        <div x-show="error" class="pi-releases__state pi-releases__state--error" x-text="error"></div>
+        <div x-show="notice" class="pi-releases__state" x-text="notice"></div>
+
+        <template x-if="loaded && !loading && !error">
+            <div>
+                <!-- ===== Moyennes / médianes d'en-tête ===== -->
+                <div class="pi-releases__stats">
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Terminées / Total<?= \App\View\MetricTooltips::render('pi_releases_done') ?></span>
+                        <span class="pi-stat__value">
+                            <span x-text="stats.nbDone ?? 0"></span> / <span x-text="stats.total ?? 0"></span>
+                        </span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Lead Time (moy / méd)<?= \App\View\MetricTooltips::render('lead_time') ?></span>
+                        <span class="pi-stat__value"
+                            x-text="fmtDays(stats.lead?.avg) + ' / ' + fmtDays(stats.lead?.median)"></span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Cycle Time (moy / méd)<?= \App\View\MetricTooltips::render('cycle_time') ?></span>
+                        <span class="pi-stat__value"
+                            x-text="fmtDays(stats.cycle?.avg) + ' / ' + fmtDays(stats.cycle?.median)"></span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Waiting Time (moy / méd)<?= \App\View\MetricTooltips::render('waiting_time') ?></span>
+                        <span class="pi-stat__value"
+                            x-text="fmtDays(stats.waiting?.avg) + ' / ' + fmtDays(stats.waiting?.median)"></span>
+                        <span class="pi-stat__line">Maximum : <b x-text="fmtDays(stats.waiting?.maxTotal)"></b></span>
+                    </div>
+                    <div class="pi-stat">
+                        <span class="pi-stat__label">Efficacité du Flux<?= \App\View\MetricTooltips::render('pi_flow_efficiency') ?></span>
+                        <span class="pi-stat__line">Part de réalisation réelle (moy) :
+                            <b x-text="fmtDays(stats.realisation?.avgDays) + ' / ' + fmtPct(stats.realisation?.avgPct)"></b></span>
+                        <span class="pi-stat__line">Efficacité totale (moy) :
+                            <b x-text="fmtDays(stats.efficacite?.avgDays) + ' / ' + fmtPct(stats.efficacite?.avgPct)"></b></span>
+                    </div>
+                </div>
+
+                <div x-show="items.length === 0" class="pi-releases__state">
+                    Aucune Release ou Version dans cette fenêtre.
+                </div>
+
+                <!-- ===== Tableau détaillé ===== -->
+                <div class="table-scroll" x-show="items.length > 0">
+                    <table class="pi-releases__table">
+                        <thead>
+                            <tr>
+                                <th class="pi-releases__check" title="Inclure / exclure tout des cumuls">
+                                    <input type="checkbox" @change="toggleAll()" :checked="allSelected"
+                                        x-effect="$el.indeterminate = someSelected" aria-label="Tout cocher / décocher">
+                                </th>
+                                <th class="pi-sortable" @click="sortBy('key')">Key<span x-text="sortIndicator('key')"></span></th>
+                                <th class="pi-sortable pi-releases__name" @click="sortBy('name')">Nom<span x-text="sortIndicator('name')"></span></th>
+                                <th class="pi-sortable" @click="sortBy('status')">Statut<span x-text="sortIndicator('status')"></span></th>
+                                <th class="pi-sortable" @click="sortBy('startDate')">Démarrage<span x-text="sortIndicator('startDate')"></span></th>
+                                <th class="pi-sortable" @click="sortBy('closeDate')">Clôture<span x-text="sortIndicator('closeDate')"></span></th>
+                                <th>Lead</th>
+                                <th>Cycle</th>
+                                <th>Waiting<br><small>tot / moy / méd</small></th>
+                                <th>Efficacité tot.<br><small>j · %</small></th>
+                                <th>Analyse</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="row in sortedItems()" :key="row.type + ':' + row.key">
+                                <tr :class="{ 'pi-releases__row--excluded': !isSelected(row) }">
+                                    <td class="pi-releases__check">
+                                        <input type="checkbox" :checked="isSelected(row)" @change="toggle(row)"
+                                            aria-label="Inclure dans les cumuls">
+                                    </td>
+                                    <td>
+                                        <span class="pi-badge" :class="'pi-badge--' + row.type"
+                                            x-text="row.type === 'release' ? 'R' : 'V'"></span>
+                                        <span x-text="row.key"></span>
+                                    </td>
+                                    <td class="pi-releases__name">
+                                        <a :href="row.url" target="_blank" rel="noopener" x-text="row.name"></a>
+                                    </td>
+                                    <td x-text="row.status || '—'"></td>
+                                    <td x-text="fmtDate(row.startDate)"></td>
+                                    <td x-text="fmtDate(row.closeDate)"></td>
+                                    <td x-text="fmtDays(row.leadTime)"></td>
+                                    <td x-text="fmtDays(row.cycleTime)"></td>
+                                    <td x-text="fmtDays(row.waitingTotal) + ' / ' + fmtDays(row.waitingAvg) + ' / ' + fmtDays(row.waitingMedian)"></td>
+                                    <td x-text="fmtDays(row.efficaciteDays) + ' · ' + fmtPct(row.efficacitePct)"></td>
+                                    <td>
+                                        <a :href="row.analyseUrl" class="pi-releases__analyse">Analyse →</a>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+    </div>
+
+</div>

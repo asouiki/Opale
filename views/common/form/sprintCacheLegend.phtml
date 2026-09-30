@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * Légende des badges de cache des sélecteurs de sprint (pages Sprint et Métriques d'équipe).
+ *
+ * Statique : les icônes elles-mêmes sont posées par les composants Alpine, à partir du statut
+ * renvoyé par `GET /api/internal/sprints/cache-status`.
+ * Mutualisée pour que les deux pages restent alignées si la formulation évolue.
+ */
+?>
+<p class="jira-search__note">
+    ⚡= données déjà en cache (affichage instantané) · ⏳= premier chargement depuis Jira.
+    Seuls les sprints clôturés sont mis en cache.
+</p>

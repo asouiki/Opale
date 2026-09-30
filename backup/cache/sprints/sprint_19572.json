@@ -1,0 +1,254 @@
+{
+    "cached_at": 1780661690,
+    "metrics_version": 9,
+    "data": {
+        "sprintId": "19572",
+        "projectKey": "LIEVRE",
+        "boardId": "1153",
+        "sprintData": {
+            "id": 19572,
+            "self": "https:\/\/imsa.atlassian.net\/rest\/agile\/1.0\/sprint\/19572",
+            "state": "closed",
+            "name": "PI#7 IT IP",
+            "startDate": "2026-03-23T13:33:54.814Z",
+            "endDate": "2026-04-12T22:07:52.000Z",
+            "completeDate": "2026-04-01T08:13:57.651Z",
+            "createdDate": "2026-01-16T14:58:35.100Z",
+            "originBoardId": 1153,
+            "goal": ""
+        },
+        "issuesCount": 4,
+        "landingByStatus": [
+            {
+                "status": "\u00c0 faire",
+                "category": "refinement",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 6.8,
+                "averageDays": 1.7
+            },
+            {
+                "status": "En r\u00e9daction",
+                "category": "refinement",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 6.3,
+                "averageDays": 1.6
+            },
+            {
+                "status": "En cours",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 14.8,
+                "averageDays": 3.7
+            },
+            {
+                "status": "EN ATTENTE",
+                "category": "waiting",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 3.3,
+                "averageDays": 0.8
+            }
+        ],
+        "objectiveGroups": [],
+        "features": [
+            {
+                "key": "TCRE-469",
+                "summary": "[EPIC AAF CSP] Optimisation du Li\u00e8vre KDS02 (\u00e9missions CQFD)"
+            },
+            {
+                "key": "TCRE-471",
+                "summary": "[Dette] KDS10 : s\u00e9curisation de la reprise suite \u00e0 plantage"
+            }
+        ],
+        "stats": {
+            "issuesWithoutStoryPoints": 2,
+            "estimatedAfterAdd": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "totalStoryPoints": 0,
+            "storyPointsRange": {
+                "min": 0,
+                "max": 0,
+                "median": 0,
+                "average": 0
+            },
+            "scopeChange": {
+                "plannedTicketCount": 4,
+                "currentTicketCount": 4,
+                "ticketDelta": 0,
+                "ticketGrowthPercent": 0,
+                "plannedStoryPoints": 0,
+                "currentStoryPoints": 0,
+                "storyPointsDelta": 0,
+                "storyPointsGrowthPercent": null,
+                "addedStoryPointsPercent": null,
+                "nouvellePrioStoryPointsPercent": null
+            },
+            "addedDuringSprint": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "removedDuringSprint": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "nouvellePrio": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "continuousImprovement": [],
+            "doneTickets": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "reliquat": {
+                "count": 4,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-2158",
+                        "summary": " Terminer le KDS02 avant fermeture du TP",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2158",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-469",
+                        "parentSummary": "[EPIC AAF CSP] Optimisation du Li\u00e8vre KDS02 (\u00e9missions CQFD)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 44.25,
+                        "leadTime": 146.5,
+                        "labels": [
+                            "Optim_KDS02"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2210",
+                        "summary": "Timebox - Etude S\u00e9curisation du KDS10 - 5j",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2210",
+                        "issueType": "Spike",
+                        "status": "EN ATTENTE",
+                        "statusCategory": "waiting",
+                        "statusRank": 9223372036854775807,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-471",
+                        "parentSummary": "[Dette] KDS10 : s\u00e9curisation de la reprise suite \u00e0 plantage",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "PI7"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3091",
+                        "summary": "Actions pr\u00e9paratoires aux rejeux concernant le PM tiers inconnu sur cr\u00e9ances Pr\u00e9voyance",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3091",
+                        "issueType": "Story",
+                        "status": "En r\u00e9daction",
+                        "statusCategory": "refinement",
+                        "statusRank": 7,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2336",
+                        "summary": "Mettre \u00e0 jour de board POST-DOD",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2336",
+                        "issueType": "Story",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "refinement",
+                        "statusRank": 3,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        },
+        "predictability": {
+            "startStoryPoints": 0,
+            "completedStoryPoints": 0,
+            "startTicketCount": 4,
+            "completedTicketCount": 0,
+            "completedFromStartTicketCount": 0,
+            "targetPercent": 80,
+            "targetStoryPoints": 0,
+            "achievedPercent": 0,
+            "isReached": false,
+            "engagementPercent": 0,
+            "isEngagementReached": false
+        }
+    }
+}

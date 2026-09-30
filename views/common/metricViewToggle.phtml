@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * Toggle « Vue simplifiée / Vue complète » des pages Sprint et Métriques d'équipe.
+ *
+ * Pilote le masquage des métriques non retenues dans la sélection personnelle de /config :
+ * « Vue simplifiée » applique la sélection, « Vue complète » affiche tout. Le mode est mémorisé par
+ * navigateur et par page (localStorage), il survit donc au rechargement et à une nouvelle analyse.
+ *
+ * L'état actif des boutons et le changement de mode sont câblés par public/js/metricPreferences.js
+ * (fonction syncViewToggle), qui repère ce bloc par son attribut data-metric-view-page. Le toggle est
+ * automatiquement masqué si la sélection courante ne cache aucune métrique.
+ *
+ * Emplacement attendu : dans le composant de sélection de sprint(s), entre projectRecap et le formulaire
+ * (le CSS le flotte à droite de la ligne du sélecteur).
+ *
+ * @var string $metricViewPage Identifiant de page attendu par MetricPrefs ('sprint' | 'team_metrics')
+ */
+?>
+<div class="metric-view-toggle" data-metric-view-page="<?= htmlspecialchars($metricViewPage, ENT_QUOTES) ?>"
+    role="group" aria-label="Niveau de détail des métriques affichées">
+    <button type="button" class="metric-view-toggle__btn" data-metric-view="simple">Vue simplifiée</button>
+    <button type="button" class="metric-view-toggle__btn" data-metric-view="full">Vue complète</button>
+</div>

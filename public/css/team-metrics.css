@@ -1,0 +1,597 @@
+/* ============================================================
+ * 19b. TEAM METRICS (page Métriques d'équipe)
+ * ============================================================ */
+/* --- Barre d'onglets --- */
+.team-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+}
+/* Préfixe `button` : l'emporter sur `button[type="button"]` (fond transparent, spécificité
+   supérieure à une simple classe) — sinon l'onglet actif garde le fond par défaut. */
+button.team-tab {
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 8px 18px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--neutral-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
+        transform 0.15s ease;
+}
+button.team-tab:hover:not(:disabled) { background: var(--info-bg); }
+button.team-tab--active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.35);
+    transform: translateY(-1px);
+}
+button.team-tab--active:hover:not(:disabled) { background: var(--primary-dark); }
+/* Onglet désactivé (Historique — à venir) */
+.team-tab--locked {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.team-tab--locked em {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* --- Liste à cocher des sprints clôturés --- */
+.team-sprints__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.team-sprints__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.team-sprints__actions button {
+    font-size: 12px;
+    cursor: pointer;
+}
+.team-sprints__count {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.team-sprints__checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 4px 2px;
+}
+.team-sprints__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    user-select: none;
+}
+.team-sprints__check input { cursor: pointer; }
+/* Entrée « photo à date » : état reconstruit d'un sprint, proposé À LA PLACE de son état de clôture.
+   Décalée et teintée pour se lire comme une variante du sprint qui la précède, et non comme un sprint de plus. */
+.team-sprints__check--photo {
+    margin-left: 22px;
+    color: var(--warning-text);
+}
+/* Boutons de soumission : « Calculer » + « Recalculer depuis Jira » (force le
+   recalcul en ignorant le cache des sprints, iso bouton refresh page Sprint) */
+.team-sprints__submit {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+.team-sprints__refresh {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+/* Barre d'avancement du chargement par lots de l'onglet Features. Affichée seulement quand le
+   découpage a lieu (plus d'un lot) : sur une fenêtre courte, le chargement reste d'un seul tenant. */
+.pi-batch-progress {
+    height: 6px;
+    margin: 8px 0 4px;
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.pi-batch-progress__bar {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.2s ease;
+}
+
+/* Bouton « Stopper le chargement », partagé par le sélecteur de sprints (interrompt le POST d'analyse)
+   et par les onglets Releases/Features (abandonne le fetch en cours, cf. piEntitiesTab.stopLoading). */
+.team-sprints__stop {
+    margin-top: 12px;
+    text-align: center;
+}
+.team-sprints__stop-btn {
+    background: transparent;
+    border: 1px solid var(--danger-text);
+    color: var(--danger-text);
+    cursor: pointer;
+}
+.team-sprints__stop-btn:hover {
+    opacity: 0.8;
+}
+
+/* Graphique « Points d'effort VS temps de cycle » (nuage de points) */
+.team-scatter-title {
+    margin: 24px 0 4px;
+}
+
+/* Bloc explicatif sous le nuage de points : pleine largeur, listes
+   indentées malgré le reset global margin/padding:0 */
+.team-scatter-help {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+.team-scatter-help p  { margin: 10px 0; }
+.team-scatter-help b  { color: var(--text); }
+.team-scatter-help ul {
+    list-style: disc;
+    margin: 4px 0 16px;
+    padding: 0 0 0 1.6em;        /* annule le padding 16px générique de <details> */
+}
+.team-scatter-help li { margin: 4px 0; }
+
+/* Supprime les lignes horizontales génériques de <details> dans ce bloc */
+.team-scatter-help__more > *:not(summary) {
+    border-top: none;
+}
+
+/* Déclencheur repliable : « ❓ Comment interpréter ce graphique ? » */
+.team-scatter-help__more > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0;
+    padding: 4px 0;
+    background: none;            /* retire le fond gris hérité */
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    width: fit-content;
+}
+/* Chevron repositionné AVANT le « ❓ » (annule l'absolu générique) */
+.team-scatter-help__more > summary::before {
+    content: "▸";
+    position: static;
+    left: auto;
+    font-size: 1em;
+    line-height: 1;
+    color: var(--primary);
+}
+.team-scatter-help__more[open] > summary::before { transform: rotate(90deg); }
+.team-scatter-help__more > summary:hover { color: var(--primary-dark); text-decoration: underline; }
+
+/* Lignes-clés (anciens « ► ») : flèche colorée alignée devant le texte */
+.team-scatter-help__lead {
+    position: relative;
+    padding: 0 0 0 1.5em;        /* annule le padding 16px générique de <details> */
+    color: var(--text);
+}
+.team-scatter-help__lead::before {
+    content: "►";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.8em;
+    line-height: inherit;
+    color: var(--primary);
+}
+
+/* Sous-titre interne (ex : « Questions puissantes… ») collé à sa liste */
+.team-scatter-help__subtitle {
+    margin: 16px 0 0;
+    padding: 0;                  /* annule le padding 16px générique de <details> */
+    font-weight: 600;
+    color: var(--text);
+}
+.team-scatter-help__subtitle + ul { margin-top: 4px; }
+
+/* Note : l'encart d'avertissement utilise désormais .info-note (global.css),
+   classe générique réutilisée par la page d'accueil. */
+
+/* Rappel du périmètre du nuage de points (tickets pris en compte) */
+.team-scatter-scope {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Note : la famille de filtres (.team-scatter__filters + button.team-filter*,
+   .team-filter__dot / __count) est définie dans global.css : elle est aussi
+   utilisée par les boutons de métrique du camembert de la page Sprint. */
+
+.team-scatter {
+    position: relative;
+    height: 420px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.team-scatter canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Pastilles de légende inline dans le sous-titre */
+.team-scatter-legend {
+    font-weight: 600;
+}
+
+.team-scatter-legend--point {
+    color: rgb(230, 159, 0);
+}
+
+.team-scatter-legend--avg {
+    color: rgb(0, 114, 178);
+}
+
+.team-scatter-legend--median {
+    color: rgb(0, 158, 115);
+}
+
+/* --- Graphique d'évolution (prédictibilité) --- */
+.team-chart {
+    position: relative;
+    height: 340px;
+    margin-top: 8px;
+}
+
+/* --- Avertissement sprints partiellement chargés --- */
+.team-metrics__warning {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--warning-text);
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+}
+
+/* ============================================================
+   Page Métriques d'équipe — Onglet « Releases »
+   (Releases/Versions du PI en cours : moyennes + tableau détaillé)
+   ============================================================ */
+/* Titre + textes d'explication de l'onglet. Bloc simple : les actions ne sont volontairement PAS
+   dans ce conteneur (cf. .pi-releases__actions). */
+.pi-releases__head {
+    margin-bottom: 12px;
+}
+/* Boutons d'action (Recalculer la sélection + Étendre à aujourd'hui), sur une même ligne.
+   Ils forment une bande AUTONOME entre le texte et les cartes de synthèse : tant qu'ils partageaient
+   un flex avec le texte, le retrait du bouton « jusqu'à aujourd'hui » suffisait à faire remonter le
+   bouton restant en haut à droite — position instable d'un état de page à l'autre. */
+.pi-releases__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+/* Sélecteur de période : les deux calendriers et leur bouton restent solidaires quand la barre
+   d'actions passe à la ligne sur écran étroit. */
+.pi-period {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.pi-period__field {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+.pi-period__field input {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.85rem;
+}
+.pi-releases__state {
+    padding: 18px;
+    text-align: center;
+    color: var(--text-light);
+}
+.pi-releases__state--error {
+    color: var(--danger-text, #b91c1c);
+}
+/* État loading : spinner animé (cf. [aria-busy], global.css) avec le libellé placé sous le spinner. */
+.pi-releases__state[aria-busy] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-height: 120px;
+}
+/* Cartes de moyennes/médianes d'en-tête */
+.pi-releases__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+.pi-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--card-hover);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+.pi-stat__label {
+    font-size: 0.78rem;
+    color: var(--text-light);
+}
+.pi-stat__value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+}
+/* Précision sous une valeur (ex. terminés hors fenêtre) */
+.pi-stat__note {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+/* Ligne « Moyenne / Médiane » dans une carte regroupant deux valeurs (ex. Efficacité du Flux) */
+.pi-stat__line {
+    font-size: 0.92rem;
+    color: var(--text-light);
+}
+.pi-stat__line b {
+    color: var(--text);
+}
+/* Pas de conteneur de défilement : le tableau grandit librement pour que son en-tête
+   `thead` se fige en haut de la FENÊTRE au défilement de la page (voir global.css `thead th`). */
+.table-scroll {
+    overflow: visible;
+}
+.pi-releases__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+.pi-releases__table th,
+.pi-releases__table td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+/* Colonne « Nom » : seul texte libre du tableau, donc seule vraie source de débordement. Elle plie
+   (y compris au milieu d'un mot très long) pour que le tableau tienne dans sa carte. */
+.pi-releases__table th.pi-releases__name,
+.pi-releases__table td.pi-releases__name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    min-width: 14ch;
+}
+/* Écrans étroits : plus aucune colonne ne reste d'un seul tenant, et l'on resserre police et
+   gouttières. Objectif ferme : JAMAIS de défilement horizontal, le tableau se comprime au lieu de
+   déborder de la carte (.table-scroll reste en overflow visible pour garder l'en-tête collant). */
+@media (max-width: 1200px) {
+    .pi-releases__table {
+        font-size: 0.8rem;
+    }
+    .pi-releases__table th,
+    .pi-releases__table td {
+        padding: 6px 5px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+    .pi-releases__table th.pi-sortable {
+        white-space: normal;
+    }
+}
+.pi-releases__table th {
+    font-weight: 600;
+    color: var(--text-light);
+}
+.pi-releases__table th small {
+    font-weight: 400;
+    opacity: 0.8;
+}
+/* En-têtes de colonnes triables (Key, Nom, Statut, Démarrage, Clôture) */
+.pi-releases__table th.pi-sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.pi-releases__table th.pi-sortable:hover {
+    color: var(--text);
+}
+.pi-releases__table tbody tr:hover {
+    background: var(--card-hover);
+}
+/* Colonne case à cocher : étroite, case centrée (inclusion dans les cumuls). */
+.pi-releases__table th.pi-releases__check,
+.pi-releases__table td.pi-releases__check {
+    width: 1%;
+    text-align: center;
+    padding-right: 6px;
+    padding-left: 6px;
+}
+.pi-releases__check input {
+    cursor: pointer;
+    margin: 0;
+}
+/* Ligne exclue des cumuls : atténuée pour signaler qu'elle ne compte plus. */
+.pi-releases__table tbody tr.pi-releases__row--excluded {
+    opacity: 0.45;
+}
+/* Pastille de type : R = Release (ticket), V = Version (fixVersion), F = Feature */
+.pi-badge {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    margin-right: 6px;
+}
+.pi-badge--release { background: #8b5cf6; }
+.pi-badge--version { background: #2563eb; }
+.pi-badge--feature { background: #0e9f6e; }
+.pi-releases__analyse {
+    color: var(--primary);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   Onglet Features — détail dépliable d'une ligne
+   (total Story Points, bugs, camembert des types de ticket)
+   ============================================================ */
+/* Colonne du chevron : aussi étroite que la case à cocher voisine. */
+.pi-releases__table th.pi-releases__expand,
+.pi-releases__table td.pi-releases__expand {
+    width: 1%;
+    text-align: center;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+.pi-expand {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 0.9rem;
+    line-height: 1;
+    color: var(--text-light);
+}
+.pi-expand:hover {
+    color: var(--primary);
+}
+/* Ligne de détail : fond distinct pour la détacher de la ligne de synthèse qui la porte. */
+.pi-detail > td {
+    background: var(--card-hover);
+    white-space: normal;
+    padding: 14px 16px;
+}
+.pi-detail__grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(220px, 1fr) minmax(260px, 1.4fr);
+    gap: 14px;
+    align-items: start;
+}
+/* Sous 900px, les trois blocs s'empilent (le camembert garde sa hauteur fixe). */
+@media (max-width: 900px) {
+    .pi-detail__grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Boutons de métrique solidaires du graphique, comme sur le camembert de la page Sprint. */
+.pi-detail__chart-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.pi-detail__chart {
+    position: relative;
+    height: 240px;
+}
+
+/* ============================================================
+   Page Métriques d'équipe — Onglet « Sprints »
+   Causes d'attente cumulées (section repliable sous « Temps de traversée »)
+   ============================================================ */
+/* Flex-item de .meta-line-metrics (flex-wrap) : `flex: 0 0 100%` force sa propre ligne pleine
+   largeur sous les cartes — comme le h3 de section ; un simple width:100% se ferait écraser. */
+.team-waiting-causes {
+    flex: 0 0 100%;
+    width: 100%;
+}
+.team-waiting-list {
+    list-style: none;
+    margin: 8px 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.team-waiting-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   Page Métriques d'équipe — Onglet « Sprints »
+   Cartes compteur du PI (Releases & Versions, Features) — lien vers l'onglet détaillé
+   ============================================================ */
+.pi-count-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.pi-count-card__icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+.pi-count-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 auto;
+    min-width: 180px;
+}
+.pi-count-card__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+}
+.pi-count-card__label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+.pi-count-card__link {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-hover);
+    color: var(--primary, #2563eb);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.pi-count-card__link:hover {
+    background: var(--border);
+}

@@ -1,0 +1,478 @@
+/* ============================================================
+ * Page SPRINT
+ * ============================================================ */
+
+/* Utility */
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+/* Bandeau cache : déplacé dans global.css sous .cache-banner, désormais partagé avec la page Release. */
+
+/* --- État à date (page Sprint) : reconstruction du sprint à un instant passé ---
+   Bandeau ambre pour signaler franchement que les chiffres affichés ne sont PAS l'état Jira courant.
+   La variante --saved (grise, comme le bandeau cache) n'est qu'un rappel : elle n'altère aucun chiffre. */
+.sprint-asof-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-left: 4px solid var(--warning-text);
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    color: var(--warning-text);
+}
+.sprint-asof-banner--saved {
+    background: var(--neutral-bg);
+    border-color: var(--border);
+    border-left-color: var(--border-strong);
+    color: var(--text-muted);
+}
+.sprint-asof-banner__text { line-height: 1.5; }
+.sprint-asof-banner__gap { font-weight: 600; }
+.sprint-asof-banner__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.sprint-asof-banner__actions form { margin: 0; }
+.sprint-asof-banner__actions button { cursor: pointer; }
+.sprint-asof-banner__saved { font-weight: 600; white-space: nowrap; }
+
+/* Dépliant de saisie de la date, dans le sélecteur de sprint. */
+.sprint-asof-toggle {
+    margin-top: 10px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+.sprint-asof-toggle > summary { cursor: pointer; }
+.sprint-asof-toggle__hint {
+    margin: 8px 0;
+    max-width: 720px;
+    line-height: 1.5;
+}
+.sprint-asof-toggle label { margin-right: 8px; }
+.sprint-asof-toggle__submit { margin-left: 8px; }
+
+/* --- En-tête sprint --- */
+.sprint-header__meta  { margin-top: 10px; }
+.sprint-header__goals { margin-top: 16px; }
+.sprint-goal-text     { white-space: pre-line; color: var(--text); }
+
+/* --- Prédictibilité --- */
+.sprint-predict__line-tickets { margin-bottom: 4px; }
+.sprint-predict__line-sp      { margin-bottom: 10px; }
+.sprint-predict__ratio {
+    display: inline-block;
+    margin-left: 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Légende au-dessus de chaque jauge (Prédictibilité / Engagement) */
+.sprint-gauge-caption {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+.sprint-gauge-caption--mt { margin-top: 16px; }
+
+.sprint-progress {
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    height: 28px;
+    position: relative;
+    overflow: hidden;
+}
+.sprint-progress__fill  { height: 100%; transition: width .3s; }
+.sprint-progress__label {
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+.sprint-progress__label-icon { font-weight: 400; margin-left: 4px; font-size: 0.78rem; }
+.sprint-progress__target     { position: absolute; top: 0; bottom: 0; width: 4px; background: #0f172a; }
+
+/* --- Tableaux sprint --- */
+.sprint-section-sub    { margin-top: 8px; }
+.sprint-landing__table { margin-top: 6px; }
+.sprint-table-mt       { margin-top: 12px; }
+.sprint-landing__avg   { color: var(--text-muted); font-size: 0.82rem; }
+
+/* Résumé atterrissage : barre empilée */
+.sprint-landing__summary { margin: 12px 0 16px 0; }
+.sprint-landing__bar {
+    display: flex;
+    height: 28px;
+    background: var(--neutral-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+.sprint-landing__bar-segment {
+    transition: width 0.3s;
+    min-width: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.sprint-landing__bar-label {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.sprint-landing__bar-segment:hover .sprint-landing__bar-label {
+    opacity: 1;
+}
+@media (min-width: 600px) {
+    .sprint-landing__bar-segment {
+        min-width: 50px;
+    }
+    .sprint-landing__bar-segment:nth-child(1) .sprint-landing__bar-label,
+    .sprint-landing__bar-segment:nth-child(2) .sprint-landing__bar-label,
+    .sprint-landing__bar-segment[data-category="refinement"] .sprint-landing__bar-label {
+        opacity: 1;
+    }
+}
+
+/* Atterrissage : tableau (gauche) + camembert de répartition (droite). */
+/* Rangée de contrôles : ne porte plus que le toggle « Afficher les statuts
+   vides », placé au-dessus du tableau (qu'il pilote). Le switch de métrique a
+   rejoint la colonne du camembert (voir .sprint-landing__chart-filters). */
+.sprint-landing__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+    margin: 10px 0 0;
+}
+
+.sprint-landing__layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    /* stretch : les deux colonnes ont la même hauteur, donc le bas du
+       graphique s'aligne sur le bas du tableau. */
+    align-items: stretch;
+    margin-top: 6px;
+}
+.sprint-landing__table-wrap { flex: 0 1 50%; min-width: 0; }
+.sprint-landing__table-wrap .sprint-landing__table { margin-top: 0; }
+/* Colonne graphique COLLÉE au tableau : largeur fixe (≈ diamètre du camembert)
+   au lieu de remplir l'espace restant, sinon le camembert flotterait au centre
+   d'une large colonne (grand vide à gauche). Le switch de métrique étant
+   remonté dans la ligne de contrôles, le canvas occupe TOUTE la hauteur du
+   layout (= hauteur du tableau). min-height:0 autorise l'enfant à se contraindre. */
+.sprint-landing__chart-wrap {
+    flex: 0 0 auto;
+    min-width: 360px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Ancre les boutons de métrique, positionnés en absolu AU-DESSUS de la
+       colonne : le camembert occupe ainsi toute la hauteur (haut = en-tête du
+       tableau, bas = bas du tableau), les boutons débordant juste au-dessus. */
+    position: relative;
+}
+/* flex 1 + min-height 0 : la hauteur du conteneur est dérivée de la colonne
+   étirée (= hauteur du tableau), et NON du canvas. Sans cela, Chart.js
+   (responsive + maintainAspectRatio:false) ferait grossir le canvas jusqu'à
+   sa largeur. */
+.sprint-landing__chart {
+    position: relative;
+    flex: 1 1 0;
+    /* Plancher : évite l'effondrement du canvas quand la colonne est seule
+       sur sa ligne (écran étroit) ou face à un tableau très court. */
+    min-height: 300px;
+}
+/* Canvas en absolu : il remplit le conteneur sans contribuer à sa hauteur
+   (rompt la boucle de redimensionnement). */
+.sprint-landing__chart canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+/* Boutons de métrique sortis du flux et collés juste au-dessus de la colonne
+   graphique (bottom = haut du conteneur + 8px de marge) : le camembert démarre
+   alors au niveau de l'en-tête du tableau, et les boutons restent au-dessus. */
+.sprint-landing__chart-filters {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    margin: 0;
+    /* Conteneur absolu = largeur réduite : on annule le wrap hérité de
+       .team-scatter__filters et on dimensionne à la largeur des 3 boutons pour
+       les garder sur une seule ligne. */
+    flex-wrap: nowrap;
+    width: max-content;
+}
+
+/* Sous 1180px : passage forcé en une seule colonne. Le wrap naturel se
+   déclenchait trop tard (~833px) et laissait le camembert chevaucher le
+   tableau entre 833 et 1180px. On rend les deux colonnes pleine largeur :
+   tableau puis (boutons + camembert) empilés. */
+@media (max-width: 1180px) {
+    .sprint-landing__table-wrap,
+    .sprint-landing__chart-wrap {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+    /* En colonne unique, les boutons reprennent leur place dans le flux (au-dessus
+       du camembert) : sinon, en absolu, ils chevaucheraient le bas du tableau. */
+    .sprint-landing__chart-filters {
+        position: static;
+        margin: 0 0 8px;
+        width: auto;
+        flex-wrap: wrap;
+    }
+}
+.sprint-tfoot-total    { font-weight: bold; border-top: 2px solid #333; }
+
+/* --- Sections --- */
+.sprint-group-h3 { margin-top: 16px; }
+.sprint-stats-h3 { margin-top: 20px; }
+.sprint-list     { margin-top: 8px; padding-left: 20px; }
+
+/* --- Statistiques du sprint : panneau bleu unique partagé ---
+   Toutes les sous-sections (Story Points, Âge, Temps d'attente, Capacité)
+   partagent un seul fond bleu. Les .meta-line-metrics internes deviennent
+   transparentes (plus de double bordure/fond imbriqué). */
+.sprint-stats-group {
+    width: 100%;
+    padding: 18px 20px;
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-border);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.sprint-stats-group .meta-line-metrics {
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+}
+/* Premier titre de sous-section : pas de marge haute superflue */
+.sprint-stats-group .meta-line-metrics:first-child > h3 { margin-top: 0; }
+
+/* --- Bandeau collant du choix de sprint (carte séparée du rappel projet) --- */
+/* Le scope Alpine du sélecteur enveloppe les DEUX cartes (rappel projet + bandeau collant), car
+   projectRecap lit son état. Sans `display: contents`, ce conteneur serait le bloc de référence du
+   bandeau collant, qui ne pourrait alors coller que dans les limites du conteneur — c'est-à-dire pas du
+   tout, puisqu'il en est le dernier enfant. `contents` fait participer les 2 cartes au flux de la page
+   comme si le conteneur n'existait pas, sans toucher au DOM : le scope Alpine reste intact. */
+.sprint-selector-scope {
+    display: contents;
+}
+
+/* Le formulaire et le toggle ouvrent désormais la carte : leur marge haute, prévue pour les détacher du
+   rappel projet qui les précédait, ferait double emploi avec le padding de la carte. */
+.sprint-selector-bar .jira-search__block,
+.sprint-selector-bar .metric-view-toggle {
+    margin-top: 0;
+}
+
+/* Causes d'attente : bloc repliable interne à la carte « Temps de mise en attente », sur toute sa largeur */
+.sprint-waiting-causes {
+    width: 100%;
+    margin-top: 2px;
+}
+/* La liste des causes ne réapparaît qu'au dépliage : pas de puces ni de retrait, elle doit se lire comme
+   la suite des lignes « métrique » de la carte. */
+.sprint-waiting-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* --- Bloc repliable discret (détail d'un objectif, tableaux de tickets secondaires) --- */
+/* Variante sobre du <details> global : le déclencheur redevient un lien discret (le fond gris et le
+   padding hérités écraseraient la hiérarchie visuelle d'une section déjà titrée par un h3), et le
+   contenu retrouve l'alignement du reste de la carte (ni padding, ni filet supérieur).
+   `overflow: visible` est INDISPENSABLE : le `overflow: hidden` du <details> global créerait un
+   conteneur de défilement qui piégerait les en-têtes de tableaux collants à l'intérieur du bloc
+   (cf. la règle `thead th` de global.css). */
+.sprint-collapse {
+    overflow: visible;
+    margin-top: 6px;
+}
+.sprint-collapse > summary {
+    padding: 4px 4px 4px 24px;
+    background: none;
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    width: fit-content;
+}
+.sprint-collapse > summary:hover {
+    background: none;
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+.sprint-collapse > summary::before {
+    left: 2px;
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+.sprint-collapse > *:not(summary) {
+    padding: 0;
+    border-top: none;
+}
+
+/* Ligne « libellé : valeur » à l'intérieur d'une carte .metric (ex. Âge,
+   Temps d'attente regroupés sur une même ligne). */
+.metric-kv {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+.metric-kv strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* --- Carte Capacité (jours/homme + capacité en points) --- */
+/* Deux lignes empilées ; chaque ligne aligne son titre à gauche et sa saisie à
+   droite. Les champs ayant une largeur fixe, leurs bords droits s'alignent. */
+.sprint-capacity { gap: 12px; }
+.sprint-capacity__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+/* Largeur fixe du libellé : les saisies restent accolées aux libellés tout en
+   démarrant au même endroit (alignées entre les deux lignes). */
+.sprint-capacity__row .metric-title {
+    margin-bottom: 0;
+    min-width: 190px;
+}
+.sprint-capacity__row .metric-value { display: flex; }
+
+/* --- Delta capacité en points vs total Story Points (carte Total Story Points) --- */
+.sprint-capacity-delta { font-weight: 600; }
+.sprint-capacity-delta--over  { color: var(--danger-text); }
+.sprint-capacity-delta--equal { color: var(--warning-text); }
+.sprint-capacity-delta--under { color: var(--success-text); }
+
+/* --- Switch "Afficher les statuts vides" --- */
+/* Classe dédiée (et NON .sprint-toggle, qui sert au chevron des tableaux et
+   porte un margin:0 auto centrant) : ce switch doit rester aligné à gauche,
+   au-dessus de la colonne « Statut » du tableau d'atterrissage. */
+.sprint-empty-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    user-select: none;
+    margin-top: 16px;
+    margin-bottom: 2px;
+    margin-right: auto; /* absorbe l'espace à droite => collé à gauche du flex */
+}
+.sprint-empty-toggle__track {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    border-radius: var(--radius-pill);
+    background: var(--border-strong);
+    transition: background .2s;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.sprint-empty-toggle__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    transition: left .2s;
+}
+.sprint-empty-toggle__text { color: var(--text-muted); }
+
+/* La carte « Synthèse IA » utilise le composant partagé `.ai-synthesis*` (global.css). */
+
+/* ============================================================
+ * TABLEAUX DE TICKETS — CHEVRON & LIGNE DE DÉTAIL DÉPLIABLE
+ * (composant views/components/sprint/ticketsTable.phtml)
+ * ============================================================ */
+
+/* Bouton (chevron ou icône) déployant une ligne de détail sous un ticket. */
+.sprint-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0 auto;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+.sprint-toggle__chevron {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--neutral-text);
+    transition: transform var(--transition);
+}
+.sprint-toggle__chevron--open { transform: rotate(90deg); }
+
+/* Colonne « Temps d'attente » : l'icône flag Jira sert de déclencheur du détail. */
+.waiting-toggle__icon {
+    height: 1em;
+    width: auto;
+    transition: transform var(--transition);
+}
+.waiting-toggle__icon--open { transform: scale(1.15); }
+
+.sprint-detail-row > td {
+    background: var(--neutral-bg);
+    color: var(--neutral-text);
+    font-size: 13px;
+    padding: 6px 14px;
+}
+.sprint-detail-row__label { font-weight: 600; margin-right: 6px; }
+/* Espacement des badges de causes dans la ligne « Détail de l'attente ». */
+.sprint-detail-row .badge { margin: 2px 4px 2px 0; }
+/* Total dédupliqué (union) affiché après les badges de causes. */
+.waiting-union-total { margin-left: 6px; }
+.waiting-union-total em { color: var(--text-muted); font-size: 0.82em; }
+/* Pendant « cycle de vie complet » d'une attente bornée au sprint : volontairement effacé, c'est une
+   valeur de comparaison et non la métrique du sprint. */
+.waiting-full {
+    color: var(--text-muted);
+    font-size: 0.82em;
+    white-space: nowrap;
+}
+

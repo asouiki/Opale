@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * Modale de confirmation « Ajout au prochain sprint ».
+ *
+ * Récapitule la sélection (tickets cochés, Story Points, Reste à faire, capacité) avant de
+ * confirmer le déplacement réel des tickets vers le sprint auto-détecté (API Agile) + la trace
+ * commentée. Toute la logique (détection du sprint, ouverture/fermeture, appel réseau) vit dans
+ * l'état `assignSprint` du composant Alpine racine `planificationTotals()` : ce partiel est un
+ * pur gabarit, sans variable PHP.
+ *
+ * Deux niveaux d'avertissement, volontairement distincts pour que le second ne se noie pas dans
+ * le premier :
+ *  - PERMANENT (texte rouge) : rappel de démarrer le sprint cible dans Jira ;
+ *  - CONTEXTUEL (encadré rouge plein) : n'apparaît que si la SÉLECTION contient du reliquat d'un
+ *    sprint réellement actif, et verrouille alors le bouton Confirmer jusqu'à acquittement.
+ */
+?>
+<div class="planif-modal" x-cloak
+    x-show="assignSprint.open"
+    @keydown.escape.window="cancelAssignSprint()">
+    <div class="planif-modal__backdrop" @click="cancelAssignSprint()"></div>
+    <div class="planif-modal__dialog planif-modal__dialog--wide" role="dialog" aria-modal="true">
+        <div class="planif-modal__header">
+            <h3>Ajouter au prochain sprint</h3>
+            <button type="button" class="planif-modal__close" @click="cancelAssignSprint()" aria-label="Fermer">✕</button>
+        </div>
+        <!-- Seul ce bloc défile : l'en-tête et la barre d'actions restent visibles sur les écrans courts. -->
+        <div class="planif-modal__body">
+            <p class="planif-modal__text">
+                Prochain sprint détecté : <strong x-text="assignSprint.sprint?.name"></strong>.<br/>
+                <br/>
+                <em>Les tickets cochés seront réellement déplacés vers ce sprint dans Jira, et un commentaire de trace sera ajouté sur chacun.</em><br/>
+                <br/>
+                <em>Les tickets non cochés restent affectés à leur sprint actuel : aucun changement pour eux.</em><br/>
+                <br/>
+                <span class="planif-warning-text">⚠️ <strong>Assurez-vous que le sprint en cours soit bien <u>clôturé dans Jira avant de déplacer son reliquat</u>.</strong></span>
+            </p>
+
+            <!-- Garde-fou contextuel : reliquat d'un sprint ENCORE ACTIF dans la sélection. -->
+            <div class="planif-modal__danger" x-show="needsCurrentSprintAck">
+                <p class="planif-modal__danger-text">
+                    🛑 <strong><span x-text="checkedFromCurrentSprint"></span> ticket(s) sélectionné(s) appartiennent au sprint
+                    « <span x-text="currentSprint.name"></span> », qui n'est pas clôturé.</strong><br/>
+                    Les déplacer maintenant faussera définitivement son atterrissage, sa prédictibilité et sa vélocité : à la clôture, Jira ne verra plus que les tickets terminés.
+                </p>
+                <button type="button" class="planif-modal__btn planif-modal__btn--cancel"
+                    @click="uncheckCurrentSprintTickets()">
+                    ↩️ Décocher ces <span x-text="checkedFromCurrentSprint"></span> ticket(s)
+                </button>
+                <label class="planif-modal__danger-ack">
+                    <input type="checkbox" x-model="assignSprint.acknowledged">
+                    J'ai compris, déplacer quand même le reliquat
+                </label>
+            </div>
+            <p>Récapitulatif de la sélection :</p>
+            <ul class="planif-modal__recap">
+                <li>
+                    • <strong x-text="checkedCount"></strong> ticket(s)
+                    <span x-show="checkedUnestimated > 0" class="alert">&nbsp; 🚫 <strong x-text="checkedUnestimated"></strong> non estimé(s)</span>
+                </li>
+                <li>
+                    • <strong x-text="checkedStoryPoints"></strong> Story Points
+                    <small> | Delta avec la Capa - marge :</small> <span class="badge" :class="deltaClass" x-text="deltaLabel"></span>
+                </li>
+                <li>
+                    • 📦 <strong x-text="checkedRemaining"></strong> Reste à faire
+                    <small> | Delta avec la Capa - marge :</small> <span class="badge" :class="remainingDeltaClass" x-text="remainingDeltaLabel"></span>
+                </li>
+                <li>• Capacité brute : <strong x-text="capacityRaw"></strong> points</li>
+                <li>• Capacité - marge : <strong x-text="capacityWithMargin"></strong> points</li>
+            </ul>
+            <p x-show="assignSprint.error" class="inline-error" x-text="assignSprint.error"></p>
+        </div>
+        <div class="planif-modal__actions">
+            <button type="button" class="planif-modal__btn planif-modal__btn--cancel"
+                @click="cancelAssignSprint()">❌ Annuler</button>
+            <button type="button" class="planif-modal__btn planif-modal__btn--ok"
+                :disabled="assignSprint.loading || (needsCurrentSprintAck && !assignSprint.acknowledged)"
+                @click="confirmAssignSprint()">
+                <span x-show="!assignSprint.loading">✅ Confirmer</span>
+                <span x-show="assignSprint.loading">⏳ Envoi…</span>
+            </button>
+        </div>
+    </div>
+</div>

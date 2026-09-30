@@ -1,0 +1,238 @@
+{
+    "predictability": {
+        "label": "Prédictibilité",
+        "definition": "Part des Story Points planifiés au démarrage qui ont été terminés à la clôture du sprint.",
+        "origin": "Scrum — la prévisibilité de l'équipe nourrit l'empirisme (transparence, inspection, adaptation).",
+        "useCase": "Une prédictibilité durablement basse invite à revoir l'estimation ou la taille de l'engagement pris en planification."
+    },
+    "engagement": {
+        "label": "Engagement",
+        "definition": "Part des tickets du périmètre initial (prévus en planification) effectivement terminés, hors sujets ajoutés en cours de route.",
+        "origin": "Scrum — l'équipe s'engage sur un Sprint Goal et un périmètre choisi.",
+        "useCase": "Distingue « on a tenu notre promesse » (engagement) de « on a beaucoup produit » (vélocité)."
+    },
+    "sprint_landing": {
+        "label": "Atterrissage moyen / sprint",
+        "definition": "Moyennes par sprint : tickets terminés, Story Points terminés, et delta moyen entre les Story Points totaux et la capacité en points saisie (sur les sprints où elle est renseignée).",
+        "origin": "Scrum — l'atterrissage moyen aide à calibrer l'engagement de sprint au regard de la capacité.",
+        "useCase": "Un delta positif récurrent (total > capacité) signale un sur-engagement systématique à corriger en planification."
+    },
+    "landing": {
+        "label": "Atterrissage du sprint",
+        "definition": "Répartition des tickets par statut en fin de sprint (terminé, en cours, non démarré, bloqué).",
+        "origin": "Lean — visualisation du flux de travail (tableau Kanban).",
+        "useCase": "Beaucoup de « non démarré » en fin de sprint = sur-engagement ou priorisation à revoir."
+    },
+    "objectives": {
+        "label": "Tickets « objectif »",
+        "definition": "Tickets porteurs d'une étiquette « objectif », rattachés au but du sprint.",
+        "origin": "Scrum — le Sprint Goal donne un cap commun au sprint.",
+        "useCase": "Vérifier en revue que les objectifs ont été atteints, au-delà du seul volume produit."
+    },
+    "total_story_points": {
+        "label": "Total Story Points",
+        "definition": "Somme des Story Points des tickets présents dans le sprint à date.",
+        "origin": "Scrum — estimation relative de l'effort (planning poker).",
+        "useCase": "À comparer au planifié pour mesurer l'évolution du périmètre."
+    },
+    "unestimated_tickets": {
+        "label": "Tickets non estimés",
+        "definition": "Tickets du sprint dont les Story Points ne sont pas renseignés.",
+        "origin": "Scrum — un item devrait être affiné et estimé avant d'entrer en sprint (Definition of Ready).",
+        "useCase": "Un nombre élevé fausse vélocité et prédictibilité : à estimer dès l'affinage."
+    },
+    "estimated_after_add": {
+        "label": "Tickets estimés après ajout au sprint",
+        "definition": "Tickets estimés seulement une fois déjà entrés dans le sprint.",
+        "origin": "Scrum — préparation insuffisante en amont (Definition of Ready).",
+        "useCase": "Signale un affinage trop tardif ; à anticiper lors du backlog refinement."
+    },
+    "sp_range": {
+        "label": "Fourchette des points (min – max)",
+        "definition": "Plus petite et plus grande estimation parmi les tickets du sprint.",
+        "origin": "Scrum — estimation relative.",
+        "useCase": "Un écart très large suggère de redécouper les gros tickets pour fluidifier le flux."
+    },
+    "sp_median_avg": {
+        "label": "Médiane / Moyenne des points",
+        "definition": "Tendance centrale de la taille des tickets du sprint.",
+        "origin": "Lean — réduire la variabilité des tailles d'items.",
+        "useCase": "Des items de taille homogène rendent le flux plus prévisible."
+    },
+    "man_days": {
+        "label": "Jours/Homme du sprint",
+        "definition": "Capacité réelle de l'équipe sur le sprint, en jours-homme disponibles (hors PO et SM).",
+        "origin": "Lean — la capacité disponible est la base du calcul de débit.",
+        "useCase": "Sert à normaliser la vélocité (SP par jour-homme) pour comparer des sprints de capacité différente."
+    },
+    "remaining_work": {
+        "label": "Reste à faire",
+        "definition": "Somme, par ticket, des valeurs renseignées (0 compris) du champ « Reste à faire », figées à la clôture du sprint (ou à aujourd'hui s'il est actif). Un ticket sans valeur ne compte pas ; pas de repli sur les Story Points.",
+        "origin": "Lean — le reste à faire affine le suivi de charge restante mieux que l'estimation initiale.",
+        "useCase": "À comparer au total des Story Points pour estimer la charge réellement restante sur le sprint."
+    },
+    "capacity_points": {
+        "label": "Capacité en points",
+        "definition": "Volume de Story Points que l'équipe estime pouvoir réaliser sur le sprint, fixé à l'engagement.",
+        "origin": "Scrum — la capacité en points cadre l'engagement de sprint au regard de la vélocité passée.",
+        "useCase": "À comparer au total des Story Points planifiés pour repérer un sur- ou sous-engagement."
+    },
+    "velocity": {
+        "label": "Vélocité",
+        "definition": "Story Points terminés rapportés à la capacité de l'équipe (jours-homme, hors PO et SM).",
+        "origin": "Scrum — la vélocité aide à dimensionner les prochains sprints.",
+        "useCase": "À lire en tendance sur plusieurs sprints, jamais comme un objectif à maximiser."
+    },
+    "ticket_age": {
+        "label": "Âge des tickets",
+        "definition": "Temps écoulé depuis l'entrée du ticket dans le sprint.",
+        "origin": "Lean — l'âge des en-cours (work item age) révèle les sujets qui stagnent.",
+        "useCase": "Un ticket dont l'âge dépasse la normale doit être traité avant d'en démarrer un nouveau."
+    },
+    "waiting_time": {
+        "label": "Temps de mise en attente",
+        "definition": "Temps passé par les tickets dans des statuts d'attente (bloqué, en attente…).",
+        "origin": "Lean — chasse au gaspillage : l'attente ne crée pas de valeur.",
+        "useCase": "Identifier les principales causes d'attente pour lever les blocages récurrents."
+    },
+    "scope_change": {
+        "label": "Évolution du périmètre",
+        "definition": "Variation des tickets et Story Points entre le démarrage et la clôture du sprint.",
+        "origin": "Scrum — le périmètre devrait rester stable une fois l'engagement pris.",
+        "useCase": "Un changement de périmètre élevé indique des changements de plan ou repriorisations fréquentes : à objectiver pour protéger le sprint."
+    },
+    "new_prio": {
+        "label": "Tickets prioritaires ajoutés (nouvelle_prio)",
+        "definition": "Tickets urgents injectés en cours de sprint (étiquette nouvelle_prio).",
+        "origin": "Lean — demandes non planifiées qui perturbent le flux.",
+        "useCase": "S'ils sont récurrents, prévoir une capacité tampon ou un canal dédié aux urgences."
+    },
+    "added_during_sprint": {
+        "label": "Tickets ajoutés en cours de sprint",
+        "definition": "Tickets entrés dans le sprint après son démarrage.",
+        "origin": "Scrum — ajouts au périmètre après l'engagement.",
+        "useCase": "Mesure la pression extérieure sur le sprint : à discuter en rétrospective."
+    },
+    "removed_during_sprint": {
+        "label": "Tickets retirés en cours de sprint",
+        "definition": "Tickets sortis du sprint après son démarrage.",
+        "origin": "Scrum — ajustement du périmètre en cours de route.",
+        "useCase": "Des retraits fréquents interrogent la fiabilité de la planification."
+    },
+    "continuous_improvement": {
+        "label": "Amélioration continue & innovation",
+        "definition": "Tickets d'amélioration interne de l'équipe (étiquette amelio_continue / type de ticket 'Innovation' ou 'Amélioration continue').",
+        "origin": "Lean (Kaizen) — amélioration continue ; Scrum — actions issues de la rétrospective.",
+        "useCase": "Vérifier qu'une part de capacité est bien investie dans l'amélioration, pas seulement la production."
+    },
+    "features": {
+        "label": "Features traitées",
+        "definition": "Features (tickets parents) auxquelles sont rattachés les tickets du sprint.",
+        "origin": "Lean / SAFe — la feature porte la valeur livrée, au-delà du ticket isolé.",
+        "useCase": "Visualiser à quels objectifs produit le sprint a réellement contribué."
+    },
+    "done_tickets": {
+        "label": "Tickets terminés",
+        "definition": "Tickets ayant atteint le statut final (Definition of Done) dans le sprint.",
+        "origin": "Scrum — la Definition of Done garantit un incrément réellement « terminé ».",
+        "useCase": "Base du calcul de vélocité et de prédictibilité."
+    },
+    "reliquat": {
+        "label": "Tickets non terminés (reliquat)",
+        "definition": "Tickets du sprint non terminés à sa clôture.",
+        "origin": "Lean — en-cours résiduels (WIP non écoulé).",
+        "useCase": "Un reliquat récurrent signale un sur-engagement ou des blocages à traiter."
+    },
+    "throughput": {
+        "label": "Tickets terminés par sprint (débit)",
+        "definition": "Nombre moyen de tickets terminés par sprint sur la période analysée.",
+        "origin": "Lean — le débit (throughput) mesure le flux de valeur réellement livré.",
+        "useCase": "Plus stable que la vélocité en points ; utile pour prévoir la capacité de livraison à venir."
+    },
+    "sp_done_per_sprint": {
+        "label": "Story Points terminés par sprint",
+        "definition": "Moyenne des Story Points terminés par sprint sur la période.",
+        "origin": "Scrum — volume d'effort livré, base historique de la vélocité.",
+        "useCase": "À lire en tendance ; un volume erratique invite à fiabiliser estimation et engagement."
+    },
+    "sprint_duration": {
+        "label": "Durée moyenne du sprint",
+        "definition": "Nombre moyen de jours ouvrés par sprint sur la période.",
+        "origin": "Scrum — une cadence (timebox) régulière soutient un rythme soutenable.",
+        "useCase": "Sert à normaliser les autres moyennes ; des durées hétérogènes faussent les comparaisons."
+    },
+    "cycle_time": {
+        "label": "Cycle time",
+        "definition": "Temps écoulé entre la mise en travail d'un ticket (« en cours ») et sa fin.",
+        "origin": "Lean / Kanban — durée de traversée active, indicateur clé de fluidité.",
+        "useCase": "Réduire et stabiliser le cycle time accélère et fiabilise les livraisons."
+    },
+    "lead_time": {
+        "label": "Lead time",
+        "definition": "Temps écoulé entre la création d'un ticket et sa fin, files d'attente comprises.",
+        "origin": "Lean — délai vu du demandeur, de la demande à la livraison.",
+        "useCase": "Un lead time très supérieur au cycle time révèle de longues files d'attente en amont."
+    },
+    "flow_efficiency": {
+        "label": "Efficacité de flux (Flow Efficiency)",
+        "definition": "Part du temps de traversée réellement consacrée au travail (temps de production / cycle time).",
+        "origin": "Lean — proportion de valeur ajoutée face aux temps d'attente.",
+        "useCase": "Une efficacité faible (souvent < 40 %) traduit surtout des attentes : agir sur les files plutôt que sur la vitesse d'exécution."
+    },
+    "pi_releases_done": {
+        "label": "Releases & Versions terminées / total",
+        "definition": "Nombre de Releases (tickets) et Versions Jira en catégorie « terminé » rapporté au total présent dans la fenêtre du PI en cours.",
+        "origin": "Lean (VSM) — flux de livraison : ce qui sort réellement du système sur la période.",
+        "useCase": "Suivre le rythme de livraison du PI ; beaucoup d'items au total mais peu terminés signale des sujets qui s'accumulent sans aboutir."
+    },
+    "pi_flow_efficiency": {
+        "label": "Efficacité du flux (réalisation réelle & efficacité totale)",
+        "definition": "Deux lectures du Lead Time. Part de réalisation réelle = (Cycle − Waiting) / Lead : le travail effectif restant une fois retirées la file d'attente amont (Lead − Cycle) ET les attentes. Efficacité totale = (Lead − Total Waiting Time) / Lead : part du Lead Time hors temps d'attente cumulé.",
+        "origin": "Lean (VSM) — chasse au gaspillage : distinguer le temps à valeur ajoutée des files et attentes.",
+        "useCase": "Un grand écart entre les deux pointe une file d'attente amont importante (sujet anticipé ou mal priorisé) plutôt qu'un problème d'exécution."
+    },
+    "time_per_phase": {
+        "label": "Temps cumulés par phase",
+        "definition": "Répartition du temps passé entre affinage, réalisation/qualification et autres statuts.",
+        "origin": "Lean (VSM) — décomposer le flux par étape pour localiser les goulots.",
+        "useCase": "La phase qui concentre le temps indique où porter les efforts d'amélioration."
+    },
+    "lifecycle": {
+        "label": "Cycle de vie du ticket",
+        "definition": "Dates clés du ticket : création, démarrage effectif et fin.",
+        "origin": "Lean (VSM) — bornes temporelles servant au calcul des temps de traversée.",
+        "useCase": "Un long délai entre création et démarrage révèle une attente avant prise en charge."
+    },
+    "planning_help": {
+        "label": "Aide à la planification",
+        "definition": "Confronte le total des tickets sélectionnés (Story Points / reste à faire) à la capacité de l'équipe.",
+        "origin": "Scrum — dimensionnement de l'engagement lors du Sprint Planning.",
+        "useCase": "Ajuster la sélection pour que le périmètre tienne dans la capacité (marge comprise)."
+    },
+    "planning_capacity_suggestion": {
+        "label": "Capacité totale brute",
+        "definition": "Pré-remplie avec la capacité du prochain sprint à venir (grille de l'onglet Capacité, en jours/homme) multipliée par la vélocité moyenne « Points terminés par jours/homme » de la dernière sélection de sprints analysée sur la page Métriques d'équipe. Le résultat est arrondi au 0,5 le plus proche, préférence à l'inférieur. Toute saisie manuelle fait foi sur la suggestion, jusqu'au sprint suivant.",
+        "origin": "Scrum — capacity-based planning : l'engagement se dimensionne sur la capacité réelle de la période à venir, et non sur la seule vélocité passée.",
+        "useCase": "Point de départ objectif du Sprint Planning. Une suggestion absente signale une donnée manquante en amont : grille de capacité non saisie, ou aucune analyse d'équipe encore lancée."
+    },
+    "backlog": {
+        "label": "Backlog des sprints à venir",
+        "definition": "Tickets déjà planifiés dans les prochains sprints non démarrés.",
+        "origin": "Scrum — un Product Backlog affiné alimente les sprints à venir.",
+        "useCase": "Anticiper la charge des prochains sprints et vérifier que l'affinage suit le rythme."
+    },
+    "backlog_readiness": {
+        "label": "Préparation du backlog",
+        "definition": "Part des sujets planifiés qui ne sont plus en cours d'affinage : un sujet est considéré « non prêt » tant que son statut appartient à la catégorie d'affinage du workflow du projet, à l'exception du DERNIER statut de cette catégorie (ex. « A planifier » pour GCS), qui marque le passage à « prêt à planifier ». Les sujets déjà démarrés comptent aussi comme prêts.",
+        "origin": "Scrum — un Product Backlog affiné (Definition of Ready) est le prérequis d'un Sprint Planning efficace.",
+        "useCase": "Une préparation durablement basse signale un affinage qui ne suit pas le rythme des sprints à venir."
+    },
+    "cycle_time_col": {
+        "label": "Cycle Time",
+        "definition": "Jours ouvrés écoulés entre le passage « En cours » et « Terminé »."
+    },
+    "sprint_planning_estimate": {
+        "label": "Estimation de planification",
+        "definition": "Estimé lors de la planification de sprint."
+    }
+}

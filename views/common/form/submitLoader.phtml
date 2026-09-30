@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Loader de soumission de formulaire (pages /release et /feature).
+ *
+ * Ces pages calculent leurs métriques dans un POST synchrone qui peut durer plusieurs dizaines de secondes.
+ * Sans retour visuel, l'utilisateur croit que rien ne se passe et resoumet.
+ * Un unique écouteur `submit` posé au niveau du document couvre TOUS les formulaires POST de la page
+ * (sélecteur déroulant ET saisie directe par ID/nom), sans avoir à câbler chacun d'eux.
+ *
+ * ⚠️ Prérequis : un formulaire soumis par script doit l'être via `form.requestSubmit()` et non
+ * `form.submit()`, qui ne déclenche aucun événement `submit`.
+ */
+?>
+<div x-data="submitLoader()">
+    <div x-show="loading" x-cloak aria-busy="true" class="jira-search__loading">⏳ Chargement…</div>
+
+    <!-- Bouton d'interruption HORS du bloc aria-busy (pointer-events:none) pour rester cliquable. -->
+    <div x-show="loading" x-cloak class="submit-loader__stop">
+        <button type="button" @click="stop()" class="submit-loader__stop-btn">
+            ✋ Stopper le chargement
+        </button>
+    </div>
+</div>
+
+<script>
+    window.submitLoader = function() {
+        return {
+            loading: false,
+
+            /** Écouteur unique : toute soumission de formulaire de la page arme le loader. */
+            init() {
+                document.addEventListener('submit', () => {
+                    this.loading = true;
+                });
+            },
+
+            /**
+             * Interrompt la navigation POST en cours et rend la main sur les formulaires.
+             * window.stop() équivaut au bouton Stop du navigateur : la page courante reste affichée,
+             * il suffit alors de repasser loading à false pour faire disparaître le loader.
+             */
+            stop() {
+                window.stop();
+                this.loading = false;
+            },
+        };
+    };
+</script>

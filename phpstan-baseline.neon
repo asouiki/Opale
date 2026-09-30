@@ -1,0 +1,1231 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Controller\\JiraBoardController\:\:boardsListByProject\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/JiraBoardController.php
+
+		-
+			message: '#^Method App\\Controller\\JiraBoardController\:\:sprintsListByBoard\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/JiraBoardController.php
+
+		-
+			message: '#^Method App\\Controller\\JiraIssueTypeController\:\:listByProject\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/JiraIssueTypeController.php
+
+		-
+			message: '#^Method App\\Controller\\ManDaysController\:\:json\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/ManDaysController.php
+
+		-
+			message: '#^Method App\\Controller\\ManDaysController\:\:save\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/ManDaysController.php
+
+		-
+			message: '#^Method App\\Controller\\ManDaysController\:\:saveCapacityPoints\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/ManDaysController.php
+
+		-
+			message: '#^Method App\\Controller\\ManDaysController\:\:validateArgs\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/ManDaysController.php
+
+		-
+			message: '#^Method App\\Controller\\PlanificationController\:\:updateIssue\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/PlanificationController.php
+
+		-
+			message: '#^Method App\\Controller\\ProjectFeaturesController\:\:featuresListByProject\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/ProjectFeaturesController.php
+
+		-
+			message: '#^Method App\\Controller\\ProjectReleasesController\:\:releasesListByProject\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/ProjectReleasesController.php
+
+		-
+			message: '#^Method App\\Controller\\ProjectVersionsController\:\:versionsListByProject\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/ProjectVersionsController.php
+
+		-
+			message: '#^Method App\\Controller\\SprintController\:\:analyze\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/SprintController.php
+
+		-
+			message: '#^Method App\\Controller\\SprintController\:\:json\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/SprintController.php
+
+		-
+			message: '#^Method App\\Controller\\TeamConfigController\:\:get\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/TeamConfigController.php
+
+		-
+			message: '#^Method App\\Controller\\TeamConfigController\:\:json\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/TeamConfigController.php
+
+		-
+			message: '#^Method App\\Controller\\TeamConfigController\:\:save\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/TeamConfigController.php
+
+		-
+			message: '#^Method App\\Controller\\TeamMetricsController\:\:analyze\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/TeamMetricsController.php
+
+		-
+			message: '#^Method App\\Controller\\TeamMetricsController\:\:getPiReleases\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/TeamMetricsController.php
+
+		-
+			message: '#^Method App\\Controller\\TeamMetricsController\:\:json\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/TeamMetricsController.php
+
+		-
+			message: '#^Method App\\Controller\\WorkflowConfigController\:\:get\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/WorkflowConfigController.php
+
+		-
+			message: '#^Method App\\Controller\\WorkflowConfigController\:\:json\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/WorkflowConfigController.php
+
+		-
+			message: '#^Method App\\Controller\\WorkflowConfigController\:\:normalizeCategories\(\) has parameter \$categories with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/WorkflowConfigController.php
+
+		-
+			message: '#^Method App\\Controller\\WorkflowConfigController\:\:sanitizeCategories\(\) has parameter \$body with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/WorkflowConfigController.php
+
+		-
+			message: '#^Method App\\Controller\\WorkflowConfigController\:\:save\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/WorkflowConfigController.php
+
+		-
+			message: '#^Method App\\Model\\AbstractIssueCollection\:\:getAverageTimeByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/AbstractIssueCollection.php
+
+		-
+			message: '#^Method App\\Model\\AbstractIssueCollection\:\:getTimelineByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/AbstractIssueCollection.php
+
+		-
+			message: '#^Property App\\Model\\AbstractIssueCollection\:\:\$aggregatedWaitingTimes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/AbstractIssueCollection.php
+
+		-
+			message: '#^Property App\\Model\\AbstractIssueCollection\:\:\$averageTimeByStatus type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/AbstractIssueCollection.php
+
+		-
+			message: '#^Property App\\Model\\AbstractIssueCollection\:\:\$timelineByStatus type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/AbstractIssueCollection.php
+
+		-
+			message: '#^Method App\\Model\\Config\:\:getFileContent\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Config.php
+
+		-
+			message: '#^Method App\\Model\\Config\:\:getJiraWorkflow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Config.php
+
+		-
+			message: '#^Method App\\Model\\Config\:\:getProjectIssuesWorkflow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Config.php
+
+		-
+			message: '#^Method App\\Model\\Config\:\:getWatchedProjects\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Config.php
+
+		-
+			message: '#^Method App\\Model\\Config\:\:saveIssuesWorkflow\(\) has parameter \$categories with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Config.php
+
+		-
+			message: '#^Method App\\Model\\Config\:\:writeConfigFile\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Config.php
+
+		-
+			message: '#^Property App\\Model\\Config\:\:\$fileCache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Config.php
+
+		-
+			message: '#^Method App\\Model\\CurrentPiReleases\:\:versionUrl\(\) has parameter \$v with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/CurrentPiReleases.php
+
+		-
+			message: '#^Property App\\Model\\Feature\:\:\$featureData type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Feature.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:fromProjection\(\) has parameter \$p with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getHistory\(\) has parameter \$sorted with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getHistory\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getIssueType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getResolutionDateTime\(\) has parameter \$format with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getRevertCount\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getTimeByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:getWorkflowTimeBreakdown\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:initializeData\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:setFirstAddToSprintDate\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:setFirstSprint\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:setFirstSprint\(\) has parameter \$sprint with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Issue\:\:toProjection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Property App\\Model\\Issue\:\:\$data type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Property App\\Model\\Issue\:\:\$revertCount type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Property App\\Model\\Issue\:\:\$timeByStatus type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Property App\\Model\\Issue\:\:\$waitingTimes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Issue.php
+
+		-
+			message: '#^Method App\\Model\\Planification\:\:getBacklogSprints\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Planification.php
+
+		-
+			message: '#^Method App\\Model\\Planification\:\:getCurrentSprintReliquat\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Planification.php
+
+		-
+			message: '#^Property App\\Model\\Planification\:\:\$backlogSprints type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Planification.php
+
+		-
+			message: '#^Property App\\Model\\ProgramIncrement\:\:\$rawFeatures type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/ProgramIncrement.php
+
+		-
+			message: '#^Method App\\Model\\Sprint\:\:fromSnapshot\(\) has parameter \$snapshot with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Method App\\Model\\Sprint\:\:getFeatures\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Method App\\Model\\Sprint\:\:getObjectiveGroups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Method App\\Model\\Sprint\:\:getTicketAgeStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Method App\\Model\\Sprint\:\:toSnapshot\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Property App\\Model\\Sprint\:\:\$features type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Property App\\Model\\Sprint\:\:\$sprintBoundedTimeByStatus type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Property App\\Model\\Sprint\:\:\$sprintData type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Property App\\Model\\Sprint\:\:\$ticketAgeStats type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Sprint.php
+
+		-
+			message: '#^Method App\\Model\\TeamMetrics\:\:getCycleTimeBySp\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Method App\\Model\\TeamMetrics\:\:getSprints\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Method App\\Model\\TeamMetrics\:\:getStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Method App\\Model\\TeamMetrics\:\:summarizeSprint\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Offset ''doneIssues'' does not exist on array\{id\: string, name\: string, state\: string, startDate\: string\|null, endDate\: string\|null, completeDate\: string\|null, businessDays\: float, doneCount\: int, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 3
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Offset ''reliquatStoryPoints'' does not exist on array\{id\: string, name\: string, state\: string, startDate\: string\|null, endDate\: string\|null, completeDate\: string\|null, businessDays\: float, doneCount\: int, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Offset ''totalRemainingStory…'' on array\{id\: string, name\: string, state\: string, startDate\: string\|null, endDate\: string\|null, completeDate\: string\|null, businessDays\: float, doneCount\: int, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Offset ''totalStoryPoints'' on array\{id\: string, name\: string, state\: string, startDate\: string\|null, endDate\: string\|null, completeDate\: string\|null, businessDays\: float, doneCount\: int, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Property App\\Model\\TeamMetrics\:\:\$sprintConfig type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Property App\\Model\\TeamMetrics\:\:\$sprints \(array\<int, array\{id\: string, name\: string, state\: string, startDate\: string\|null, endDate\: string\|null, completeDate\: string\|null, businessDays\: float, doneCount\: int, \.\.\.\}\>\) does not accept non\-empty\-array\<int, non\-empty\-array\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Property App\\Model\\TeamMetrics\:\:\$stats type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/TeamMetrics.php
+
+		-
+			message: '#^Method App\\Model\\Timeline\:\:getInitialStatus\(\) has parameter \$history with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Timeline.php
+
+		-
+			message: '#^Method App\\Model\\Timeline\:\:getSortedTimelineByStatus\(\) has parameter \$timelineByStatus with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Timeline.php
+
+		-
+			message: '#^Method App\\Model\\Timeline\:\:getSortedTimelineByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Timeline.php
+
+		-
+			message: '#^Method App\\Model\\Timeline\:\:normalizeNativeStatuses\(\) has parameter \$statuses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Timeline.php
+
+		-
+			message: '#^Method App\\Model\\Timeline\:\:normalizeNativeStatuses\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Timeline.php
+
+		-
+			message: '#^Parameter \#1 \$start of method App\\Model\\Timeline\:\:calculateBusinessDays\(\) expects DateTime, DateTime\|string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Model/Timeline.php
+
+		-
+			message: '#^Parameter \#2 \$end of method App\\Model\\Timeline\:\:calculateBusinessDays\(\) expects DateTime, DateTime\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Model/Timeline.php
+
+		-
+			message: '#^Method App\\Model\\Version\:\:applyReleaseData\(\) has parameter \$entry with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Version.php
+
+		-
+			message: '#^Method App\\Model\\Version\:\:applyVersionData\(\) has parameter \$result with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Version.php
+
+		-
+			message: '#^Method App\\Model\\Version\:\:fromProjection\(\) has parameter \$p with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Version.php
+
+		-
+			message: '#^Method App\\Model\\Version\:\:toProjection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Version.php
+
+		-
+			message: '#^Property App\\Model\\Version\:\:\$versionData type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Version.php
+
+		-
+			message: '#^Property App\\Model\\Version\:\:\$versionIssuesIds type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Model/Version.php
+
+		-
+			message: '#^Method App\\Repository\\BoardRepository\:\:buildSprintLabel\(\) has parameter \$sprint with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/BoardRepository.php
+
+		-
+			message: '#^Method App\\Repository\\BoardRepository\:\:mapSprint\(\) has parameter \$sprint with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/BoardRepository.php
+
+		-
+			message: '#^Method App\\Repository\\BoardRepository\:\:sortByStartDateDesc\(\) has parameter \$sprints with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/BoardRepository.php
+
+		-
+			message: '#^Method App\\Repository\\BoardRepository\:\:sortByStartDateDesc\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/BoardRepository.php
+
+		-
+			message: '#^Method App\\Repository\\JiraProjectRepository\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/JiraProjectRepository.php
+
+		-
+			message: '#^Method App\\Repository\\JiraProjectRepositoryInterface\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/JiraProjectRepositoryInterface.php
+
+		-
+			message: '#^Method App\\Repository\\ProjectFeaturesRepository\:\:sortFeaturesList\(\) has parameter \$features with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ProjectFeaturesRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ProjectFeaturesRepository\:\:sortFeaturesList\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ProjectFeaturesRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ProjectVersionsRepository\:\:getProjectVersionsList\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ProjectVersionsRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ProjectVersionsRepository\:\:sortVersionsList\(\) has parameter \$versions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ProjectVersionsRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ProjectVersionsRepository\:\:sortVersionsList\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ProjectVersionsRepository.php
+
+		-
+			message: '#^Method App\\Service\\GovApiService\:\:normalizeIndex\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/GovApiService.php
+
+		-
+			message: '#^Method App\\Service\\GovApiService\:\:normalizeIndex\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/GovApiService.php
+
+		-
+			message: '#^Method App\\Service\\JiraReleaseService\:\:findAllByName\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraReleaseService.php
+
+		-
+			message: '#^Method App\\Service\\JiraReleaseService\:\:findByKey\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraReleaseService.php
+
+		-
+			message: '#^Method App\\Service\\JiraReleaseService\:\:storeInCache\(\) has parameter \$rawRelease with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraReleaseService.php
+
+		-
+			message: '#^Property App\\Service\\JiraReleaseService\:\:\$cache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 2
+			path: src/Service/JiraReleaseService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:callSearchApiGet\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:callSearchApiGet\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:callSearchApiPost\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:callSearchApiPost\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:completeIssueChangelog\(\) has parameter \$issue with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:completeIssueChangelog\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:fetchAllIssueChangelog\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:fetchAllPaginated\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getBoardsByProject\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getFeaturesByProject\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getFeaturesByProjectAndPI\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssueById\(\) has parameter \$expand with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssueById\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssueById\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssuesByLinkedIssue\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssuesByParent\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssuesBySprint\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssuesDetails\(\) has parameter \$issuesIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssuesDetails\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getIssuesIdsByVersion\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getReleasesByProject\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getSprintById\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getSprintsByBoard\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getVersionById\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:getVersionsByProject\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:request\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:searchProjects\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraService\:\:sendWriteRequest\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraService.php
+
+		-
+			message: '#^Method App\\Service\\JiraVersionService\:\:findAllByName\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraVersionService.php
+
+		-
+			message: '#^Method App\\Service\\JiraVersionService\:\:storeInCache\(\) has parameter \$versionData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraVersionService.php
+
+		-
+			message: '#^Property App\\Service\\JiraVersionService\:\:\$cache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/JiraVersionService.php
+
+		-
+			message: '#^Property App\\Service\\ReleaseMetricsCacheService\:\:\$cache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/ReleaseMetricsCacheService.php
+
+		-
+			message: '#^Method App\\Service\\SprintCacheService\:\:get\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SprintCacheService.php
+
+		-
+			message: '#^Method App\\Service\\SprintCacheService\:\:put\(\) has parameter \$snapshot with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SprintCacheService.php
+
+		-
+			message: '#^Method App\\Service\\SprintConfigRepository\:\:getAll\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SprintConfigRepository.php
+
+		-
+			message: '#^Method App\\Service\\TeamConfigRepository\:\:getAllSprintSettings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Method App\\Service\\TeamConfigRepository\:\:getWorkflow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Method App\\Service\\TeamConfigRepository\:\:load\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Method App\\Service\\TeamConfigRepository\:\:save\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Method App\\Service\\TeamConfigRepository\:\:setIgnoredSprints\(\) has parameter \$ignoredSprints with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Method App\\Service\\TeamConfigRepository\:\:setWorkflow\(\) has parameter \$categories with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Method App\\Service\\TeamConfigRepository\:\:writeFile\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Property App\\Service\\TeamConfigRepository\:\:\$cache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TeamConfigRepository.php
+
+		-
+			message: '#^Method App\\UseCase\\SearchJiraProjectsUseCase\:\:execute\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/UseCase/SearchJiraProjectsUseCase.php
+
+		-
+			message: '#^Method App\\View\\AbstractCollectionView\:\:getAggregatedWaitingTimes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/AbstractCollectionView.php
+
+		-
+			message: '#^Method App\\View\\AbstractCollectionView\:\:getAverageTimeByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/AbstractCollectionView.php
+
+		-
+			message: '#^Method App\\View\\AbstractCollectionView\:\:getIssues\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/AbstractCollectionView.php
+
+		-
+			message: '#^Method App\\View\\AbstractCollectionView\:\:getTimelineByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/AbstractCollectionView.php
+
+		-
+			message: '#^Method App\\View\\FeatureView\:\:getSelfTimelineByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/FeatureView.php
+
+		-
+			message: '#^Method App\\View\\FeatureView\:\:getStatusLabel\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/View/FeatureView.php
+
+		-
+			message: '#^Method App\\View\\MetricTooltips\:\:load\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/MetricTooltips.php
+
+		-
+			message: '#^Method App\\View\\PlanificationView\:\:getBacklogSprints\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/PlanificationView.php
+
+		-
+			message: '#^Method App\\View\\PlanificationView\:\:getCurrentSprintReliquat\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/PlanificationView.php
+
+		-
+			message: '#^Method App\\View\\SprintView\:\:getFeatures\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/SprintView.php
+
+		-
+			message: '#^Method App\\View\\SprintView\:\:getLandingByStatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/SprintView.php
+
+		-
+			message: '#^Method App\\View\\SprintView\:\:getObjectiveGroups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/SprintView.php
+
+		-
+			message: '#^Method App\\View\\SprintView\:\:getOriginBadge\(\) has parameter \$ticket with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/SprintView.php
+
+		-
+			message: '#^Method App\\View\\SprintView\:\:getPredictability\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/SprintView.php
+
+		-
+			message: '#^Method App\\View\\SprintView\:\:getStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/SprintView.php
+
+		-
+			message: '#^Method App\\View\\SprintView\:\:getTicketAgeStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/SprintView.php
+
+		-
+			message: '#^Method App\\View\\TeamMetricsView\:\:getCycleTimeBySp\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/TeamMetricsView.php
+
+		-
+			message: '#^Method App\\View\\TeamMetricsView\:\:getCycleTimeScatterDatasets\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/TeamMetricsView.php
+
+		-
+			message: '#^Method App\\View\\TeamMetricsView\:\:getErrors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/TeamMetricsView.php
+
+		-
+			message: '#^Method App\\View\\TeamMetricsView\:\:getSprints\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/TeamMetricsView.php
+
+		-
+			message: '#^Method App\\View\\TeamMetricsView\:\:getStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/TeamMetricsView.php
+
+		-
+			message: '#^Method App\\View\\TeamMetricsView\:\:sprintsChronological\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/View/TeamMetricsView.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\CalculateMedianTest\:\:median\(\) has parameter \$values with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/CalculateMedianTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\CurrentPiReleasesTest\:\:makeSubject\(\) has parameter \$releases with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/CurrentPiReleasesTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\CurrentPiReleasesTest\:\:makeSubject\(\) has parameter \$versions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/CurrentPiReleasesTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\CurrentPiReleasesTest\:\:rawRelease\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/CurrentPiReleasesTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\CurrentPiReleasesTest\:\:rawVersion\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/CurrentPiReleasesTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintMetricsTest\:\:call\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintMetricsTest\:\:predictabilityFor\(\) has parameter \$tickets with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintMetricsTest\:\:predictabilityFor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintMetricsTest\:\:statsFor\(\) has parameter \$tickets with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintMetricsTest\:\:statsFor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintReconstructionTest\:\:call\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintReconstructionTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintReconstructionTest\:\:statsFor\(\) has parameter \$tickets with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintReconstructionTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\SprintReconstructionTest\:\:statsFor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/SprintReconstructionTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\TeamMetricsTest\:\:aggregatesFor\(\) has parameter \$sprints with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/TeamMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\TeamMetricsTest\:\:aggregatesFor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/TeamMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\TeamMetricsTest\:\:call\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/TeamMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\TeamMetricsTest\:\:makeTeamMetrics\(\) has parameter \$sprints with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/TeamMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\TeamMetricsTest\:\:sprintSummary\(\) has parameter \$overrides with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/TeamMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\TeamMetricsTest\:\:sprintSummary\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/TeamMetricsTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\Model\\TimelineTest\:\:provideTimeSlots\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/Model/TimelineTest.php
+
+		-
+			message: '#^Method Tests\\Unit\\View\\FeatureViewOverdueTest\:\:workflow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Unit/View/FeatureViewOverdueTest.php
+
+		-
+			message: '#^Method Tests\\Utils\\FakeConfig\:\:__construct\(\) has parameter \$nonWorkingDays with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Utils/FakeConfig.php
+
+		-
+			message: '#^Method Tests\\Utils\\FakeConfig\:\:__construct\(\) has parameter \$workflow with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Utils/FakeConfig.php
+
+		-
+			message: '#^Method Tests\\Utils\\FakeConfig\:\:defaultWorkflow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Utils/FakeConfig.php
+
+		-
+			message: '#^Method Tests\\Utils\\FakeConfig\:\:getJiraWorkflow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Utils/FakeConfig.php
+
+		-
+			message: '#^Property Tests\\Utils\\FakeConfig\:\:\$workflow type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Utils/FakeConfig.php
+
+		-
+			message: '#^Property Tests\\Utils\\IssueBuilder\:\:\$histories type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Utils/IssueBuilder.php
+
+		-
+			message: '#^Property Tests\\Utils\\IssueBuilder\:\:\$labels type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: tests/Utils/IssueBuilder.php

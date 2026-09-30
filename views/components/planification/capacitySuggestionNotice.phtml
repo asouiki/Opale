@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Notice explicative du champ « Capacité totale brute ».
+ *
+ * Détaille le calcul avec les CHIFFRES RÉELS du projet — à distinguer du tooltip
+ * `planning_capacity_suggestion`, qui n'énonce que la règle générale. Couvre aussi les trois cas
+ * dégradés, en disant à chaque fois CE QUI manque et où le renseigner : aucun sprint à venir détecté,
+ * grille de capacité non saisie, vélocité d'équipe jamais calculée.
+ *
+ * La partie « suggestion » est statique (données serveur figées au rendu) ; la phrase « Marge de … »
+ * est rendue par Alpine car elle se recalcule à chaque saisie.
+ *
+ * @var array{projectKey:string, margin:int, suggestion:array{sprintId:string, sprintName:string, capaTotal:float|null, avgVelocity:float|null, suggestedCapacity:float|null}|null} $planningConfig
+ * @var \App\View\PlanificationView $view
+ */
+$suggestion = $planningConfig['suggestion'];
+?>
+<p class="planif-capacity__notice">
+    <?php if ($suggestion === null): ?>
+        ℹ️ Aucun sprint à venir avec une date de début future n'a été détecté sur ce board :
+        saisissez la capacité brute manuellement.
+    <?php elseif ($suggestion['capaTotal'] === null): ?>
+        ⚠️ Aucune capacité n'est saisie pour le prochain sprint
+        <strong><?= htmlspecialchars($suggestion['sprintName']) ?></strong> :
+        renseignez sa grille sur la page <a href="/capacity">Capacité</a> pour obtenir une suggestion.
+    <?php elseif ($suggestion['avgVelocity'] === null): ?>
+        ⚠️ Capacité du prochain sprint <strong><?= htmlspecialchars($suggestion['sprintName']) ?></strong> :
+        <strong><?= $view->formatSp($suggestion['capaTotal']) ?></strong> jours/homme, mais aucune vélocité
+        d'équipe n'est encore enregistrée. Lancez une analyse sur
+        <a href="/team-metrics">Métriques d'équipe</a> pour obtenir une suggestion.
+    <?php else: ?>
+        💡 Suggestion pour <strong><?= htmlspecialchars($suggestion['sprintName']) ?></strong> :
+        <?= $view->formatSp($suggestion['capaTotal']) ?> jours/homme
+        × moy de <?= $view->formatSp($suggestion['avgVelocity']) ?> point/jour-homme<span class="alert"><sup>*</sup></span>
+        = <strong><?= $view->formatSp($suggestion['suggestedCapacity']) ?></strong> points.
+        <span x-show="capacityRaw > 0">
+            &nbsp; Avec marge :
+            <span x-text="capacityRaw"></span> - <span x-text="margin + '%'"></span>
+            = <strong x-text="capacityWithMargin"></strong> points.
+        </span>
+        <span x-show="isManualCapacity" x-cloak>✏️ Valeur remplacée manuellement.</span>
+        <br/>
+        <small>
+            (<span class="alert"><sup>*</sup></span> : vélocité moyenne de la dernière sélection de sprints dans
+            <a href="/team-metrics">Métriques d'équipe</a>)
+        </small>
+    <?php endif; ?>
+</p>

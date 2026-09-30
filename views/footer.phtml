@@ -1,0 +1,28 @@
+<footer>
+	<p>Contact : <a href="mailto:ha.lamot.pro@gmail.com">Hugues-Arnaud LAMOT</a>
+		(<a href="https://www.linkedin.com/in/hugues-arnaud-lamot/" target="_blank" rel="noopener">
+			<img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn" width="16" height="16">
+		</a>)
+	</p>
+</footer>
+
+<!-- Bouton « Remonter en haut » — apparaît au défilement, sur toutes les pages. -->
+<button type="button" class="back-to-top" id="backToTop"
+  title="Remonter en haut de la page" aria-label="Remonter en haut de la page">↑</button>
+<script>
+  (function () {
+    var btn = document.getElementById('backToTop');
+    if (!btn) { return; }
+
+    var toggle = function () {
+      btn.classList.toggle('back-to-top--visible', window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', toggle, { passive: true });
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    toggle();
+  })();
+</script>

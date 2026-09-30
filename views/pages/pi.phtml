@@ -1,0 +1,122 @@
+﻿<?php
+
+/** @var \App\Controller\ProgramIncrementController $this */
+/** @var \App\View\ProgramIncrementView|null $view */
+/** @var string|null $error */
+$currentPage = 'pi';
+$storageKey  = 'jira_project_pi';
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - PI Jira</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/pi.css">
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <div class="card">
+        <form method="POST" action="/pi">
+            <?php include __DIR__ . '/../components/pi/form/selectJiraProjectOnly.phtml'; ?>
+
+            <div class="pi-form-row">
+                <label for="piNumber"><strong>Calculer les métriques du PI n° :</strong></label>
+                <input
+                    type="text"
+                    id="piNumber"
+                    name="piNumber"
+                    required
+                    placeholder="Ex : 8 ou PI8"
+                    value="<?= $view ? htmlspecialchars($view->getPiNumber()) : '' ?>"
+                    class="input" />
+                <button type="submit">OK</button>
+            </div>
+        </form>
+    </div>
+
+    <?php include __DIR__ . '/../common/errorMessage.phtml'; ?>
+
+    <?php if ($view): ?>
+        <div class="card"
+             x-data="piMetrics(<?= htmlspecialchars($view->getFeaturesDetailsAsJson(), ENT_QUOTES) ?>)">
+            <h2>
+                📊 Cumul des métriques — PI <?= htmlspecialchars($view->getPiNumber()) ?>
+                (<?= htmlspecialchars($view->getProjectKey()) ?>)
+            </h2>
+
+            <p><em>Décochez une Feature pour l'exclure du cumul.</em></p>
+
+            <table class="pi-features-table">
+                <thead>
+                    <tr>
+                        <th>Inclure</th>
+                        <th>Feature</th>
+                        <th>Statut</th>
+                        <th class="pi-num">Lead Time<?= \App\View\MetricTooltips::render('lead_time') ?></th>
+                        <th class="pi-num">Cycle Time<?= \App\View\MetricTooltips::render('cycle_time') ?></th>
+                        <!-- <th class="pi-num">Waiting Time</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="(f, idx) in features" :key="f.key">
+                        <tr :class="f.included ? '' : 'row-excluded'">
+                            <td><input type="checkbox" x-model="f.included"></td>
+                            <td>
+                                <a :href="f.url" target="_blank">
+                                    <strong x-text="f.key"></strong>
+                                </a>
+                                — <span x-text="f.name"></span>
+                            </td>
+                            <td x-text="f.status"></td>
+                            <td class="pi-num" x-text="f.leadTime > 0 ? f.leadTime + ' j' : '—'"></td>
+                            <td class="pi-num" x-text="f.cycleTime > 0 ? f.cycleTime + ' j' : '—'"></td>
+                            <!-- <td class="pi-num" x-text="f.waitingTime > 0 ? f.waitingTime + ' j' : '—'"></td> -->
+                        </tr>
+                    </template>
+                </tbody>
+                <tfoot>
+                    <tr class="pi-features-table__total">
+                        <td colspan="3">
+                            Total cumulé (<span x-text="includedCount"></span> Feature(s))
+                        </td>
+                        <td class="pi-num" x-text="'Lead: ' + totalLead.toFixed(2) + ' j'"></td>
+                        <td class="pi-num" x-text="'Cycle: ' + totalCycle.toFixed(2) + ' j'"></td>
+                        <!-- <td class="pi-num" x-text="'Wait: ' + totalWait.toFixed(2) + ' j'"></td> -->
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <script>
+            window.piMetrics = function(features) {
+                return {
+                    features: features.map(f => ({ ...f, included: !f.excluded })),
+                    get includedCount() {
+                        return this.features.filter(f => f.included).length;
+                    },
+                    get totalLead() {
+                        return this.features.filter(f => f.included).reduce((s, f) => s + (f.leadTime || 0), 0);
+                    },
+                    get totalCycle() {
+                        return this.features.filter(f => f.included).reduce((s, f) => s + (f.cycleTime || 0), 0);
+                    },
+                    get totalWait() {
+                        return this.features.filter(f => f.included).reduce((s, f) => s + (f.waitingTime || 0), 0);
+                    },
+                };
+            };
+        </script>
+    <?php endif; ?>
+
+    <?php include __DIR__ . '/../footer.phtml'; ?>
+</body>
+
+</html>

@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * Configuration du workflow d'issues d'un projet.
+ *
+ * Deux modes selon $workflowInline (défaut : false) :
+ *  - false (pages hors /config) : rend un simple lien CTA qui redirige vers la
+ *    page /config (la configuration ne se fait plus en popin ailleurs).
+ *  - true  (page /config)       : rend le bouton + la popin Alpine.js complète
+ *    (overlay autour du partiel réutilisable workflowConfigForm.phtml).
+ *
+ * Le projet ciblé est lu dans le store partagé (même sélection que le sélecteur
+ * de sprint / la page de config).
+ *
+ * @var bool $workflowInline
+ */
+$workflowInline = $workflowInline ?? false;
+?>
+<?php if (!$workflowInline): ?>
+
+    <a href="/config" class="wf-trigger wf-trigger--link">
+        ⚙️ Configurer le workflow du projet
+    </a>
+
+<?php else: ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+    <div x-data="workflowConfig()" class="wf-root">
+        <!-- Déclencheur -->
+        <button type="button" class="wf-trigger" @click="openFromStore()">
+            ⚙️ Configurer le workflow du projet
+        </button>
+
+        <!-- Confirmation post-enregistrement : rappelle que c'est le workflow de
+             l'équipe (projet Jira) qui est pris en compte par les métriques. -->
+        <span class="wf-configured" x-show="configured" x-cloak>
+            ✅ Workflow d'équipe configuré : <strong x-text="configured"></strong>
+        </span>
+
+        <!-- Overlay -->
+        <div class="modal-overlay" x-show="open" x-cloak
+            @keydown.escape.window="close()">
+            <div class="modal-content wf-modal" @click.outside="close()">
+                <div class="modal-header">
+                    <h2>
+                        🛠️ Workflow Jira —
+                        <span x-text="projectLabel || projectKey"></span>
+                    </h2>
+                    <button type="button" class="modal-close" @click="close()" aria-label="Fermer">✕</button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="wf-intro">
+                        Classez les statuts de ce projet dans les catégories ci-dessous.
+                        L'ordre compte : le statut le plus <strong>haut</strong> est le point de
+                        <strong>départ</strong>, le plus <strong>bas</strong> le statut <strong>final</strong>.
+                        Glissez-déposez pour réordonner ou changer de catégorie.
+                    </p>
+
+                    <?php include __DIR__ . '/form/workflowConfigForm.phtml'; ?>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" @click="close()">Annuler</button>
+                    <button type="button" class="btn-primary"
+                        @click="save()"
+                        :disabled="saving || loading">
+                        <span x-show="!saving">💾 Enregistrer</span>
+                        <span x-show="saving">⏳ Enregistrement…</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<?php endif; ?>

@@ -1,0 +1,923 @@
+{
+    "cached_at": 1780661699,
+    "metrics_version": 9,
+    "data": {
+        "sprintId": "19569",
+        "projectKey": "LIEVRE",
+        "boardId": "1153",
+        "sprintData": {
+            "id": 19569,
+            "self": "https:\/\/imsa.atlassian.net\/rest\/agile\/1.0\/sprint\/19569",
+            "state": "closed",
+            "name": "PI#7 IT1",
+            "startDate": "2026-01-16T14:26:12.000Z",
+            "endDate": "2026-02-05T23:00:00.000Z",
+            "completeDate": "2026-02-09T13:04:12.727Z",
+            "createdDate": "2026-01-16T13:58:34.445Z",
+            "originBoardId": 1153,
+            "goal": "Livrer en prod le RGDU\nLivrer en prod le CNIEG BA15 \nLivrer en prod les Taux AT et le taux vieillesse\nLivrer en prod le retour arri\u00e8re FNAL"
+        },
+        "issuesCount": 17,
+        "landingByStatus": [
+            {
+                "status": "Backlog",
+                "category": "refinement",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 3,
+                "averageDays": 0.2
+            },
+            {
+                "status": "Sujet \u00e0 venir",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 2.5,
+                "averageDays": 0.1
+            },
+            {
+                "status": "\u00c0 faire",
+                "category": "refinement",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 77.3,
+                "averageDays": 4.5
+            },
+            {
+                "status": "A pr\u00e9senter \u00e0 l'\u00e9quipe",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 0.8,
+                "averageDays": 0
+            },
+            {
+                "status": "En cours",
+                "category": "sprint",
+                "count": 4,
+                "storyPoints": 0,
+                "totalDays": 70.5,
+                "averageDays": 4.1
+            },
+            {
+                "status": "Termin\u00e9(e)",
+                "category": "done",
+                "count": 11,
+                "storyPoints": 24.5,
+                "totalDays": 115.3,
+                "averageDays": 6.8
+            },
+            {
+                "status": "Annul\u00e9",
+                "category": "done",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 4.5,
+                "averageDays": 0.3
+            },
+            {
+                "status": "EN ATTENTE",
+                "category": "waiting",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 25.5,
+                "averageDays": 1.5
+            }
+        ],
+        "objectiveGroups": [],
+        "features": [
+            {
+                "key": "TCRE-266",
+                "summary": "E-718 R\u00e9partition de la r\u00e9duction petit pool sur la Cotisation employeurs r\u00e9gime de droit commun IEG (population adoss\u00e9e) (code DSN ind. 034)"
+            },
+            {
+                "key": "TCRE-280",
+                "summary": "E-510 Cotisation vieillesse 076 BA 15 \u00e0 reverser \u00e0 la CNIEG"
+            },
+            {
+                "key": "TCRE-467",
+                "summary": "E-757 Mise en place de la RGDU (\u00e9volution de la RGCS) et \u00e9volution du Bandeau Famille et Maladie au 01\/01\/2026"
+            },
+            {
+                "key": "TCRE-490",
+                "summary": "Ajustement du coefficient maximal de r\u00e9duction g\u00e9n\u00e9rale des cotisations et contributions sociales \u00e0 la charge des employeurs et \u00e9volution du taux PP de la cotisation vieillesse d\u00e9plafonn\u00e9e"
+            },
+            {
+                "key": "TCRE-585",
+                "summary": "E-714 Mise en place du versement mobilit\u00e9 r\u00e9gional et rural (lot 2 : activation des cr\u00e9ances)"
+            },
+            {
+                "key": "TCRE-615",
+                "summary": "Audit CAC IT 2025 - Deloitte - Cotisations"
+            },
+            {
+                "key": "TCRE-644",
+                "summary": "[MCO] CREA PI7"
+            },
+            {
+                "key": "TCRE-651",
+                "summary": "[MCO] PM55322 Retour arri\u00e8re sur le \"correctif FNAL\" suite \u00e0 r\u00e9gression"
+            }
+        ],
+        "stats": {
+            "issuesWithoutStoryPoints": 6,
+            "estimatedAfterAdd": {
+                "count": 4,
+                "storyPoints": 1.5,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-2749",
+                        "summary": "Suivi Outil requ\u00eatage sur environnements de production",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2749",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2780",
+                        "summary": "Demande d\u00e9blocage \u00e0 faire le 22\/01 - Arr\u00eat du KDS00 en attente des livraisons",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2780",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2750",
+                        "summary": "PM55522 - MSA28 - Abort KDS10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2750",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-644",
+                        "parentSummary": "[MCO] CREA PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2851",
+                        "summary": "Aborts MSA22 du 02\/02\/2026 : KDS10 et KDS02",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2851",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "totalStoryPoints": 24.5,
+            "storyPointsRange": {
+                "min": 0.5,
+                "max": 8,
+                "median": 3,
+                "average": 3.5
+            },
+            "scopeChange": {
+                "plannedTicketCount": 11,
+                "currentTicketCount": 17,
+                "ticketDelta": 6,
+                "ticketGrowthPercent": 54.5,
+                "plannedStoryPoints": 24,
+                "currentStoryPoints": 24.5,
+                "storyPointsDelta": 0.5,
+                "storyPointsGrowthPercent": 2.1,
+                "addedStoryPointsPercent": 2.1,
+                "nouvellePrioStoryPointsPercent": 0
+            },
+            "addedDuringSprint": {
+                "count": 6,
+                "storyPoints": 0.5,
+                "remainingStoryPoints": 4,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-2780",
+                        "summary": "Demande d\u00e9blocage \u00e0 faire le 22\/01 - Arr\u00eat du KDS00 en attente des livraisons",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2780",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2781",
+                        "summary": "PM54898 : Abort KDS04 MSA33 - SAS fichiers plein",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2781",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2851",
+                        "summary": "Aborts MSA22 du 02\/02\/2026 : KDS10 et KDS02",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2851",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2893",
+                        "summary": "REJEU pour l'\u00e9volution de r\u00e9partition de la r\u00e9duction petit pool I029 sur la cot IEG I039 et I034",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2893",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 1,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2894",
+                        "summary": "REJEU des DSN A & R n\u00e9ant 2022-25 pour le socle DSN",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2894",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 1,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2896",
+                        "summary": "REJEU des messages LI-CT de 2024 rest\u00e9s en DLQ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2896",
+                        "issueType": "Story",
+                        "status": "Backlog",
+                        "statusCategory": "refinement",
+                        "statusRank": 1,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 2,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "removedDuringSprint": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "nouvellePrio": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "continuousImprovement": [],
+            "doneTickets": {
+                "count": 11,
+                "storyPoints": 24.5,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-2112",
+                        "summary": "[CNIEG] Cotisation vieillesse 076 d\u00e9clar\u00e9e sous la base assujettie 15 ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2112",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-280",
+                        "parentSummary": "E-510 Cotisation vieillesse 076 BA 15 \u00e0 reverser \u00e0 la CNIEG",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "ASVBA15",
+                            "PI6"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2202",
+                        "summary": "R\u00e9partition de R\u00e9duction g\u00e9n\u00e9rale des cotisations patronales (RGDU) 2026 ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2202",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-467",
+                        "parentSummary": "E-757 Mise en place de la RGDU (\u00e9volution de la RGCS) et \u00e9volution du Bandeau Famille et Maladie au 01\/01\/2026",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "PI6",
+                            "PI6-IT2",
+                            "RGDU"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2617",
+                        "summary": "Modification du taux AT pour r\u00e9duction I018 et taux vieillesse PP d\u00e9plafonn\u00e9e",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2617",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-490",
+                        "parentSummary": "Ajustement du coefficient maximal de r\u00e9duction g\u00e9n\u00e9rale des cotisations et contributions sociales \u00e0 la charge des employeurs et \u00e9volution du taux PP de la cotisation vieillesse d\u00e9plafonn\u00e9e",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "AT\/ASV_2026"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2648",
+                        "summary": "Audit CAC IT 2025 - Deloitte - Cotisations",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2648",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-615",
+                        "parentSummary": "Audit CAC IT 2025 - Deloitte - Cotisations",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 1.5,
+                        "leadTime": 12,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2750",
+                        "summary": "PM55522 - MSA28 - Abort KDS10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2750",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-644",
+                        "parentSummary": "[MCO] CREA PI7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2609",
+                        "summary": "[PM55322]R\u00e9ductions multipli\u00e9es dans la CAI lors de r\u00e9gulation \u00e0 0",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2609",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 8,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-651",
+                        "parentSummary": "[MCO] PM55322 Retour arri\u00e8re sur le \"correctif FNAL\" suite \u00e0 r\u00e9gression",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "PM55322"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2255",
+                        "summary": "PM46033 - finaliser la reprise",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2255",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2749",
+                        "summary": "Suivi Outil requ\u00eatage sur environnements de production",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2749",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2780",
+                        "summary": "Demande d\u00e9blocage \u00e0 faire le 22\/01 - Arr\u00eat du KDS00 en attente des livraisons",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2780",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "LIEVRE-2781",
+                        "summary": "PM54898 : Abort KDS04 MSA33 - SAS fichiers plein",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2781",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2851",
+                        "summary": "Aborts MSA22 du 02\/02\/2026 : KDS10 et KDS02",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2851",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "reliquat": {
+                "count": 6,
+                "storyPoints": 0,
+                "remainingStoryPoints": 4,
+                "finalStoryPoints": 8,
+                "issues": [
+                    {
+                        "key": "LIEVRE-1813",
+                        "summary": "R\u00e9partition de la r\u00e9duction petit pool sur la Cotisation employeurs r\u00e9gime de droit commun IEG (population adoss\u00e9e) (code DSN ind. 034)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-1813",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-266",
+                        "parentSummary": "E-718 R\u00e9partition de la r\u00e9duction petit pool sur la Cotisation employeurs r\u00e9gime de droit commun IEG (population adoss\u00e9e) (code DSN ind. 034)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "PI6",
+                            "PetitPool"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-1967",
+                        "summary": "Versement Mobilit\u00e9 R\u00e9gional",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-1967",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": 8,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-585",
+                        "parentSummary": "E-714 Mise en place du versement mobilit\u00e9 r\u00e9gional et rural (lot 2 : activation des cr\u00e9ances)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "VMRRLIEVRE"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2893",
+                        "summary": "REJEU pour l'\u00e9volution de r\u00e9partition de la r\u00e9duction petit pool I029 sur la cot IEG I039 et I034",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2893",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 1,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2894",
+                        "summary": "REJEU des DSN A & R n\u00e9ant 2022-25 pour le socle DSN",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2894",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 1,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2896",
+                        "summary": "REJEU des messages LI-CT de 2024 rest\u00e9s en DLQ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2896",
+                        "issueType": "Story",
+                        "status": "Backlog",
+                        "statusCategory": "refinement",
+                        "statusRank": 1,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 2,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2336",
+                        "summary": "Mettre \u00e0 jour de board POST-DOD",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2336",
+                        "issueType": "Story",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "refinement",
+                        "statusRank": 3,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        },
+        "predictability": {
+            "startStoryPoints": 24,
+            "completedStoryPoints": 24.5,
+            "startTicketCount": 11,
+            "completedTicketCount": 11,
+            "completedFromStartTicketCount": 8,
+            "targetPercent": 80,
+            "targetStoryPoints": 19.2,
+            "achievedPercent": 102.1,
+            "isReached": true,
+            "engagementPercent": 72.7,
+            "isEngagementReached": false
+        }
+    }
+}

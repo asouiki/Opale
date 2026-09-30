@@ -1,0 +1,53 @@
+<?php
+
+/** @var \App\View\AbstractCollectionView $view */
+?>
+<div class="meta-line meta-line-metrics">
+    <h3>📌 Métriques cumulées des tickets associés</h3>
+
+    <div class="metric">
+        <span class="metric-title">
+            🏗️ <b>Lead Time (Métier)</b><?= \App\View\MetricTooltips::render('lead_time') ?><br />
+            <em>(jours ouvrés Création -> Terminé)</em>
+        </span>
+        <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
+        <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours /ticket</strong></span>
+        <span>Median : <strong><?= $view->getMedianLeadTime(); ?> jours</strong></span>
+    </div>
+
+    <div class="metric">
+        <span class="metric-title">
+            🛠️ <b>Cycle Time (effectif)</b><?= \App\View\MetricTooltips::render('cycle_time') ?><br />
+            <em>(jours ouvrés En cours -> Terminé)</em>
+        </span>
+        <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
+        <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours /ticket</strong></span>
+        <span>Median : <strong><?= $view->getMedianCycleTime(); ?> jours</strong></span>
+    </div>
+
+    <div class="metric">
+        <span class="metric-title">
+            ⌛ <b>Waiting Time</b><?= \App\View\MetricTooltips::render('waiting_time') ?><br />
+            <em>(Nombre de jours ouvrés de mise en attente ou de blocage)</em>
+        </span>
+        <span>Total : <strong><?= $view->getTotalTimeSpentInWaiting(); ?> jours</strong></span>
+        <span>Moyen : <strong><?= $view->getAverageTimeSpentInWaiting(); ?> jours /ticket</strong></span>
+    </div>
+
+    <div class="metric">
+        <span class="metric-title">
+            🚀 <b>% d'Efficacité (Flow Efficiency)</b><?= \App\View\MetricTooltips::render('flow_efficiency') ?><br />
+            <em>(Temps de production / Cycle Time effectif)</em>
+        </span>
+        <span>Efficacité : <strong><?= $view->getFlowEfficiency(); ?></strong></span>
+        <span>Temps de production : <strong><?= $view->getTotalProductionTime(); ?> jours ouvrés</strong>
+            <em>(Cycle Time − Waiting Time)</em></span>
+    </div>
+
+    <div class="metric">
+        <span class="metric-title">🧮 <b>Temps cumulés par phase</b><?= \App\View\MetricTooltips::render('time_per_phase') ?></span>
+        <span>🧠 Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInRefinement(); ?> jours /ticket.</strong></em></span>
+        <span>⚙️ Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInSprint(); ?> jours /ticket.</strong></em></span>
+        <span>❓ Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInOther(); ?> jours /ticket.</strong></em></span>
+    </div>
+</div>

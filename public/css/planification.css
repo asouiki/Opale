@@ -1,0 +1,429 @@
+/* ============================================================
+ * Page PLANIFICATION
+ * ============================================================ */
+
+/* --- Liste à cocher des sprints à venir (backlog) --- */
+.planif-sprint-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+.planif-sprint-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    user-select: none;
+}
+.planif-sprint-check input { cursor: pointer; }
+
+/* --- Total dynamique de la sélection (collant en haut au défilement) --- */
+/* Le comportement collant vient de la classe utilitaire .sticky-bar (global.css), qui gère aussi le
+   décalage des en-têtes de tableaux via `--sticky-bar-h`. Ici, seul l'habillage propre au bandeau. */
+.planif-summary {
+    border: 2px solid var(--primary);
+    /* Le « scroll anchoring » est désactivé globalement (voir `html` dans global.css) : le passage
+       au rendu compact (`.is-stuck`) change la hauteur de CE bandeau, et le nœud ancre choisi par le
+       navigateur pour compenser n'est pas nécessairement le bandeau lui-même. */
+}
+/* Sentinelle de détection du mode sticky (planification.phtml) : aucune emprise visuelle. */
+.planif-summary__sentinel {
+    height: 0;
+}
+
+/* Rendu compact quand le bandeau est réellement sticky (`.is-stuck`, posé par le script en bas de
+   page) : tout, sauf 2 lignes très denses, est masqué — pour que la version sticky prenne le moins
+   de place possible pendant le défilement. Le rendu aéré habituel reste inchangé tant que le bandeau
+   n'est pas sticky (les éléments `__compact*` sont alors masqués). */
+.planif-summary__compact-capacity,
+.planif-summary__compact {
+    display: none;
+}
+.planif-summary.is-stuck .planif-summary__title,
+.planif-summary.is-stuck .planif-capacity,
+.planif-summary.is-stuck .planif-capacity__notice,
+.planif-summary.is-stuck .planif-summary__essentials,
+.planif-summary.is-stuck .planif-summary__deltas,
+.planif-summary.is-stuck .planif-summary__actions {
+    display: none;
+}
+/* Ligne 1 : capacité brute, marge, capacité avec marge — sans le bouton de réinitialisation. */
+.planif-summary.is-stuck .planif-summary__compact-capacity {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+.planif-capacity__input--inline {
+    width: 75px;
+    padding: 3px 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+}
+/* Ligne 2 : le reste (sélection, Story Points, reste à faire, deltas), aligné à droite avec un
+   espacement fixe et généreux entre chaque item. */
+.planif-summary.is-stuck .planif-summary__compact {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+/* --- Saisie de la capacité de l'équipe --- */
+.planif-capacity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px 28px;
+    margin: 10px 0 14px;
+}
+.planif-capacity__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.planif-capacity__field input {
+    width: 65px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+}
+.planif-capacity__input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.planif-capacity__value {
+    font-size: 1.15rem;
+    color: var(--text);
+}
+/* Bouton discret, aligné sur la ligne de saisie des champs voisins (qui ont un libellé au-dessus). */
+.planif-capacity__reset {
+    align-self: flex-end;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.planif-capacity__reset:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.planif-capacity__reset:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+/* Détail chiffré du calcul de la capacité suggérée, sous les 3 champs. */
+.planif-capacity__notice {
+    margin: -6px 0 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+.planif-capacity__notice small {
+    font-size: 0.92em;
+    opacity: 0.85;
+}
+
+/* --- Colonne de cases à cocher des tableaux de sujets --- */
+.planif-check-col  { width: 1%; text-align: center; white-space: nowrap; }
+.planif-check-cell { text-align: center; }
+.planif-check-cell input { cursor: pointer; }
+
+
+/* --- Champ « Reste à faire » dans le tableau --- */
+.planif-remaining { white-space: nowrap; }
+.planif-remaining__input {
+    width: 70px;
+    padding: 4px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font: inherit;
+    text-align: right;
+}
+/* Alerte affichée quand la valeur saisie diffère du Story Points Jira. */
+.planif-remaining__warn {
+    font-size: 0.72rem;
+    color: var(--warning-text);
+    margin-top: 3px;
+    line-height: 1.1;
+}
+/* Confirmation affichée après une mise à jour Jira réussie. */
+.planif-remaining__ok {
+    font-size: 0.72rem;
+    color: #15803d; /* vert (green-700) */
+    margin-top: 3px;
+    line-height: 1.1;
+}
+/* Ligne « logo Jira + input » : l'input reste épinglé à droite (flex-end),
+   le logo est centré dans l'espace libre à sa gauche (marges auto) — il se place
+   ainsi entre les champs « Reste à faire » et « SP final » sans décaler l'input. */
+.planif-remaining__row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+/* Groupe d'actions (⟳ pull + logo push) : centré dans l'espace libre à gauche
+   de l'input grâce aux marges auto, sans décaler l'input épinglé à droite. */
+.planif-sync-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 0; /* calé à gauche de l'espace libre */
+    margin-right: auto; /* l'input reste épinglé à droite */
+}
+/* Contrôle de synchro (logo ou bouton) : porte le tooltip CSS. */
+.planif-sync {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+}
+/* Logo « pull » (récupérer depuis Jira) : même logo, retourné à 180°. */
+.planif-sync__icon--flip { transform: rotate(180deg); }
+
+/* --- Modale de confirmation des actions de synchro Jira --- */
+.planif-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.planif-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45); /* slate-900 / 45% */
+}
+.planif-modal__dialog {
+    position: relative;
+    max-width: 420px;
+    margin: 16px;
+    margin-top: -100px;
+    padding: 22px 24px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+.planif-modal__text {
+    margin: 0 0 18px;
+    line-height: 1.4;
+}
+.planif-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.planif-modal__btn {
+    padding: 7px 16px;
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border);
+}
+.planif-modal__btn--cancel { background: #fff; color: #334155; /* slate-700 */ }
+.planif-modal__btn--cancel:hover:not(:disabled) { background: #f1f5f9; /* slate-100 */ }
+.planif-modal__btn--ok {
+    background: rgba(14, 165, 233, 0.95); /* bleu sky-500 */
+    border-color: rgba(14, 165, 233, 0.95);
+    color: #fff;
+}
+.planif-modal__btn--ok:hover:not(:disabled) { background: rgba(2, 132, 199, 0.98); /* sky-600 */ }
+/* Bouton inerte (envoi en cours, ou garde-fou non acquitté) : gris franc plutôt qu'un simple voile
+   d'opacité, sinon le bleu reste lisible et le bouton paraît cliquable. `:hover` est neutralisé
+   explicitement car la règle globale `button:hover` (global.css) le repeindrait sinon en bleu foncé. */
+.planif-modal__btn:disabled,
+.planif-modal__btn:disabled:hover {
+    background: var(--neutral-bg);
+    border-color: var(--border);
+    color: var(--text-light);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* --- Modale « Ajout au prochain sprint » (variante large, avec en-tête + croix) ---
+   Contenu variable (l'encadré rouge « reliquat » peut doubler la hauteur) : le dialogue est borné à
+   la hauteur du viewport et seul son corps défile, pour que l'en-tête et les boutons Annuler/Confirmer
+   restent atteignables sur un écran de 1080 px de haut ou moins.
+   Le `margin-top` négatif hérité (centrage optique de la petite modale) est annulé ici : combiné à un
+   contenu haut, il sortait le haut du dialogue de l'écran. */
+.planif-modal__dialog--wide {
+    max-width: 540px;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 32px);
+}
+/* La scrollbar « fluent » par défaut de Windows/Chrome n'est qu'un filet au repos et ne s'épaissit qu'au survol :
+   on la force ici en rendu classique, toujours visible dès qu'elle existe, sinon rien n'indique qu'il reste du
+   contenu sous la ligne de flottaison.
+   Le couple padding/margin de même valeur ouvre une gouttière pour la barre SANS désaligner le contenu sur
+   l'en-tête et les boutons, qu'elle soit présente ou non. */
+.planif-modal__body {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #e2e8f0; /* pouce slate-400 sur rail slate-200 */
+    padding-right: 10px;
+    margin-right: -10px;
+}
+.planif-modal__body::-webkit-scrollbar { width: 10px; }
+.planif-modal__body::-webkit-scrollbar-track {
+    background: #e2e8f0; /* slate-200 */
+    border-radius: 5px;
+}
+.planif-modal__body::-webkit-scrollbar-thumb {
+    background: #94a3b8; /* slate-400 */
+    border-radius: 5px;
+}
+.planif-modal__body::-webkit-scrollbar-thumb:hover { background: #64748b; /* slate-500 */ }
+.planif-modal__dialog--wide .planif-modal__actions {
+    flex-shrink: 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+.planif-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+.planif-modal__close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #64748b; /* slate-500 */
+}
+.planif-modal__close:hover { color: #334155; /* slate-700 */ }
+.planif-modal__recap {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 14px;
+    display: grid;
+    gap: 6px;
+}
+/* --- Garde-fou « déplacement avant clôture » (modale d'ajout au prochain sprint) ---
+   Deux niveaux volontairement distincts : le rappel PERMANENT reste un simple texte rouge, tandis que
+   l'alerte CONTEXTUELLE (reliquat d'un sprint encore actif dans la sélection) est un encadré à fond plein.
+   Les mettre au même niveau ferait retomber la seconde dans le bruit de la première. */
+.planif-warning-text { color: #b91c1c; /* red-700 */ }
+.planif-modal__danger {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border: 1px solid #b91c1c; /* red-700 */
+    border-radius: 8px;
+    background: #fef2f2; /* red-50 */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+.planif-modal__danger-text {
+    margin: 0;
+    line-height: 1.4;
+    color: #7f1d1d; /* red-900 */
+}
+.planif-modal__danger-ack {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #7f1d1d; /* red-900 */
+    cursor: pointer;
+}
+
+.planif-summary__actions {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.planif-summary__success { color: #16a34a; /* green-600 */ }
+
+/* --- En-tête collant à 2 lignes : nom du sprint, puis en-têtes de colonnes --- */
+/* Le titre est une ligne du <thead> (et non un h3 au-dessus du tableau) : il hérite ainsi du collage des
+   en-têtes, alors que le CTA d'assignation qui précède le tableau reste dans le flux.
+   La 2e ligne est décalée de la hauteur de la 1re pour s'empiler sans recouvrement — même pattern que la
+   grille de capacité (capacity.css). `--planif-title-h` doit rester égale à la hauteur réelle du titre. */
+.planif-table {
+    --planif-title-h: 34px;
+}
+.planif-table thead tr:nth-child(2) th {
+    top: calc(var(--sticky-bar-h, 0px) + var(--planif-title-h));
+}
+/* Ligne de titre : annule la typographie d'en-tête de colonne (petites capitales grises) pour redevenir
+   un titre de section lisible. */
+.planif-table__title {
+    height: var(--planif-title-h);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text);
+}
+
+/* Rappel du même CTA sous chaque tableau (voir assignNextSprintCta.phtml). */
+.planif-table-cta {
+    margin: 12px 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Logo Jira cliquable « Mettre à jour Jira » (apparaît quand une valeur diffère).
+   Hauteur calée sur celle des champs de saisie. */
+.planif-sync__icon {
+    height: 30px;
+    width: auto;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.planif-sync__icon:hover { opacity: 0.7; }
+.planif-sync__icon--loading { opacity: 0.5; cursor: progress; pointer-events: none; }
+/* Tooltip instantané affiché au survol du logo (texte = attribut data-tooltip). */
+.planif-sync::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: #1e293b; /* slate-800 */
+    color: #fff;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.08s; /* quasi instantané, pas de délai navigateur */
+    z-index: 10;
+}
+.planif-sync:hover::after { opacity: 1; }
+/* Message d'erreur de synchronisation Jira. */
+.planif-sync__err {
+    font-size: 0.72rem;
+    color: var(--warning-text);
+    margin-top: 3px;
+    line-height: 1.1;
+    white-space: normal;
+    max-width: 160px;
+}
+

@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * Contenu de bienvenue OPALE, mutualisé entre la page d'accueil et la popin d'onboarding.
+ *
+ * Piloté par $onboardingMode (une seule source de contenu à maintenir) :
+ *  - 'page'  (défaut) : rendu inline dans home.phtml. Pas de lien « Ignorer ».
+ *  - 'popin'          : rendu dans onboardingModal.phtml. Active le lien « Ignorer » et
+ *                       le marquage « déjà vu » au clic « Configurer » (directives Alpine).
+ *
+ * @var string $onboardingMode 'page' ou 'popin'.
+ */
+$onboardingMode = $onboardingMode ?? 'page';
+$isPopin        = ($onboardingMode === 'popin');
+
+// Fonctionnalités clefs : libellé, icône, courte description et page cible.
+$features = [
+    ['🛠️', 'Analyse du Sprint', 'Avancée des objectifs, Prédictibilité, Atterrissage, Evolution du périmètre, Reste à faire...', '/sprint'],
+    ['🗓️', 'Capacité de l\'équipe', 'Calculer la capacité de l\'équipe à partir des jours de présence. Possibilité d\'importer le fichier des absences.', '/capacity'],
+    ['️🧮', 'Support à la planification', 'Préparez et ajustez facilement le contenu du prochain sprint.', '/planification'],
+    ['📊', 'Métriques équipe', 'Vélocité, Engagement, Âge des tickets, Temps d\'attente...', '/team-metrics'],
+    ['🚀', 'VSM par Release / Version', 'Flux de valeur des Releases ou Versions.', '/release'],
+    ['⭐', 'VSM par Feature', 'Flux de valeur des Features.', '/feature'],
+    ['📙', 'Manuel Utilisateur', 'Documentation de l\'outil.', '/docs'],
+];
+?>
+<div class="onboarding">
+    <h1 class="onboarding__title">👋 Bienvenue sur OPALE</h1>
+    <p class="onboarding__subtitle">Outil Pour l'Amélioration Lean des Équipes</p>
+
+    <p class="onboarding__intro">
+        OPALE analyse vos données Jira pour donner à votre équipe une lecture claire de ses sprints et de son flux de valeur, en quelques clics.<br/>
+		Les différentes pages :
+    </p>
+
+    <div class="onboarding__features">
+        <?php foreach ($features as [$icon, $label, $desc, $href]): ?>
+            <a href="<?= $href ?>" class="onboarding__feature">
+                <span class="onboarding__feature-icon"><?= $icon ?></span>
+                <span class="onboarding__feature-label"><?= $label ?></span>
+                <span class="onboarding__feature-desc"><?= $desc ?></span>
+            </a>
+        <?php endforeach; ?>
+    </div>
+    
+    <p class="info-note">
+        ℹ️ Cet outil n'a <b>pas vocation à évaluer ou surveiller la performance</b> des individus ni même de l'équipe.<br/>
+        Il aide l'équipe à <b>mieux comprendre son système de travail</b> afin d'<b>améliorer sa prédictibilité</b> et d'<b>identifier des leviers d'amélioration continue</b>, tout en se reposant sur des données <b>factuelles</b> plutôt qu'un ressenti.
+        <br/><br/>
+        ℹ️ A noter que les données sont toutes <b>issues de Jira</b>. Leur pertinence et fiabilité dépend donc du niveau de <b>mise à jour par l'équipe de son projet Jira</b>.
+    </p>
+
+    <div class="onboarding__cta">
+        <a href="/config" class="btn-primary onboarding__configure"<?= $isPopin ? ' @click="markSeen()"' : '' ?>>
+            ⚙️ Configurer mon projet
+        </a>
+        <?php if ($isPopin): ?>
+            <a href="#" class="onboarding-skip" @click.prevent="dismiss()">Ignorer</a>
+        <?php endif; ?>
+    </div>
+</div>

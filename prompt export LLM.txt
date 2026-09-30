@@ -1,0 +1,25 @@
+Métriques à ajouter dans le digest à exporter (je me base sur ce qui est affiché dans le phtml et que je ne vois pas dans le digest, donc mes libellés de métriques sont en général ceux du Front) :
+
+MetricsDigestBuilder::forSprint :
+- ne transmet pas les libellés d'objectifs, pour des raisons de confidentialité, uniquement les chiffres. Idem pour les noms de tickets.
+- le tableau complet de l'atterissage (y compris les statuts actuellements vides mais pour lequel des tickets ont transité, hors statuts de catégorie refinement_statuses) : statut, nb de tickets, total story points, cumul temps + moyenne /ticket)
+- les tickets non estimés (à la clôture/date + ceux estimés _après_ leur ajout au sprint)
+- distribution des points (min, max, mediane, moyenne)
+- les capacités jours/homme et en points (N/A si non renseignés)
+- vélocité (tous les calculs)
+- Temps d'attente : total et liste des causes
+- nb de tickets retirés du sprint
+- le nombre de features traitées (juste le nombre, pas les libellés)
+
+
+MetricsDigestBuilder::forTeam :
+- nb de releases/versions et nb de features sur cette période
+- dans moyennes par sprint : le delta moyen entre total SP et la capa
+- dans vélocité : ajoute les différents calculs
+- la durée moyenne (jours ouvrés + jours/homme)
+- reliquat : la part moyenne non terminée (% des tickets + % des SP)
+- les causes d'attente
+- le graphique "Cycle time vs Temps de cycle"
+
+
++ Met à jour les tests (tests\Unit\Service\MetricsDigestBuilderTest.php) avec ces données + celles que j'ai déjà modifié moi-même dans forSprint et forTeam

@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * Page d'erreur générique de l'application.
+ *
+ * @var string      $error         Message d'erreur affichable
+ * @var string|null $errorDetail   Détail technique (mode debug uniquement), ou null
+ * @var bool        $isConfigIssue Vrai si l'erreur provient d'un problème de configuration Jira (.env)
+ */
+$currentPage = '';
+?>
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Erreur</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/metrics.css">
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <?php include __DIR__ . '/../common/errorMessage.phtml'; ?>
+
+    <?php if (!empty($isConfigIssue)): ?>
+        <div class="card">
+            <h3>Que faire ?</h3>
+            <ul>
+                <li>Vérifiez que <code>JIRA_BASE_URL</code>, <code>JIRA_EMAIL</code> et <code>JIRA_API_TOKEN</code> sont bien renseignés dans le fichier <code>.env</code>.</li>
+                <li>Assurez-vous que le token API Jira est toujours valide (non expiré ni révoqué).</li>
+                <li>Contactez l'administrateur de l'application si le problème persiste.</li>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($errorDetail)): ?>
+        <div class="card">
+            <details>
+                <summary>Détail technique</summary>
+                <pre><?= htmlspecialchars($errorDetail, ENT_QUOTES, 'UTF-8') ?></pre>
+            </details>
+        </div>
+    <?php endif; ?>
+
+    <?php include __DIR__ . '/../footer.phtml'; ?>
+</body>
+
+</html>

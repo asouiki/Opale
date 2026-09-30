@@ -1,0 +1,491 @@
+<?php
+
+/**
+ * Composant de sélection multi-sprints pour la page « Métriques d'équipe ».
+ *
+ * Le projet et le board proviennent de la page Configuration (/config) via le
+ * pool partagé « jira_pool_team » : ils sont rappelés en lecture seule par
+ * projectRecap.phtml (avec un CTA « Configurer le projet »). Cette page ne gère
+ * plus qu'une liste à COCHER des sprints CLÔTURÉS uniquement : seuls les sprints
+ * terminés produisent des moyennes fiables.
+ *
+ * La sélection de sprints reste propre à la page (clé locale).
+ *
+ * Le formulaire soumet `sprintIds[]` + `projectKey` + `boardId` en POST vers
+ * /team-metrics.
+ */
+?>
+<div x-data="teamSprintsSelector()" class="jira-project-search">
+
+    <!-- ===== 1. Rappel projet + board (lecture seule) + CTA ===== -->
+    <?php include __DIR__ . '/../../../common/form/projectRecap.phtml'; ?>
+
+    <!-- Toggle du niveau de détail des métriques de la page : flotté à droite, il se cale sur la ligne
+         de la sélection de sprints qui suit. -->
+    <?php
+    $metricViewPage = 'team_metrics';
+include __DIR__ . '/../../../common/metricViewToggle.phtml';
+?>
+
+    <!-- ===== 2. Sélection des sprints clôturés ===== -->
+    <form method="POST" action="/team-metrics" x-ref="analyzeForm" @submit="loading = true; submitting = true" x-show="closedSprints.length" class="jira-search__block">
+        <input type="hidden" name="projectKey" :value="selectedProject?.key ?? ''">
+        <input type="hidden" name="boardId" :value="boardId">
+        <!-- Posé à 1 par le bouton « Recalculer » : ignore le cache côté serveur. -->
+        <input type="hidden" name="refresh" :value="forceRefresh ? '1' : ''">
+
+        <div class="team-sprints__head">
+            <strong>Sprints clôturés à analyser :</strong>
+            <span class="team-sprints__actions">
+                <button type="button" @click="selectAll()">Tout cocher</button>
+                <button type="button" @click="selectNone()">Tout décocher</button>
+                <span class="team-sprints__count" x-text="selectedIds.length + ' sélectionné(s)'"></span>
+            </span>
+        </div>
+
+        <div class="team-sprints__checklist">
+            <template x-for="sprint in selectableSprints" :key="sprint.id">
+                <label class="team-sprints__check" :class="sprint.isPhoto ? 'team-sprints__check--photo' : ''">
+                    <input
+                        type="checkbox"
+                        name="sprintIds[]"
+                        :value="sprint.id"
+                        :checked="selectedIds.includes(String(sprint.id))"
+                        @change="toggle(sprint.id, $event.target.checked)">
+                    <span x-text="sprint.label" :class="sprint.ignored ? 'sprint-ignored' : ''"></span>
+                    <span x-show="!sprint.isPhoto"
+                          :title="cacheStatus[String(sprint.id)]?.cached ? 'Données en cache — chargement instantané' : 'Pas encore en cache — premier chargement depuis Jira'"
+                          x-text="cacheStatus[String(sprint.id)] !== undefined ? (cacheStatus[String(sprint.id)].cached ? '⚡' : '⏳') : ''"></span>
+                </label>
+            </template>
+        </div>
+
+        <div class="team-sprints__submit">
+            <button type="submit" :disabled="!selectedIds.length || loading">
+                📊 Calculer les métriques d'équipe
+            </button>
+            <button type="button"
+                    @click="submitRefresh()"
+                    :disabled="!selectedIds.length || loading"
+                    class="team-sprints__refresh"
+                    title="Ignore le cache et recharge les sprints sélectionnés depuis Jira">
+                🔄 Recalculer depuis Jira
+            </button>
+        </div>
+
+        <?php include __DIR__ . '/../../../common/form/sprintCacheLegend.phtml'; ?>
+    </form>
+
+    <!-- Rafraîchit la LISTE des sprints (cache BoardCacheService, TTL 12 h) — à distinguer du
+         « Recalculer depuis Jira » ci-dessus, qui recalcule les MÉTRIQUES des sprints cochés. D'où le
+         libellé explicite : les deux boutons cohabitent sur cette page. -->
+    <p class="list-refresh" x-show="selectedProject" x-cloak>
+        <button type="button" @click="refreshLists()" :disabled="loading"
+                title="Redemande à Jira les boards et les sprints, sans attendre l'expiration du cache (12 h)">
+            ↻ Rafraîchir la liste des sprints
+        </button>
+    </p>
+
+    <div x-show="loading" aria-busy="true" class="jira-search__loading">⏳ Chargement…</div>
+
+    <!-- Bouton d'interruption HORS du bloc aria-busy (pointer-events:none) pour rester cliquable.
+         Affiché uniquement pendant le POST d'analyse (submitting) : pendant les fetch board/sprints,
+         window.stop() les annulerait (« Failed to fetch ») et laisserait la liste vide. -->
+    <div x-show="submitting" x-cloak class="team-sprints__stop">
+        <button type="button" @click="stopLoading()" class="team-sprints__stop-btn">
+            ✋ Stopper le chargement
+        </button>
+    </div>
+
+    <div x-show="noClosedSprints && !loading" class="jira-search__empty">
+        ⚠️ Aucun sprint clôturé trouvé pour ce board.
+    </div>
+
+    <div x-show="error" class="inline-error" x-cloak>❌ <span x-text="error"></span></div>
+</div>
+
+<script>
+    (function() {
+        const LOCAL_KEY = 'jira_team_metrics_selector';
+        const POOL_KEY = 'jira_pool_team';
+
+        // Suffixe distinguant l'entrée « photo à date » d'un sprint de son entrée nominale, dans la liste comme
+        // dans les IDs postés. Décomposé côté serveur par TeamMetricsController.
+        const PHOTO_SUFFIX = ':asof';
+
+        // Nombre de sprints clôturés cochés par défaut (fenêtre glissante typique).
+        const DEFAULT_SELECTION = 6;
+
+        window.teamSprintsSelector = function() {
+            return {
+                // --- Projet (résolu depuis le pool, en lecture seule sur cette page) ---
+                selectedProject: null,
+
+                // --- Boards ---
+                boards: [],
+                boardId: '',
+
+                // --- Sprints ---
+                sprints: [],
+                selectedIds: [],
+                cacheStatus: {}, // { sprintId: bool } — ⚡ si true, ⏳ si false
+
+                // --- UI ---
+                loading: false,
+                // true uniquement pendant le POST d'analyse (soumission du formulaire) : pilote le
+                // bouton « Stopper le chargement » sans l'exposer pendant les fetch board/sprints
+                // (les annuler via window.stop() lèverait un « Failed to fetch » et viderait la liste).
+                submitting: false,
+                error: '',
+                noClosedSprints: false,
+
+                /** true si le board par défaut n'est pas configuré alors que plusieurs boards Scrum existent */
+                boardNotConfigured: false,
+
+                /** true le temps d'une soumission « Recalculer » : poste refresh=1. */
+                forceRefresh: false,
+
+                /** ID de board mémorisé (localStorage) à re-sélectionner après chargement */
+                _savedBoardId: '',
+
+                /** IDs de sprints mémorisés (localStorage) à re-cocher après chargement */
+                _savedSprintIds: [],
+
+                /** true si une sélection de sprints est déjà mémorisée localement */
+                _hasSavedSelection: false,
+
+                /** true au retour sur la page : relance l'analyse une fois les sprints restaurés */
+                _autoSubmit: false,
+
+                /** Libellé du board courant (alimente le rappel projectRecap.phtml) */
+                get boardName() {
+                    const board = this.boards.find(b => String(b.id) === String(this.boardId));
+                    return board ? board.label : '';
+                },
+
+                /**
+                 * Sprints clôturés (seuls éligibles aux moyennes), déjà triés du
+                 * plus récent au plus ancien par l'API (BoardRepository).
+                 */
+                get closedSprints() {
+                    return this.sprints.filter(s => s.state === 'closed');
+                },
+
+                /**
+                 * Liste réellement affichée : les sprints clôturés, chacun suivi de sa photo « à date » quand il en
+                 * existe une. La photo est une entrée à part entière (id suffixé `:asof`) que l'on coche À LA PLACE
+                 * de l'état de clôture, pour consolider des métriques justes quand le reliquat a été déplacé avant
+                 * la clôture.
+                 */
+                get selectableSprints() {
+                    const rows = [];
+                    this.closedSprints.forEach(sprint => {
+                        rows.push(sprint);
+                        const asOf = this.cacheStatus[String(sprint.id)]?.asOf;
+                        if (asOf) {
+                            rows.push({
+                                ...sprint,
+                                id: String(sprint.id) + PHOTO_SUFFIX,
+                                label: sprint.label + ' (📸 photo au ' + this.formatAsOf(asOf) + ')',
+                                isPhoto: true,
+                            });
+                        }
+                    });
+                    return rows;
+                },
+
+                /** Date ISO d'une photo → JJ/MM/AAAA (repli sur la valeur brute si non parsable). */
+                formatAsOf(iso) {
+                    const date = new Date(iso);
+                    return isNaN(date.getTime()) ? iso : date.toLocaleDateString('fr-FR');
+                },
+
+                /** ID du sprint sous-jacent, qu'il s'agisse de l'entrée nominale ou de sa photo. */
+                baseSprintId(id) {
+                    return String(id).replace(PHOTO_SUFFIX, '');
+                },
+
+                /**
+                 * Restauration : on retient la plus récente entre la clé locale de
+                 * la page et la clé partagée du pool « team » (alimenté par /config)
+                 * pour le projet + board.
+                 *
+                 * La sélection de sprints, elle, est propre à la page et n'est
+                 * stockée que dans la clé LOCALE. On la restaure dès qu'elle porte
+                 * sur le board qu'on s'apprête à charger — même si le pool partagé
+                 * (mis à jour par une autre page : Sprint, Planification) est devenu
+                 * plus récent. Sans cela, la sélection serait écrasée par la sélection
+                 * par défaut au moindre détour par une autre page.
+                 */
+                init() {
+                    const local = window.jiraStore.read(LOCAL_KEY);
+                    const winner = window.jiraStore.mostRecent(local, window.jiraStore.read(POOL_KEY));
+                    if (winner && winner.project) {
+                        this.selectedProject = winner.project;
+                        this._savedBoardId = winner.boardId || '';
+                        // Sélection locale valable si elle cible le même board que
+                        // celui retenu (boardId Jira unique → implique le même projet).
+                        const localMatchesBoard = !!(local && local.project
+                            && local.boardId
+                            && String(local.boardId) === String(this._savedBoardId)
+                            && Array.isArray(local.sprintIds));
+                        this._savedSprintIds = localMatchesBoard ? local.sprintIds : [];
+                        this._hasSavedSelection = localMatchesBoard;
+                        // Auto-analyse au retour sur la page si une sélection de sprints
+                        // était mémorisée ET que les résultats ne sont pas déjà affichés
+                        // (window.__teamMetricsAnalyzed, posé par PHP après le POST) —
+                        // évite la boucle de re-soumission. Iso comportement page Sprint.
+                        this._autoSubmit = localMatchesBoard
+                            && this._savedSprintIds.length > 0
+                            && !window.__teamMetricsAnalyzed;
+                        this.loadBoards();
+                    }
+                },
+
+                /**
+                 * Soumet automatiquement le formulaire (clic « Calculer »). Attend le
+                 * prochain tick Alpine pour que les cases à cocher restaurées et les
+                 * champs cachés (projectKey, boardId) soient bien à jour avant le POST.
+                 */
+                submitAnalysis() {
+                    this.$nextTick(() => {
+                        // loading posé ICI (après le .finally de loadSprints) pour que le
+                        // loader et le CTA grisé restent visibles pendant le POST.
+                        this.loading = true;
+                        this.submitting = true;
+                        // 2e tick : laisse Alpine peindre le loader ET le bouton « Stopper » AVANT que la
+                        // navigation POST ne fige le DOM. Sans ça, sur l'auto-relance au chargement (où
+                        // loading est déjà true), le passage submitting=false→true n'a pas le temps de s'afficher.
+                        this.$nextTick(() => {
+                            if (this.$refs.analyzeForm) {
+                                this.$refs.analyzeForm.submit();
+                            }
+                        });
+                    });
+                },
+
+                /**
+                 * Soumission « Recalculer depuis Jira » : pose forceRefresh pour que
+                 * le champ caché `refresh` vaille 1, puis soumet via submitAnalysis().
+                 * Le $nextTick de submitAnalysis() garantit que la liaison :value du
+                 * champ caché est à jour avant le POST.
+                 */
+                submitRefresh() {
+                    this.forceRefresh = true;
+                    this.submitAnalysis();
+                },
+
+                /**
+                 * Interrompt le POST d'analyse en cours et rend la main à l'utilisateur.
+                 * window.stop() annule la navigation en cours (équivalent du bouton Stop du navigateur) :
+                 * la page courante reste affichée. En repassant loading/submitting à false, le loader
+                 * disparaît et le formulaire (x-show="closedSprints.length", déjà peuplé au moment du POST)
+                 * réapparaît — l'utilisateur peut réduire sa sélection puis relancer l'analyse.
+                 */
+                stopLoading() {
+                    this._autoSubmit = false;
+                    this.forceRefresh = false;
+                    window.stop();
+                    this.submitting = false;
+                    this.loading = false;
+                    this.error = '';
+                },
+
+                /**
+                 * Redemande boards ET sprints à Jira en ignorant le cache serveur (TTL 12 h), pour
+                 * faire apparaître un sprint tout juste créé. À ne pas confondre avec submitRefresh(),
+                 * qui recalcule les MÉTRIQUES des sprints déjà sélectionnés.
+                 */
+                refreshLists() {
+                    this.loadBoards(true);
+                },
+
+                /**
+                 * Charge les boards du projet et résout le board courant dans l'ordre :
+                 * board mémorisé → board par défaut (config) → unique board scrum.
+                 * Le choix de board ne se fait plus sur cette page : si aucun board
+                 * n'est résoluble (0 board, ou plusieurs sans par défaut), on n'affiche
+                 * que le rappel — son CTA « Configurer le projet » renvoie vers /config.
+                 *
+                 * @param {boolean} refresh Ignore le cache serveur des boards et des sprints.
+                 */
+                loadBoards(refresh = false) {
+                    this.loading = true;
+                    this.error = '';
+                    this.noClosedSprints = false;
+                    this.boardNotConfigured = false;
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/boards'
+                        + (refresh ? '?refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            this.boards = data;
+                            const scrumBoards = data.filter(b => b.type === 'scrum');
+                            const preferredBoard = data.find(b => b.preferred);
+
+                            let resolvedId = '';
+                            if (this._savedBoardId && data.some(b => String(b.id) === String(this._savedBoardId))) {
+                                resolvedId = String(this._savedBoardId);
+                            } else if (preferredBoard) {
+                                resolvedId = String(preferredBoard.id);
+                            } else if (scrumBoards.length === 1) {
+                                resolvedId = String(scrumBoards[0].id);
+                            }
+
+                            if (resolvedId) {
+                                this.boardId = resolvedId;
+                                this.save();
+                                this.loadSprints(refresh);
+                            } else {
+                                // Board non résoluble. Plusieurs boards Scrum sans board
+                                // par défaut : message dédié invitant à configurer le projet.
+                                // Sinon (0 board), le rappel + son CTA suffisent.
+                                this.loading = false;
+                                this.boardNotConfigured = scrumBoards.length > 0;
+                            }
+                        })
+                        .catch(err => { this.error = err.message; this.loading = false; console.error(err); });
+                },
+
+                /**
+                 * Charge les sprints du board, puis coche par défaut les
+                 * DEFAULT_SELECTION sprints clôturés les plus récents (ou
+                 * restaure la sélection mémorisée).
+                 *
+                 * @param {boolean} refresh Ignore le cache serveur des sprints (TTL 12 h).
+                 */
+                loadSprints(refresh = false) {
+                    if (!this.boardId) return;
+                    this.loading = true;
+                    this.error = '';
+                    this.noClosedSprints = false;
+                    this.sprints = [];
+                    this.selectedIds = [];
+                    fetch('/api/internal/boards/' + encodeURIComponent(this.boardId) + '/sprints?projectKey='
+                        + encodeURIComponent(this.selectedProject?.key ?? '')
+                        + (refresh ? '&refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            this.sprints = data;
+                            const closed = this.closedSprints;
+                            if (!closed.length) {
+                                this.noClosedSprints = true;
+                                return;
+                            }
+                            if (this._hasSavedSelection) {
+                                // Re-coche les sprints mémorisés encore disponibles. Comparaison sur l'ID de BASE :
+                                // le statut de cache (donc l'existence des photos) n'est chargé qu'ensuite, un
+                                // « 123:asof » mémorisé serait sinon écarté à tort.
+                                this.selectedIds = this._savedSprintIds
+                                    .map(String)
+                                    .filter(id => closed.some(s => String(s.id) === this.baseSprintId(id)));
+                            } else {
+                                // Défaut : les N sprints clôturés les plus récents, hors ignorés.
+                                this.selectedIds = closed
+                                    .filter(s => !s.ignored)
+                                    .slice(0, DEFAULT_SELECTION)
+                                    .map(s => String(s.id));
+                            }
+                            this.save();
+                            this.loadCacheStatus(closed);
+
+                            // Retour sur la page avec une sélection mémorisée : on relance
+                            // l'analyse automatiquement (iso page Sprint), une seule fois.
+                            if (this._autoSubmit && this.selectedIds.length) {
+                                this._autoSubmit = false;
+                                this.submitAnalysis();
+                            }
+                        })
+                        .catch(err => { this.error = err.message; console.error(err); })
+                        .finally(() => { this.loading = false; });
+                },
+
+                /**
+                 * Coche/décoche un sprint. Liaison explicite (et non x-model) :
+                 * dans une boucle x-for, x-model sur un tableau combiné à :value
+                 * dynamique restaure mal l'état au rechargement (cf. planification).
+                 *
+                 * Un sprint et sa photo « à date » s'excluent : cocher l'un décoche l'autre, sinon le même sprint
+                 * serait compté deux fois dans les moyennes.
+                 *
+                 * @param {string|number} sprintId
+                 * @param {boolean}        checked
+                 */
+                toggle(sprintId, checked) {
+                    const id = String(sprintId);
+                    if (checked) {
+                        const base = this.baseSprintId(id);
+                        // Retire l'autre version (nominale ou photo) du même sprint avant d'ajouter celle-ci.
+                        this.selectedIds = this.selectedIds.filter(x => this.baseSprintId(x) !== base);
+                        this.selectedIds.push(id);
+                    } else {
+                        this.selectedIds = this.selectedIds.filter(x => x !== id);
+                    }
+                    this._hasSavedSelection = true;
+                    this.save();
+                },
+
+                /**
+                 * Coche tous les sprints clôturés, hors sprints ignorés.
+                 * Retient la PHOTO quand elle existe : c'est la version corrigée, celle qu'on veut consolider.
+                 */
+                selectAll() {
+                    this.selectedIds = this.selectableSprints
+                        .filter(s => !s.ignored)
+                        .filter(s => s.isPhoto || !this.hasPhoto(s.id))
+                        .map(s => String(s.id));
+                    this._hasSavedSelection = true;
+                    this.save();
+                },
+
+                /** Une photo « à date » est-elle enregistrée pour ce sprint ? */
+                hasPhoto(sprintId) {
+                    return !!this.cacheStatus[this.baseSprintId(sprintId)]?.asOf;
+                },
+
+                /** Décoche tous les sprints. */
+                selectNone() {
+                    this.selectedIds = [];
+                    this._hasSavedSelection = true;
+                    this.save();
+                },
+
+                /**
+                 * Récupère le statut de cache pour tous les sprints clôturés
+                 * et le stocke dans `cacheStatus` (map sprintId → bool).
+                 *
+                 * @param {Array} sprints Liste des sprints clôturés.
+                 */
+                loadCacheStatus(sprints) {
+                    if (!sprints.length) return;
+                    const projectKey = this.selectedProject?.key ?? '';
+                    const params = sprints.map(s => 'sprintId[]=' + encodeURIComponent(s.id)).join('&')
+                        + (projectKey ? '&projectKey=' + encodeURIComponent(projectKey) : '');
+                    fetch('/api/internal/sprints/cache-status?' + params)
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => { this.cacheStatus = data; })
+                        .catch(() => {}); // best-effort : pas critique si ça échoue
+                },
+
+                /**
+                 * Persiste la sélection : en local (projet + board + sprints) et dans
+                 * le pool « team » (projet + board). Le projet/board valent ce que
+                 * /config a fixé ; cette écriture préserve l'arbitrage mostRecent.
+                 * La sélection de sprints reste propre à la page (clé locale uniquement).
+                 */
+                save() {
+                    window.jiraStore.write(LOCAL_KEY, {
+                        project: this.selectedProject,
+                        boardId: this.boardId,
+                        sprintIds: this.selectedIds,
+                    });
+                    window.jiraStore.write(POOL_KEY, {
+                        project: this.selectedProject,
+                        boardId: this.boardId,
+                    });
+                },
+            };
+        };
+    })();
+</script>

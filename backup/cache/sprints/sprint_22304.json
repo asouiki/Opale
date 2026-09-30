@@ -1,0 +1,1781 @@
+{
+    "cached_at": 1780662098,
+    "metrics_version": 9,
+    "data": {
+        "sprintId": "22304",
+        "projectKey": "GCS",
+        "boardId": "3493",
+        "sprintData": {
+            "id": 22304,
+            "self": "https:\/\/imsa.atlassian.net\/rest\/agile\/1.0\/sprint\/22304",
+            "state": "closed",
+            "name": "GCS PI8 it\u00e9 1",
+            "startDate": "2026-03-26T09:22:10.202Z",
+            "endDate": "2026-04-09T23:00:00.000Z",
+            "completeDate": "2026-04-13T07:44:49.064Z",
+            "createdDate": "2026-02-25T09:23:09.673Z",
+            "originBoardId": 3493,
+            "goal": "- [NAF] Livrer en SLE les impacts de la recodification NAF sur la FMSE\n- [Accords] Faire valider le Vainci 1 des modifications \/ ajouts d'accords Pr\u00e9voyance Sant\u00e9"
+        },
+        "issuesCount": 31,
+        "landingByStatus": [
+            {
+                "status": "Backlog",
+                "category": "refinement",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 11.3,
+                "averageDays": 0.4
+            },
+            {
+                "status": "Vainci 1",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 3,
+                "averageDays": 0.1
+            },
+            {
+                "status": "\u00c0 faire",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 0.5,
+                "totalDays": 79,
+                "averageDays": 2.5
+            },
+            {
+                "status": "En cours",
+                "category": "sprint",
+                "count": 4,
+                "storyPoints": 5,
+                "totalDays": 101.8,
+                "averageDays": 3.3
+            },
+            {
+                "status": "Revue D\u00e9v \/ Pair",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 7.5,
+                "averageDays": 0.2
+            },
+            {
+                "status": "A Qualifier",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 13.8,
+                "averageDays": 0.4
+            },
+            {
+                "status": "Qualif En Cours",
+                "category": "sprint",
+                "count": 2,
+                "storyPoints": 5,
+                "totalDays": 25.5,
+                "averageDays": 0.8
+            },
+            {
+                "status": "Validation PO",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 13.5,
+                "averageDays": 0.4
+            },
+            {
+                "status": "Vainci 2",
+                "category": "sprint",
+                "count": 2,
+                "storyPoints": 2,
+                "totalDays": 10.5,
+                "averageDays": 0.3
+            },
+            {
+                "status": "Termin\u00e9(e)",
+                "category": "done",
+                "count": 13,
+                "storyPoints": 15,
+                "totalDays": 18,
+                "averageDays": 0.6
+            },
+            {
+                "status": "Abandonn\u00e9",
+                "category": "done",
+                "count": 7,
+                "storyPoints": 8.5,
+                "totalDays": 68.5,
+                "averageDays": 2.2
+            }
+        ],
+        "objectiveGroups": [
+            {
+                "label": "objectif_1",
+                "title": "[NAF] Livrer en SLE les impacts de la recodification NAF sur la FMSE",
+                "issues": [
+                    {
+                        "key": "GCS-513",
+                        "summary": "[Recodif NAF - FMSE] contr\u00f4le du code production pour les NAF 0149Z (FMSE)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-513",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 45,
+                        "leadTime": 90.5,
+                        "labels": [
+                            "Dev",
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            {
+                "label": "objectif_2",
+                "title": "[Accords] Faire valider le Vainci 1 des modifications \/ ajouts d'accords Pr\u00e9voyance Sant\u00e9",
+                "issues": [
+                    {
+                        "key": "GCS-671",
+                        "summary": "[Accords] Mutualia Mara\u00eechage Loire Atlantique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-671",
+                        "issueType": "Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 31.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-665",
+                        "summary": "[Accords] Agrica - Mara\u00eechage Loire Atlantique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-665",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 42,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-711",
+                        "summary": "[Accords] Cr\u00e9ation d'un copie de Mutualia APA PREVOYANCE",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-711",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 32,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-712",
+                        "summary": "[Accords] Ajout de garanties Pr\u00e9voyance de Loire CUMA",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-712",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 31.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-713",
+                        "summary": "[Accords] Modification LOIRE GIDEO",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-713",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8.25,
+                        "leadTime": 31.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-739",
+                        "summary": "[Accords] Modification GIT Savoie - taux de cotisations, taux de pr\u00e9compte et taux de prestation",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-739",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8.25,
+                        "leadTime": 21.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-740",
+                        "summary": "[Accords] Modification GIT Haute-savoie - taux de cotisations, taux de pr\u00e9compte et taux de prestation",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-740",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8.25,
+                        "leadTime": 21.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-771",
+                        "summary": "[Accords] Vaincis + MEP commune",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-771",
+                        "issueType": "Release",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 9,
+                        "leadTime": 13,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-796",
+                        "summary": "[Accords] Test de Packaging - T2 2026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-796",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 3,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        ],
+        "features": [
+            {
+                "key": "REP-51",
+                "summary": "D\u00e9mat\u00e9rialisation de l'A\/R DPAE "
+            },
+            {
+                "key": "REP-243",
+                "summary": "MCO REPAIRES PI6"
+            },
+            {
+                "key": "REP-263",
+                "summary": "MCO REPAIRES PI7"
+            },
+            {
+                "key": "REP-264",
+                "summary": "MCO REPAIRES PI8"
+            },
+            {
+                "key": "REP-362",
+                "summary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)"
+            },
+            {
+                "key": "REP-459",
+                "summary": "Signalements remont\u00e9s par la tour de contr\u00f4le PI#7"
+            },
+            {
+                "key": "REP-461",
+                "summary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)"
+            },
+            {
+                "key": "REP-465",
+                "summary": "Neutraliser le blocage d\u2019int\u00e9gration des fins de contrat des salari\u00e9s TO\/DE pour les CUMA et coop\u00e9ratives de conditionnent de fruits et l\u00e9gumes"
+            },
+            {
+                "key": "REP-474",
+                "summary": "Optimisation K28 suite au probl\u00e8me au pb de file MOM DLQ"
+            },
+            {
+                "key": "REP-534",
+                "summary": "Suivi planning ACIJ \/tortue \/ RAC 2026"
+            },
+            {
+                "key": "REP-543",
+                "summary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8"
+            },
+            {
+                "key": "REP-552",
+                "summary": "Gestion des anomalies techniques du traitement K4430 "
+            }
+        ],
+        "stats": {
+            "issuesWithoutStoryPoints": 9,
+            "estimatedAfterAdd": {
+                "count": 4,
+                "storyPoints": 10,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-718",
+                        "summary": "[K4402 ACIJ] reprise 1T 2025 ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-718",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 19,
+                        "leadTime": 38.75,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-743",
+                        "summary": "[RAC 2026] Suivi des traitements",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-743",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 21,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-748",
+                        "summary": "[RAC 2026] Aide au param\u00e9trage des traitements",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-748",
+                        "issueType": "Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 19.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-779",
+                        "summary": "[K4430] Retour de reprise",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-779",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 13.5,
+                        "leadTime": 14,
+                        "labels": [
+                            "Bug_prod"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "totalStoryPoints": 36,
+            "storyPointsRange": {
+                "min": 0.5,
+                "max": 5,
+                "median": 2,
+                "average": 1.89
+            },
+            "scopeChange": {
+                "plannedTicketCount": 25,
+                "currentTicketCount": 31,
+                "ticketDelta": 6,
+                "ticketGrowthPercent": 24,
+                "plannedStoryPoints": 29,
+                "currentStoryPoints": 36,
+                "storyPointsDelta": 7,
+                "storyPointsGrowthPercent": 24.1,
+                "addedStoryPointsPercent": 24.1,
+                "nouvellePrioStoryPointsPercent": 0
+            },
+            "addedDuringSprint": {
+                "count": 6,
+                "storyPoints": 7,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-771",
+                        "summary": "[Accords] Vaincis + MEP commune",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-771",
+                        "issueType": "Release",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 9,
+                        "leadTime": 13,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-794",
+                        "summary": "Appels K41M21 dans la partie Flux - Vainci + MEP",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-794",
+                        "issueType": "Release",
+                        "status": "Vainci 2",
+                        "statusCategory": "sprint",
+                        "statusRank": 90,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 16,
+                        "leadTime": 17,
+                        "labels": [
+                            "Taskforce"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-648",
+                        "summary": "K4430 - Abort phase E -  gestion de la date de fin de contrat pr\u00e9visionnelle",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-648",
+                        "issueType": "Story",
+                        "status": "Qualif En Cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 75,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 48.5,
+                        "leadTime": 64,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-792",
+                        "summary": "K6028 - Erreurs lors du passage du S1",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-792",
+                        "issueType": "Bug",
+                        "status": "Qualif En Cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 75,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 22,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-795",
+                        "summary": "ECART PAS - MSA 41 17032026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-795",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 1,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-796",
+                        "summary": "[Accords] Test de Packaging - T2 2026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-796",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 3,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "removedDuringSprint": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "nouvellePrio": {
+                "count": 2,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-792",
+                        "summary": "K6028 - Erreurs lors du passage du S1",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-792",
+                        "issueType": "Bug",
+                        "status": "Qualif En Cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 75,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 22,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-795",
+                        "summary": "ECART PAS - MSA 41 17032026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-795",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 1,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "continuousImprovement": [
+                {
+                    "key": "GCS-701",
+                    "summary": "[R\u00e9tro] Que les tickets soient \u00e0 jour avant les dailies",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-701",
+                    "issueType": "T\u00e2che",
+                    "status": "En cours",
+                    "statusCategory": "sprint",
+                    "statusRank": 57,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Normal",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                        "id": "4"
+                    },
+                    "cycleTime": 45.5,
+                    "leadTime": 48,
+                    "labels": [
+                        "Action_R\u00e9tro",
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-704",
+                    "summary": "[R\u00e9tro] Utiliser la DoD simplifi\u00e9e D\u00e9v\/Qualif -> valid PO, puis la compl\u00e8te pour -> Termin\u00e9",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-704",
+                    "issueType": "T\u00e2che",
+                    "status": "En cours",
+                    "statusCategory": "sprint",
+                    "statusRank": 57,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Normal",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                        "id": "4"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "Action_R\u00e9tro",
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                }
+            ],
+            "doneTickets": {
+                "count": 20,
+                "storyPoints": 23.5,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-298",
+                        "summary": "[AR D\u00e9mat lot 2] Fournir une requ\u00eate pour \u00e9valuer la volum\u00e9trie des workflows les plus r\u00e9currents \u00e0 tester",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-298",
+                        "issueType": "T\u00e2che",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-51",
+                        "parentSummary": "D\u00e9mat\u00e9rialisation de l'A\/R DPAE ",
+                        "priority": {
+                            "name": "Mineur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/lowest_new.svg",
+                            "id": "5"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 159.5,
+                        "labels": [
+                            "BA",
+                            "dep_BigData"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-385",
+                        "summary": "Suivi Prod K4430 (5 et 15 du mois) - d\u00e9cembre (it\u00e9 4)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-385",
+                        "issueType": "T\u00e2che",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-243",
+                        "parentSummary": "MCO REPAIRES PI6",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 44,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-788",
+                        "summary": "[ECART PAS] Caisse 14",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-788",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 2.75,
+                        "leadTime": 3,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-795",
+                        "summary": "ECART PAS - MSA 41 17032026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-795",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 1,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-513",
+                        "summary": "[Recodif NAF - FMSE] contr\u00f4le du code production pour les NAF 0149Z (FMSE)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-513",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 45,
+                        "leadTime": 90.5,
+                        "labels": [
+                            "Dev",
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-533",
+                        "summary": "PM54159 - Rejets MOM GO1.AS et GO1.mdcrem",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-533",
+                        "issueType": "Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-459",
+                        "parentSummary": "Signalements remont\u00e9s par la tour de contr\u00f4le PI#7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 74.5,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-650",
+                        "summary": "[K4430] - PM55352 - G\u00e9rer les DSN mixtes (TESA et DSN) ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-650",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 44.75,
+                        "leadTime": 51.75,
+                        "labels": [
+                            "Bug_prod"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-559",
+                        "summary": "[Fin de contrat TO-DE] Impacts sur l'ACIJ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-559",
+                        "issueType": "Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-465",
+                        "parentSummary": "Neutraliser le blocage d\u2019int\u00e9gration des fins de contrat des salari\u00e9s TO\/DE pour les CUMA et coop\u00e9ratives de conditionnent de fruits et l\u00e9gumes",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 72,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-743",
+                        "summary": "[RAC 2026] Suivi des traitements",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-743",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 21,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-748",
+                        "summary": "[RAC 2026] Aide au param\u00e9trage des traitements",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-748",
+                        "issueType": "Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 19.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-665",
+                        "summary": "[Accords] Agrica - Mara\u00eechage Loire Atlantique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-665",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 42,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-671",
+                        "summary": "[Accords] Mutualia Mara\u00eechage Loire Atlantique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-671",
+                        "issueType": "Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 31.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-711",
+                        "summary": "[Accords] Cr\u00e9ation d'un copie de Mutualia APA PREVOYANCE",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-711",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 32,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-712",
+                        "summary": "[Accords] Ajout de garanties Pr\u00e9voyance de Loire CUMA",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-712",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8,
+                        "leadTime": 31.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-713",
+                        "summary": "[Accords] Modification LOIRE GIDEO",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-713",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8.25,
+                        "leadTime": 31.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-739",
+                        "summary": "[Accords] Modification GIT Savoie - taux de cotisations, taux de pr\u00e9compte et taux de prestation",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-739",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8.25,
+                        "leadTime": 21.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-740",
+                        "summary": "[Accords] Modification GIT Haute-savoie - taux de cotisations, taux de pr\u00e9compte et taux de prestation",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-740",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 8.25,
+                        "leadTime": 21.75,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-571",
+                        "summary": "[WF 444015-REPSTK] - WF 444015 apr\u00e8s reprise car le salari\u00e9 a dans sa DSN de mai des d\u00e9clarations de 04\/2025 et des rectifications sur 12\/2024,01\/2025,02\/2025 et 03\/2025 => R\u00e9m OK sur avril et d\u00e9cembre mais WF 444015 sur toutes les p\u00e9riodes de la DSN",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-571",
+                        "issueType": "Bug",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 71.25,
+                        "leadTime": 71.25,
+                        "labels": [
+                            "TASKFORCE-444015-REPSTK"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-771",
+                        "summary": "[Accords] Vaincis + MEP commune",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-771",
+                        "issueType": "Release",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 9,
+                        "leadTime": 13,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-796",
+                        "summary": "[Accords] Test de Packaging - T2 2026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-796",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 3,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "reliquat": {
+                "count": 11,
+                "storyPoints": 12.5,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-648",
+                        "summary": "K4430 - Abort phase E -  gestion de la date de fin de contrat pr\u00e9visionnelle",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-648",
+                        "issueType": "Story",
+                        "status": "Qualif En Cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 75,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 48.5,
+                        "leadTime": 64,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-792",
+                        "summary": "K6028 - Erreurs lors du passage du S1",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-792",
+                        "issueType": "Bug",
+                        "status": "Qualif En Cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 75,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 22,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-790",
+                        "summary": "[ECART PAS] Caisse 12",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-790",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-643",
+                        "summary": "R\u00e9solution de l'anomalie NOM COM DISTRI ABSENT produite par la phase B du K2800",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-643",
+                        "issueType": "Story",
+                        "status": "Backlog",
+                        "statusCategory": "refinement",
+                        "statusRank": 0,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-474",
+                        "parentSummary": "Optimisation K28 suite au probl\u00e8me au pb de file MOM DLQ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-718",
+                        "summary": "[K4402 ACIJ] reprise 1T 2025 ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-718",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 19,
+                        "leadTime": 38.75,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-780",
+                        "summary": "Appels K41M21 dans la partie Flux",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-780",
+                        "issueType": "Story",
+                        "status": "Vainci 2",
+                        "statusCategory": "sprint",
+                        "statusRank": 90,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 20,
+                        "leadTime": 23.75,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-770",
+                        "summary": "[K4430] - PM56547 - Mise \u00e0 jour des TPL des Workflow",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-770",
+                        "issueType": "Bug",
+                        "status": "A Qualifier",
+                        "statusCategory": "sprint",
+                        "statusRank": 73,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 38,
+                        "leadTime": 38,
+                        "labels": [
+                            "Bug_prod"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-779",
+                        "summary": "[K4430] Retour de reprise",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-779",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 13.5,
+                        "leadTime": 14,
+                        "labels": [
+                            "Bug_prod"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-794",
+                        "summary": "Appels K41M21 dans la partie Flux - Vainci + MEP",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-794",
+                        "issueType": "Release",
+                        "status": "Vainci 2",
+                        "statusCategory": "sprint",
+                        "statusRank": 90,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 16,
+                        "leadTime": 17,
+                        "labels": [
+                            "Taskforce"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-701",
+                        "summary": "[R\u00e9tro] Que les tickets soient \u00e0 jour avant les dailies",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-701",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 45.5,
+                        "leadTime": 48,
+                        "labels": [
+                            "Action_R\u00e9tro",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-704",
+                        "summary": "[R\u00e9tro] Utiliser la DoD simplifi\u00e9e D\u00e9v\/Qualif -> valid PO, puis la compl\u00e8te pour -> Termin\u00e9",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-704",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Action_R\u00e9tro",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        },
+        "predictability": {
+            "startStoryPoints": 29,
+            "completedStoryPoints": 23.5,
+            "startTicketCount": 25,
+            "completedTicketCount": 20,
+            "completedFromStartTicketCount": 17,
+            "targetPercent": 80,
+            "targetStoryPoints": 23.2,
+            "achievedPercent": 81,
+            "isReached": true,
+            "engagementPercent": 68,
+            "isEngagementReached": false
+        }
+    }
+}

@@ -1,0 +1,1367 @@
+<?php
+
+/**
+ * Grille de capacité de la page /capacity.
+ *
+ * Reproduit le calcul de capacité d'équipe (auparavant sous Excel) : pour un sprint choisi, une grille
+ * lignes = jours ouvrés / colonnes = membres (groupés par rôle), la présence quotidienne, une ligne
+ * Événements, un ratio de conversion, et le récap Jours de présence + Capa à faire par rôle.
+ *
+ * Composant autonome : le projet et le board proviennent du pool partagé « jira_pool_team » (alimenté par
+ * /config et la page Métriques d'équipe) ; le roster provient de /config (clé members). Aucune dépendance
+ * à une sélection de sprints analysés.
+ *
+ * Fonctionnalités : sélecteur de sprint → grille jours ouvrés × membres (présence 0 à 1 éditable,
+ * 0 grisé hors période du membre ou jour férié) ; lignes Jours présence / Événements / Ratio / Capa à
+ * faire ; récap d'équipe (présence + capa par rôle) ; agrégation inter-sprints (PI). Saisie persistée
+ * par sprint via l'API capacity (calcul temps réel côté JS).
+ */
+
+// Jours fériés (France) connus du projet, convertis de d/m/Y en Y-m-d pour comparaison directe avec les
+// dates de la grille. getNonWorkingDays() est mis en cache (fichier) ; en cas d'indisponibilité de l'API
+// on dégrade proprement en liste vide (la grille reste utilisable, sans distinction des fériés).
+$capacityHolidays = [];
+try {
+    foreach ((new \App\Model\Config())->getNonWorkingDays() as $frenchDate) {
+        $holiday = \DateTime::createFromFormat('d/m/Y', $frenchDate);
+        if ($holiday !== false) {
+            $capacityHolidays[] = $holiday->format('Y-m-d');
+        }
+    }
+} catch (\Throwable $e) {
+    $capacityHolidays = [];
+}
+$capacityConfig = ['holidays' => $capacityHolidays];
+?>
+
+<!-- ============ GRILLE DE CAPACITÉ ============ -->
+<!-- La page n'affiche que ce composant : le contexte (projet/board/sprints/roster) est résolu dès
+     l'initialisation, sans attendre d'événement déclencheur. -->
+<div x-data="teamCapacity(<?= htmlspecialchars(json_encode($capacityConfig), ENT_QUOTES) ?>)"
+    x-init="loadOnce()">
+
+    <!-- Overlay bloquant pendant le chargement du contexte (sprints/roster/grille) : évite le re-flow
+         « la page se recharge » perçu à l'ouverture de l'onglet. La croix permet de forcer sa fermeture
+         si un chargement reste bloqué (garde-fou). -->
+    <div class="cap-loader" x-show="loading && !loaderDismissed" x-cloak>
+        <button type="button" class="cap-loader__close" @click="loaderDismissed = true"
+            aria-label="Fermer le chargement">✕</button>
+        <div class="cap-loader__spinner" aria-hidden="true"></div>
+        <p class="cap-loader__text">Chargement de la capacité…</p>
+    </div>
+
+    <div class="card">
+        <h2>📋 Capacité de l'équipe par sprint</h2>
+        <p class="sprint-section-sub">
+            Choisissez un sprint : sa fenêtre de dates (issue de Jira) génère la grille des jours ouvrés.
+            Les membres proviennent de la page <a href="/config">Configuration</a> ; seuls ceux présents
+            sur la période du sprint sont affichés (hors période = colonne grisée à 0). 
+            Les jours fériés sont grisés à 0. <br/>
+            Astuce : vous pouvez sélectionner plusieurs jours avec majuscule + clic, pour supprimer ou mettre à 1 la sélection.
+        </p>
+
+        <!-- États d'accueil / erreurs -->
+        <div x-show="!selectedProject && !loading" class="cap-state">
+            📊 Sélectionnez d'abord un projet (onglet <strong>Sprints</strong> ou page Configuration).
+        </div>
+        <div x-show="loading" class="cap-state">⏳ Chargement…</div>
+        <div x-show="error" class="cap-state cap-state--error" x-text="error" x-cloak></div>
+
+        <!-- Sélecteur de sprint -->
+        <div class="cap-toolbar" x-show="selectedProject && sprints.length" x-cloak>
+            <label for="cap-sprint-select"><strong>Sprint :</strong></label>
+            <select id="cap-sprint-select" class="input cap-select" x-model="sprintId" @change="onSprintChange()">
+                <option value="">-- Choisir un sprint --</option>
+                <template x-for="s in sprints" :key="s.id">
+                    <option :value="String(s.id)" x-text="s.label"></option>
+                </template>
+            </select>
+            <span x-show="capacitySaving" class="cap-saving">⏳ Enregistrement…</span>
+            <span x-show="capacitySaved && !capacitySaving" class="cap-saved">✅ Enregistré</span>
+            <span class="cap-import-group">
+                <span x-show="lastImportAt" class="cap-last-import" x-text="'Dernier import : ' + formatLastImport()" x-cloak></span>
+                <button type="button" class="cap-import-btn" @click="openImport()">📥 Importer les absences</button>
+            </span>
+        </div>
+
+        <!-- ===== Modale d'import des absences ===== -->
+        <div class="cap-modal" x-show="importOpen" x-cloak @keydown.escape.window="closeImport()">
+            <div class="cap-modal__backdrop" @click="closeImport()"></div>
+            <div class="cap-modal__box" role="dialog" aria-modal="true" aria-label="Importer les absences">
+                <button type="button" class="cap-modal__close" @click="closeImport()" aria-label="Fermer">✕</button>
+                <h3>📥 Importer les absences</h3>
+
+                <div class="cap-modal__help">
+                    <p>Importez un extract Excel (<strong>.xlsx</strong>) des absences de l'équipe. Format attendu :</p>
+                    <ul>
+                        <li>Matrice mensuelle : bandeaux de mois en en-tête, une ligne <em>Nom Prénom</em> +
+                            numéros de jour, une personne par ligne.</li>
+                        <li>Cellule non vide = absence (journée entière) ; <code>1/2A ou 0.5</code> = demi-journée ;
+                            cellule vide = présent.</li>
+                        <li><code>P</code> = absence <strong>prévisionnelle</strong> : comptée 0 comme une absence,
+                            mais affichée <code>prév.</code> dans la grille tant qu'elle n'est pas confirmée.</li>
+                        <li>La colonne des noms doit correspondre aux <strong>prénoms de la configuration
+                                OPALE</strong> — le rapprochement <strong>ignore les accents et la casse</strong>
+                            (ex. <code>loic</code> ↔ <code>Loïc</code>).</li>
+                    </ul>
+                    <br/>
+                    <p><a href="/api/internal/absence-import/example">⬇️ Télécharger le fichier d'exemple</a></p>
+                    <figure class="cap-modal__example">
+                        <img src="/img/exemple_fichier_import_conges.jpg" class="cap-modal__example-img"
+                            alt="Exemple de fichier d'absences : matrice mois × jours, une personne par ligne, codes d'absence en cellules" />
+                        <figcaption>Aperçu du format attendu (Une ligne par personne, ses absences dans les cellules. Vide = présent).</figcaption>
+                    </figure>
+                </div>
+                
+                <br/>
+
+                <!-- Zone de dépôt / sélection -->
+                <div class="cap-dropzone" :class="{ 'cap-dropzone--over': dragOver }"
+                    @dragover.prevent="dragOver = true" @dragleave.prevent="dragOver = false"
+                    @drop.prevent="onImportDrop($event)" @click="$refs.importInput.click()">
+                    <input type="file" accept=".xlsx" x-ref="importInput" class="cap-dropzone__input"
+                        @change="onImportFileChosen($event.target.files)">
+                    <template x-if="!importFile">
+                        <span>Glissez-déposez le fichier ici, ou <strong>cliquez pour parcourir</strong> (.xlsx)</span>
+                    </template>
+                    <template x-if="importFile">
+                        <span>📄 <span x-text="importFile.name"></span> —
+                            <a href="#" @click.prevent.stop="importFile = null">changer</a></span>
+                    </template>
+                </div>
+
+                <div>
+                    <p class="cap-modal__note">💡Le fichier importé est <strong>supprimé automatiquement</strong> en fin d'import — aucune donnée n'est conservée sur le serveur.</p>
+                </div>
+
+                <div x-show="importError" class="cap-modal__error" x-text="importError" x-cloak></div>
+
+                <!-- Récap de l'import -->
+                <template x-if="importReport">
+                    <div class="cap-import-report">
+                        <p class="cap-import-report__ok">
+                            ✅ Import terminé : <strong x-text="importReport.daysImported"></strong> jour(s)
+                            d'absence importé(s) sur <strong x-text="importReport.sprintsTouched.length"></strong>
+                            sprint(s) ; <strong x-text="importReport.matchedMembers.length"></strong> membre(s) reconnu(s).
+                        </p>
+                        <template x-for="w in importReport.warnings" :key="w">
+                            <p class="cap-import-report__warn">⚠️ <span x-text="w"></span></p>
+                        </template>
+                        <template x-for="n in importReport.notices" :key="n">
+                            <p class="cap-import-report__notice">ℹ️ <span x-text="n"></span></p>
+                        </template>
+                    </div>
+                </template>
+
+                <div class="cap-modal__actions">
+                    <button type="button" @click="closeImport()">Fermer</button>
+                    <button type="button" class="cap-modal__primary" :disabled="!importFile || importing"
+                        @click="doImport()">
+                        <span x-show="!importing">Importer</span>
+                        <span x-show="importing" x-cloak>⏳ Import en cours…</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="selectedProject && !sprints.length && !loading && !error" class="cap-state" x-cloak>
+            ⚠️ Aucun sprint trouvé pour ce board.
+        </div>
+
+        <!-- Rafraîchit la LISTE des boards/sprints (cache BoardCacheService, TTL 12 h). Affiché même
+             quand la liste est vide : c'est précisément le cas où il faut pouvoir la redemander. -->
+        <p class="list-refresh" x-show="selectedProject" x-cloak>
+            <button type="button" @click="refreshLists()" :disabled="loading"
+                    title="Redemande à Jira les boards et les sprints, sans attendre l'expiration du cache (12 h)">
+                ↻ Rafraîchir la liste des sprints
+            </button>
+        </p>
+
+        <!-- Résultat du report des événements sur les futurs sprints (bouton de la colonne « Évén. »). -->
+        <div x-show="eventsPropagateMsg" class="cap-state" x-text="eventsPropagateMsg" x-cloak></div>
+        <div x-show="eventsPropagateWarn" class="cap-state cap-state--warn" x-text="eventsPropagateWarn" x-cloak></div>
+
+        <!-- Avertissements liés au sprint choisi -->
+        <div x-show="sprintId && !members.length && !loading" class="cap-state" x-cloak>
+            ⚠️ Aucun membre d'équipe configuré. Ajoutez-les dans la page <a href="/config">Configuration</a>.
+        </div>
+        <div x-show="sprintId && members.length && !presentMembers().length && !loading" class="cap-state" x-cloak>
+            ⚠️ Aucun membre présent sur la période de ce sprint (vérifiez les dates d'entrée/sortie).
+        </div>
+
+        <!-- Grille de capacité -->
+        <div class="cap-grid-wrap" x-show="sprintId && weekdays().length && presentMembers().length" x-cloak
+            @mouseleave="hoverMember = null">
+            <table class="cap-grid">
+                <thead>
+                    <!-- Bandeau des rôles (colonnes groupées par profil) -->
+                    <tr>
+                        <th class="cap-grid__daycol"></th>
+                        <!-- Colonne des événements du jour (planif, démo…), enjambe les deux lignes d'en-tête. -->
+                        <th class="cap-grid__evcol" rowspan="2">
+                            <span title="Jours d'événements du sprint (planif, démo, rétro…) retranchés de la capa des personnes présentes">Évén.</span>
+                            <button type="button" class="cap-ev-propagate" @click="applyEventsToFutureSprints()"
+                                :disabled="eventsPropagating || !futureSprintsForEvents().length"
+                                title="Appliquer ces événements à tous les futurs sprints de même durée (remplace leurs événements)"
+                                aria-label="Appliquer ces événements à tous les futurs sprints">
+                                <span x-show="!eventsPropagating">⏩</span>
+                                <span x-show="eventsPropagating" x-cloak>⏳</span>
+                            </button>
+                        </th>
+                        <template x-for="grp in roleGroups()" :key="grp.role">
+                            <th class="cap-grid__role" :class="'cap-role--' + grp.role" :colspan="grp.members.length"
+                                x-text="grp.label"></th>
+                        </template>
+                    </tr>
+                    <!-- Noms des membres -->
+                    <tr>
+                        <th class="cap-grid__daycol">Date</th>
+                        <template x-for="m in presentMembers()" :key="m.id">
+                            <th class="cap-grid__member" :class="{ 'cap-col--hl': m.id === hoverMember }"
+                                x-text="m.name"></th>
+                        </template>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="day in weekdays()" :key="day.date">
+                        <tr :class="{ 'cap-grid__row--weekstart': day.weekStart, 'cap-grid__row--holiday': day.holiday }">
+                            <td class="cap-grid__daycol" x-text="day.label + (day.holiday ? ' férié' : '')"></td>
+                            <!-- Événement du jour : saisi une fois pour toute l'équipe (0 à 1, pas de 0,5). -->
+                            <td class="cap-grid__evcol" :class="{ 'cap-cell--off': day.holiday }">
+                                <template x-if="day.holiday"><span>0</span></template>
+                                <template x-if="!day.holiday">
+                                    <input type="number" class="cap-input" min="0" max="1" step="0.5"
+                                        :value="dayEvent(day.date)"
+                                        @focus="$event.target.select()" @mouseup.prevent
+                                        @keydown="blockNonNumericKey($event)"
+                                        @input="setDayEvent(day.date, $event.target.value)"
+                                        @change="$event.target.value = dayEvent(day.date)">
+                                </template>
+                            </td>
+                            <template x-for="m in presentMembers()" :key="m.id">
+                                <td class="cap-grid__cell" @mouseenter="hoverMember = m.id"
+                                    :class="{ 'cap-cell--off': cellOff(m, day), 'cap-cell--selected': isSelected(m.id, day.date), 'cap-col--hl': m.id === hoverMember, 'cap-cell--forecast': !cellOff(m, day) && isForecast(m.id, day.date) }"
+                                    :title="cellOff(m, day) ? cellOffReason(m, day) : (isForecast(m.id, day.date) ? 'Absence prévisionnelle (comptée 0) — saisir une valeur la confirme' : '')">
+                                    <!-- Cellule éditable seulement les jours ouvrés dans la période du membre. -->
+                                    <template x-if="cellOff(m, day)"><span>0</span></template>
+                                    <template x-if="!cellOff(m, day)">
+                                        <input type="number" class="cap-input" min="0" max="1" step="0.01"
+                                            :data-cap="m.id + '|' + day.date"
+                                            :value="presenceValue(m.id, day.date)"
+                                            :class="{
+                                                'cap-input--absent': presenceValue(m.id, day.date) === 0,
+                                                'cap-input--partial': presenceValue(m.id, day.date) > 0 && presenceValue(m.id, day.date) < 1
+                                            }"
+                                            @focus="$event.target.select()" @mouseup.prevent
+                                            @click="onPresenceClick(m, day, $event)"
+                                            @keydown="onPresenceKeydown(m, day, $event)"
+                                            @input="setPresence(m.id, day.date, $event.target.value)"
+                                            @change="$event.target.value = presenceValue(m.id, day.date)">
+                                    </template>
+                                </td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>
+                <tfoot>
+                    <tr class="cap-grid__footrow cap-grid__footrow--calc">
+                        <td class="cap-grid__daycol">Jours présence</td>
+                        <td class="cap-grid__evcol"></td>
+                        <template x-for="m in presentMembers()" :key="'jp-' + m.id">
+                            <td x-text="fmt(joursPresence(m))"></td>
+                        </template>
+                    </tr>
+                    <!-- Événements effectifs retranchés à chaque membre = somme des événements des jours où
+                         il est présent (plafonnés par sa présence). Lecture seule : la saisie se fait par
+                         jour dans la colonne « Évén. ». La cellule sous « Évén. » affiche le total du sprint. -->
+                    <tr class="cap-grid__footrow cap-grid__footrow--calc">
+                        <td class="cap-grid__daycol">Événements</td>
+                        <td class="cap-grid__evcol" x-text="fmt(totalDayEvents())"></td>
+                        <template x-for="m in presentMembers()" :key="'ev-' + m.id">
+                            <td x-text="fmt(eventsOf(m))"></td>
+                        </template>
+                    </tr>
+                    <!-- Ratio de conversion présence → capa (sans objet pour PO/SM : désactivé). -->
+                    <tr class="cap-grid__footrow">
+                        <td class="cap-grid__daycol">Ratio (%)</td>
+                        <td class="cap-grid__evcol"></td>
+                        <template x-for="m in presentMembers()" :key="'rt-' + m.id">
+                            <td>
+                                <input type="number" class="cap-input" min="0" max="100" step="5"
+                                    :disabled="m.role === 'PO' || m.role === 'SM'"
+                                    @focus="$event.target.select()" @mouseup.prevent
+                                    @keydown="blockNonNumericKey($event)"
+                                    :value="ratioOf(m.id)" @input="setRatio(m.id, $event.target.value)"
+                                    @change="$event.target.value = ratioOf(m.id)">
+                            </td>
+                        </template>
+                    </tr>
+                    <tr class="cap-grid__footrow cap-grid__footrow--calc">
+                        <td class="cap-grid__daycol">Capa à faire</td>
+                        <td class="cap-grid__evcol"></td>
+                        <template x-for="m in presentMembers()" :key="'cf-' + m.id">
+                            <td :class="{ 'cap-cell--off': m.role === 'PO' || m.role === 'SM' }"
+                                x-text="(m.role === 'PO' || m.role === 'SM') ? '—' : fmt(capa(m))"></td>
+                        </template>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Récap d'équipe : total jours présence + capa à faire par rôle et total (PO/SM hors capa). -->
+        <div class="cap-recap" x-show="sprintId && presentMembers().length" x-cloak>
+            <div class="cap-recap__item">
+                <span class="cap-recap__label cap-role--Dev">Capa Dév</span>
+                <span class="cap-recap__value" x-text="fmt(capaByRole('Dev'))"></span>
+            </div>
+            <div class="cap-recap__item">
+                <span class="cap-recap__label cap-role--BA">Capa BA</span>
+                <span class="cap-recap__value" x-text="fmt(capaByRole('BA'))"></span>
+            </div>
+            <div class="cap-recap__item">
+                <span class="cap-recap__label cap-role--QA">Capa QA</span>
+                <span class="cap-recap__value" x-text="fmt(capaByRole('QA'))"></span>
+            </div>
+            <div class="cap-recap__item cap-recap__item--total">
+                <span class="cap-recap__label">Capa à faire totale (Dév + BA + QA)</span>
+                <span class="cap-recap__value" x-text="fmt(capaTotal())"></span>
+            </div>
+            <div class="cap-recap__item cap-recap__item--total">
+                <span class="cap-recap__label">Total jours présence équipe (incl. PO+SM)</span>
+                <span class="cap-recap__value" x-text="fmt(totalPresence())"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Agrégation par PI (récap inter-sprints, capture 2) ===== -->
+    <div class="card" x-show="selectedProject && sprints.length" x-cloak>
+        <h2>🧮 Agrégation par PI</h2>
+        <p class="sprint-section-sub">
+            Cochez les sprints du PI (souvent 4, plus l'itération IP) pour agréger leur capacité.
+            Les valeurs proviennent des totaux <strong>enregistrés</strong> de chaque sprint (le sprint en
+            cours d'édition est reflété en direct).
+        </p>
+
+        <div class="cap-pi__actions">
+            <button type="button" @click="piSelectAll()">Tout sélectionner</button>
+            <button type="button" @click="piSelectNone()">Tout désélectionner</button>
+        </div>
+
+        <div class="cap-pi__picker">
+            <template x-for="s in sprints" :key="'pi-' + s.id">
+                <label class="cap-pi__check">
+                    <input type="checkbox" :checked="piSprintIds.includes(String(s.id))"
+                        @change="togglePiSprint(s.id, $event.target.checked)">
+                    <span x-text="s.name"></span>
+                </label>
+            </template>
+        </div>
+
+        <div class="cap-grid-wrap" x-show="piSelectedSprints().length" x-cloak style="margin-top:14px">
+            <table class="cap-grid">
+                <thead>
+                    <tr>
+                        <th class="cap-grid__daycol">Itération</th>
+                        <template x-for="s in piSelectedSprints()" :key="'pic-' + s.id">
+                            <th class="cap-grid__member" x-text="s.name"></th>
+                        </template>
+                        <th class="cap-grid__member">Total PI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="cap-grid__footrow cap-grid__footrow--calc">
+                        <td class="cap-grid__daycol">Total « TTC » (incl. PO+SM)</td>
+                        <template x-for="s in piSelectedSprints()" :key="'ttc-' + s.id">
+                            <td x-text="fmt(piPresence(s.id))"></td>
+                        </template>
+                        <!-- Total PI : « avec IP » et, si une itération IP est cochée, la valeur « sans IP ». -->
+                        <td class="cap-pi__sum">
+                            <span x-text="fmt(piSumPresence())"></span>
+                            <template x-if="hasIpSelected()">
+                                <span class="cap-pi__noip">sans IP&nbsp;: <span x-text="fmt(piSumPresence(true))"></span></span>
+                            </template>
+                        </td>
+                    </tr>
+                    <tr class="cap-grid__footrow cap-grid__footrow--calc">
+                        <td class="cap-grid__daycol">Total capa à faire (Dév+BA+QA)</td>
+                        <template x-for="s in piSelectedSprints()" :key="'tot-' + s.id">
+                            <td x-text="fmt(piCapaTotal(s.id))"></td>
+                        </template>
+                        <td class="cap-pi__sum">
+                            <span x-text="fmt(piSumCapaTotal())"></span>
+                            <template x-if="hasIpSelected()">
+                                <span class="cap-pi__noip">sans IP&nbsp;: <span x-text="fmt(piSumCapaTotal(true))"></span></span>
+                            </template>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="cap-grid__daycol"><span class="cap-pi__role cap-role--Dev">Capa Dév</span></td>
+                        <template x-for="s in piSelectedSprints()" :key="'dev-' + s.id">
+                            <td x-text="fmt(piCapaRole(s.id, 'Dev'))"></td>
+                        </template>
+                        <td class="cap-pi__sum" x-text="fmt(piSumRole('Dev'))"></td>
+                    </tr>
+                    <tr>
+                        <td class="cap-grid__daycol"><span class="cap-pi__role cap-role--QA">Capa Qualif</span></td>
+                        <template x-for="s in piSelectedSprints()" :key="'qa-' + s.id">
+                            <td x-text="fmt(piCapaRole(s.id, 'QA'))"></td>
+                        </template>
+                        <td class="cap-pi__sum" x-text="fmt(piSumRole('QA'))"></td>
+                    </tr>
+                    <tr>
+                        <td class="cap-grid__daycol"><span class="cap-pi__role cap-role--BA">Capa BA</span></td>
+                        <template x-for="s in piSelectedSprints()" :key="'ba-' + s.id">
+                            <td x-text="fmt(piCapaRole(s.id, 'BA'))"></td>
+                        </template>
+                        <td class="cap-pi__sum" x-text="fmt(piSumRole('BA'))"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Composant Alpine de la page « Capacité ».
+         *
+         * Résout projet/board depuis le pool partagé, charge les sprints du board et le roster du projet,
+         * puis, pour le sprint choisi, génère la grille jours ouvrés × membres présents. La règle de
+         * présence est un intervalle semi-ouvert : un membre est présent le jour D si
+         * (entryDate vide OU D ≥ entryDate) ET (exitDate vide OU D ≤ exitDate).
+         */
+        window.teamCapacity = function (config) {
+            const POOL_KEY = 'jira_pool_team';
+            // Jours fériés ('YYYY-MM-DD') en Set pour un test d'appartenance O(1).
+            const HOLIDAYS = new Set((config && config.holidays) || []);
+            // Ordre et libellés d'affichage des rôles (regroupement des colonnes).
+            const ROLE_ORDER = [
+                { role: 'Dev', label: 'Dév' },
+                { role: 'BA',  label: 'BA' },
+                { role: 'QA',  label: 'QA' },
+                { role: 'PO',  label: 'PO' },
+                { role: 'SM',  label: 'SM' },
+            ];
+
+            return {
+                selectedProject: null,
+                boardId: '',
+                sprints: [],
+                sprintId: '',
+                members: [],       // roster brut du projet (tous membres)
+                loading: false,
+                loaderDismissed: false, // overlay de chargement fermé manuellement (garde-fou anti-blocage)
+                error: '',
+                loaded: false,     // garde-fou de chargement paresseux unique
+
+                // Saisie réactive :
+                presenceOverrides: {}, // 'memberId|YYYY-MM-DD' -> valeur de présence (≠ défaut 1)
+                forecastDates: {},     // 'memberId|YYYY-MM-DD' -> true : absence prévisionnelle (code « P » à l'import), affichée « prév. »
+                dayEvents: {},         // 'YYYY-MM-DD' -> jours d'événements du jour (planif, démo…), partagés par l'équipe
+                ratio: {},             // memberId -> ratio de conversion présence → capa (%)
+                capacitySaving: false,
+                capacitySaved: false,
+                _saveTimer: null,      // debounce de la persistance
+                _persistedSprintId: '', // sprint déjà figé « à la consultation » (anti-doublons)
+                _capacityLoadedSprintId: '', // sprint dont la VRAIE grille (fetch capacity) est arrivée
+
+                // Report des événements du sprint courant sur les futurs sprints :
+                eventsPropagating: false, // requête de report en cours
+                eventsPropagateMsg: '',   // récap du report (sprints mis à jour)
+                eventsPropagateWarn: '',  // sprints ignorés (durée différente)
+
+                // Sélection multiple de cellules de présence (une seule colonne = un seul membre) :
+                selMember: null,       // id du membre dont les cellules sont sélectionnées
+                selAnchor: null,       // date d'ancrage (1er clic) pour l'extension au Maj+clic
+                selDates: [],          // dates sélectionnées (jours éditables uniquement)
+                hoverMember: null,     // colonne (personne) survolée, pour l'exergue croisé jour × personne
+
+                // Agrégation PI (sélection multi-sprints) :
+                piSprintIds: [],       // sprints cochés pour le récap PI
+                piData: {},            // sprintId -> totals enregistrés | null
+
+                // Import d'absences (modale) :
+                importOpen: false,     // modale ouverte
+                importFile: null,      // fichier .xlsx sélectionné
+                importing: false,      // requête d'import en cours
+                importReport: null,    // récap renvoyé par le serveur (matchés, non reconnus, notices…)
+                importError: '',       // message d'erreur d'import
+                dragOver: false,       // survol de la zone de dépôt (drag'n'drop)
+                lastImportAt: null,    // date/heure ISO du dernier import réussi (issue de team-config ou du récap)
+
+                // Premier affichage de l'onglet : résout le contexte une seule fois.
+                loadOnce() {
+                    if (this.loaded) return;
+                    this.loaded = true;
+                    this.resolveContext();
+                },
+
+                // Lit le projet/board du pool partagé puis charge boards, sprints et roster.
+                resolveContext() {
+                    const pool = window.jiraStore ? window.jiraStore.read(POOL_KEY) : null;
+                    if (!pool || !pool.project) {
+                        return; // écran d'accueil (aucun projet) — rien à charger
+                    }
+                    this.selectedProject = pool.project;
+                    this.boardId = pool.boardId ? String(pool.boardId) : '';
+                    this.loadRoster();
+                    if (this.boardId) {
+                        this.loadSprints();
+                    } else {
+                        this.resolveBoard();
+                    }
+                },
+
+                // Redemande boards et sprints à Jira en ignorant le cache serveur (TTL 12 h), pour faire
+                // apparaître un sprint tout juste créé. Le board venant du pool quand il est connu, on ne
+                // repasse par resolveBoard() que s'il ne l'est pas — même branchement qu'à l'init.
+                refreshLists() {
+                    if (this.boardId) {
+                        this.loadSprints(true);
+                    } else {
+                        this.resolveBoard(true);
+                    }
+                },
+
+                // Résout un board quand le pool n'en porte pas : board par défaut, sinon unique board scrum.
+                // $refresh ignore le cache serveur des boards et des sprints.
+                resolveBoard(refresh = false) {
+                    this.loading = true;
+                    this.loaderDismissed = false;
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/boards'
+                        + (refresh ? '?refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            const scrum = data.filter(b => b.type === 'scrum');
+                            const preferred = data.find(b => b.preferred);
+                            if (preferred) {
+                                this.boardId = String(preferred.id);
+                            } else if (scrum.length === 1) {
+                                this.boardId = String(scrum[0].id);
+                            }
+                            if (this.boardId) {
+                                this.loadSprints(refresh);
+                            } else {
+                                this.loading = false;
+                                this.error = 'Aucun board par défaut configuré pour ce projet.';
+                            }
+                        })
+                        .catch(err => { this.loading = false; this.error = err.message; console.error(err); });
+                },
+
+                // Charge les sprints du board (tous états). Présélectionne l'actif, sinon le plus récent.
+                // $refresh ignore le cache serveur des sprints (TTL 12 h).
+                loadSprints(refresh = false) {
+                    this.loading = true;
+                    this.loaderDismissed = false;
+                    this.error = '';
+                    this.piSprintIds = [];
+                    this.piData = {};
+                    fetch('/api/internal/boards/' + encodeURIComponent(this.boardId) + '/sprints?projectKey='
+                        + encodeURIComponent(this.selectedProject.key)
+                        + (refresh ? '&refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            // On ne garde que les sprints datés (nécessaires pour générer la grille).
+                            this.sprints = (data || []).filter(s => s.startDate && s.endDate);
+                            const active = this.sprints.find(s => s.state === 'active');
+                            this.sprintId = active ? String(active.id) : (this.sprints[0] ? String(this.sprints[0].id) : '');
+                            this.loadCapacity();
+                            this.loadPiSelection();
+                        })
+                        .catch(err => { this.error = err.message; console.error(err); })
+                        .finally(() => { this.loading = false; });
+                },
+
+                // Charge le roster du projet (page Configuration → clé members).
+                loadRoster() {
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/team-config')
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(config => {
+                            this.members = (config && Array.isArray(config.members)) ? config.members : [];
+                            this.lastImportAt = (config && config.lastCapacityImportAt) ? config.lastCapacityImportAt : null;
+                            this.$nextTick(() => this.persistIfReady());
+                        })
+                        .catch(err => { this.error = err.message; console.error(err); });
+                },
+
+                // Changement de sprint : recharge la grille stockée (les getters dérivés suivent sprintId).
+                onSprintChange() {
+                    this.loadCapacity();
+                },
+
+                // Sprint actuellement sélectionné (objet complet), ou null.
+                currentSprint() {
+                    return this.sprints.find(s => String(s.id) === String(this.sprintId)) || null;
+                },
+
+                // Liste des jours ouvrés (lun–ven) du sprint, du début à la fin (inclus).
+                // Chaque entrée : { date: 'YYYY-MM-DD', label: 'lun 06/01' }.
+                weekdays() {
+                    const sprint = this.currentSprint();
+                    if (!sprint) return [];
+                    const days = [];
+                    const abbr = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+                    const start = this.parseYmd(sprint.startDate);
+                    const end = this.parseYmd(sprint.endDate);
+                    if (!start || !end) return [];
+                    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                        const dow = d.getDay();
+                        if (dow === 0 || dow === 6) continue; // week-end exclu
+                        const ymd = this.toYmd(d);
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        days.push({
+                            date: ymd,
+                            label: abbr[dow] + ' ' + dd + '/' + mm,
+                            // Séparateur de semaine : vrai sur chaque lundi, sauf le tout premier jour listé.
+                            weekStart: dow === 1 && days.length > 0,
+                            holiday: HOLIDAYS.has(ymd),
+                        });
+                    }
+                    return days;
+                },
+
+                // Membres présents sur la fenêtre du sprint, ordonnés par rôle (ROLE_ORDER).
+                presentMembers() {
+                    const sprint = this.currentSprint();
+                    if (!sprint) return [];
+                    const start = sprint.startDate, end = sprint.endDate;
+                    const present = this.members.filter(m => this.overlapsWindow(m, start, end));
+                    // Tri stable par ordre de rôle (les rôles inconnus vont en fin).
+                    return present.slice().sort((a, b) => this.roleIndex(a.role) - this.roleIndex(b.role));
+                },
+
+                // Colonnes groupées par rôle (dans l'ordre ROLE_ORDER), pour le bandeau d'en-tête.
+                roleGroups() {
+                    const groups = [];
+                    ROLE_ORDER.forEach(def => {
+                        const members = this.presentMembers().filter(m => m.role === def.role);
+                        if (members.length) groups.push({ role: def.role, label: def.label, members });
+                    });
+                    return groups;
+                },
+
+                // Rang d'un rôle dans ROLE_ORDER (999 si inconnu → relégué en fin).
+                roleIndex(role) {
+                    const i = ROLE_ORDER.findIndex(d => d.role === role);
+                    return i === -1 ? 999 : i;
+                },
+
+                // Le membre recoupe-t-il la fenêtre [start, end] du sprint (au moins un jour présent) ?
+                // Présence sur [entryDate, exitDate] : les deux bornes sont incluses (présent le jour même
+                // de l'entrée ET le jour même de la sortie). Si les deux dates sont renseignées et
+                // exitDate < entryDate (sortie temporaire puis retour), le membre est toujours affiché, dans
+                // la grille de TOUS les sprints (jamais masqué) — seule inTenure() neutralise les jours d'absence.
+                overlapsWindow(member, start, end) {
+                    const entry = member.entryDate || '';
+                    const exit = member.exitDate || '';
+                    if (entry && exit && exit < entry) return true; // sortie temporaire : jamais masqué
+                    if (entry && end < entry) return false;   // sprint entièrement avant l'entrée
+                    if (exit && start > exit) return false;   // sprint entièrement après la sortie (sortie incluse)
+                    return true;
+                },
+
+                // Le membre est-il présent le jour `date` ? Entrée et sortie incluses : présent sur
+                // [entryDate, exitDate]. Cas sortie temporaire puis retour (exitDate < entryDate, les deux
+                // renseignées) : présent partout sauf strictement entre les deux dates (les bornes elles-mêmes
+                // restent des jours de présence).
+                inTenure(member, date) {
+                    const entry = member.entryDate || '';
+                    const exit = member.exitDate || '';
+                    if (entry && exit && exit < entry) return date <= exit || date >= entry;
+                    if (entry && date < entry) return false;
+                    if (exit && date > exit) return false;
+                    return true;
+                },
+
+                // Cellule inactive (présence 0, grisée) : jour férié OU membre hors de sa période.
+                cellOff(member, day) {
+                    return day.holiday || !this.inTenure(member, day.date);
+                },
+
+                // Explique pourquoi une cellule est neutralisée (infobulle) : jour férié, pas encore arrivé,
+                // déjà sorti, ou absence temporaire (sortie puis retour, cf. inTenure).
+                cellOffReason(member, day) {
+                    if (day.holiday) return 'Jour férié';
+                    const entry = member.entryDate || '';
+                    const exit = member.exitDate || '';
+                    if (entry && exit && exit < entry) {
+                        return 'Absent : sortie temporaire du ' + this.fmtYmd(exit) + ' (départ) au ' + this.fmtYmd(entry) + ' (retour)';
+                    }
+                    if (entry && day.date < entry) {
+                        return 'Absent : arrivée dans l\'équipe le ' + this.fmtYmd(entry);
+                    }
+                    if (exit && day.date > exit) {
+                        return 'Absent : sorti de l\'équipe le ' + this.fmtYmd(exit);
+                    }
+                    return '';
+                },
+
+                // ===== Saisie, calculs et persistance =====
+
+                // Charge la grille stockée du sprint courant et (ré)initialise l'état réactif de saisie.
+                loadCapacity() {
+                    this.presenceOverrides = {};
+                    this.forecastDates = {};
+                    this.dayEvents = {};
+                    this.ratio = {};
+                    this.eventsPropagateMsg = '';
+                    this.eventsPropagateWarn = '';
+                    this.clearSelection();
+                    if (!this.sprintId || !this.selectedProject) return;
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key)
+                        + '/sprints/' + encodeURIComponent(this.sprintId) + '/capacity')
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            const members = (data && data.members) ? data.members : {};
+                            const po = {}, rt = {}, fc = {};
+                            Object.keys(members).forEach(id => {
+                                const m = members[id] || {};
+                                if (m.presence) {
+                                    Object.keys(m.presence).forEach(date => { po[id + '|' + date] = m.presence[date]; });
+                                }
+                                if (Array.isArray(m.forecast)) {
+                                    m.forecast.forEach(date => { fc[id + '|' + date] = true; });
+                                }
+                                if (m.ratio != null) rt[id] = m.ratio;
+                            });
+                            this.presenceOverrides = po;
+                            this.forecastDates = fc;
+                            this.ratio = rt;
+                            this.dayEvents = (data && data.dayEvents) ? data.dayEvents : {};
+                            this._capacityLoadedSprintId = this.sprintId;
+                            this.$nextTick(() => this.persistIfReady());
+                        })
+                        .catch(err => { this.error = err.message; console.error(err); });
+                },
+
+                // Valeur de présence d'une cellule éditable (override saisi, sinon défaut 1).
+                presenceValue(memberId, date) {
+                    const v = this.presenceOverrides[memberId + '|' + date];
+                    return (v === undefined || v === null) ? 1 : v;
+                },
+
+                // La cellule est-elle une absence prévisionnelle (code « P » du fichier importé) ? Elle vaut 0
+                // comme une absence classique : seul son affichage change (« prév. » au lieu de « 0 »).
+                isForecast(memberId, date) {
+                    return this.forecastDates[memberId + '|' + date] === true;
+                },
+
+                // Jours d'événements saisis sur un jour donné (défaut 0), partagés par toute l'équipe.
+                dayEvent(date) {
+                    const v = this.dayEvents[date];
+                    return (v === undefined || v === null) ? 0 : v;
+                },
+
+                // Événements effectifs retranchés à un membre = somme, sur ses jours actifs, de
+                // min(événement du jour, présence du jour) : un absent ne « consomme » pas l'événement,
+                // un présent partiel ne le consomme qu'à hauteur de sa présence (plafonnement).
+                eventsOf(m) {
+                    let sum = 0;
+                    this.weekdays().forEach(day => {
+                        if (day.holiday || !this.inTenure(m, day.date)) return;
+                        sum += Math.min(this.dayEvent(day.date), this.presenceValue(m.id, day.date));
+                    });
+                    return Math.round(sum * 100) / 100;
+                },
+
+                // Total des jours d'événements du sprint (somme de la colonne, indépendante des membres).
+                totalDayEvents() {
+                    let sum = 0;
+                    this.weekdays().forEach(day => { if (!day.holiday) sum += this.dayEvent(day.date); });
+                    return Math.round(sum * 100) / 100;
+                },
+
+                // Ratio de conversion d'un membre en % (défaut 100).
+                ratioOf(id) {
+                    const v = this.ratio[id];
+                    return (v === undefined || v === null) ? 100 : v;
+                },
+
+                // Saisie de présence : bornée à [0, 1] avec 2 décimales, puis persistance différée.
+                // Champ vidé = absence (0), et non retour au défaut 1. Une saisie manuelle lève le marqueur
+                // « prévisionnel » : la valeur est désormais confirmée par l'utilisateur.
+                setPresence(memberId, date, raw) {
+                    let v = parseFloat(String(raw).replace(',', '.'));
+                    if (isNaN(v)) v = 0;
+                    v = Math.round(Math.min(1, Math.max(0, v)) * 100) / 100;
+                    this.presenceOverrides[memberId + '|' + date] = v;
+                    delete this.forecastDates[memberId + '|' + date];
+                    this.scheduleSave();
+                },
+
+                // ===== Sélection multiple de cellules de présence =====
+
+                // Vide la sélection courante.
+                clearSelection() {
+                    this.selMember = null;
+                    this.selAnchor = null;
+                    this.selDates = [];
+                },
+
+                // Une cellule fait-elle partie de la sélection courante (même membre) ?
+                isSelected(memberId, date) {
+                    return this.selMember === memberId && this.selDates.includes(date);
+                },
+
+                // Clic sur une cellule : simple = ancre + sélection d'une case ; Maj+clic dans la MÊME
+                // colonne (même membre) = étend la sélection à toute la plage de jours éditables entre
+                // l'ancre et la cellule cliquée (saisie rapide d'une semaine de congés).
+                onPresenceClick(m, day, e) {
+                    if (e.shiftKey && this.selMember === m.id && this.selAnchor) {
+                        e.preventDefault();
+                        this.selectRange(m, this.selAnchor, day.date);
+                    } else {
+                        this.selMember = m.id;
+                        this.selAnchor = day.date;
+                        this.selDates = [day.date];
+                    }
+                },
+
+                // Sélectionne toutes les cellules éditables d'un membre entre deux dates (bornes incluses).
+                selectRange(m, fromDate, toDate) {
+                    const days = this.weekdays();
+                    let a = days.findIndex(d => d.date === fromDate);
+                    let b = days.findIndex(d => d.date === toDate);
+                    if (a < 0 || b < 0) return;
+                    if (a > b) { const t = a; a = b; b = t; }
+                    const dates = [];
+                    for (let i = a; i <= b; i++) {
+                        const d = days[i];
+                        if (d.holiday || !this.inTenure(m, d.date)) continue; // jours non éditables exclus
+                        dates.push(d.date);
+                    }
+                    this.selDates = dates;
+                },
+
+                // Applique une valeur de présence (bornée [0, 1]) à toutes les cellules sélectionnées.
+                // Comme la saisie unitaire, la saisie groupée lève le marqueur « prévisionnel » des cellules.
+                applyToSelection(value) {
+                    if (!this.selMember || !this.selDates.length) return;
+                    const v = Math.round(Math.min(1, Math.max(0, value)) * 100) / 100;
+                    this.selDates.forEach(date => {
+                        this.presenceOverrides[this.selMember + '|' + date] = v;
+                        delete this.forecastDates[this.selMember + '|' + date];
+                    });
+                    this.scheduleSave();
+                },
+
+                // Gestion clavier d'une cellule de présence :
+                // - TAB / Maj+TAB : descend / remonte d'un jour dans la même colonne (au lieu d'aller à droite) ;
+                // - SUPPR / RET.ARR sur une sélection multiple : vide les cases (0) ;
+                // - chiffre sur une sélection multiple : applique la valeur à toutes les cases ;
+                // - sinon : filtre de saisie numérique habituel.
+                onPresenceKeydown(m, day, e) {
+                    if (e.key === 'Tab') {
+                        e.preventDefault();
+                        this.focusPresenceCell(m, day.date, e.shiftKey ? -1 : 1);
+                        return;
+                    }
+                    const multi = this.selMember === m.id && this.selDates.length > 1 && this.selDates.includes(day.date);
+                    if (multi && (e.key === 'Delete' || e.key === 'Backspace')) {
+                        e.preventDefault();
+                        this.applyToSelection(0);
+                        return;
+                    }
+                    if (multi && /^[0-9]$/.test(e.key)) {
+                        e.preventDefault();
+                        this.applyToSelection(parseFloat(e.key));
+                        return;
+                    }
+                    this.blockNonNumericKey(e);
+                },
+
+                // Déplace le focus vers la cellule éditable du membre au jour suivant (dir=1) ou
+                // précédent (dir=-1), en sautant les jours fériés / hors période.
+                focusPresenceCell(m, fromDate, dir) {
+                    const days = this.weekdays();
+                    let i = days.findIndex(d => d.date === fromDate);
+                    if (i < 0) return;
+                    for (i += dir; i >= 0 && i < days.length; i += dir) {
+                        const d = days[i];
+                        if (d.holiday || !this.inTenure(m, d.date)) continue;
+                        const el = document.querySelector('[data-cap="' + m.id + '|' + d.date + '"]');
+                        if (el) { el.focus(); return; }
+                    }
+                },
+
+                // Saisie de l'événement d'un jour : borné à [0, 1] par pas de 0,5, puis persistance différée.
+                setDayEvent(date, raw) {
+                    let v = parseFloat(String(raw).replace(',', '.'));
+                    if (isNaN(v) || v < 0) v = 0;
+                    v = Math.min(1, Math.round(v * 2) / 2);
+                    this.dayEvents[date] = v;
+                    this.scheduleSave();
+                },
+
+                // Sprints concernés par « Appliquer à tous les futurs sprints » : ceux qui démarrent après le sprint courant
+                // et ne sont pas clôturés (les jours/homme des sprints clos restent intacts, même depuis un ancien sprint).
+                futureSprintsForEvents() {
+                    const current = this.currentSprint();
+                    if (!current) return [];
+                    const start = String(current.startDate).slice(0, 10);
+                    return this.sprints.filter(s => s.state !== 'closed'
+                        && String(s.id) !== String(current.id)
+                        && String(s.startDate).slice(0, 10) > start);
+                },
+
+                // Reporte les événements du sprint courant (valeurs affichées, y compris une saisie pas encore enregistrée)
+                // sur les futurs sprints, position par position. Le serveur ne modifie que les sprints de même durée,
+                // remplace leurs événements et recalcule leurs totaux ; les sprints ignorés sont signalés.
+                applyEventsToFutureSprints() {
+                    const current = this.currentSprint();
+                    const targets = this.futureSprintsForEvents();
+                    if (!current || !targets.length || !this.selectedProject) return;
+                    const message = 'Remplacer les événements des ' + targets.length + ' futur(s) sprint(s) par ceux de « '
+                        + current.name + ' » ?\n\nSeuls les sprints de même durée seront modifiés ; leurs événements actuels seront écrasés.';
+                    if (!window.confirm(message)) return;
+
+                    this.eventsPropagating = true;
+                    this.eventsPropagateMsg = '';
+                    this.eventsPropagateWarn = '';
+                    const body = new URLSearchParams();
+                    body.append('sourceStartDate', String(current.startDate).slice(0, 10));
+                    body.append('sourceEndDate', String(current.endDate).slice(0, 10));
+                    body.append('dayEvents', JSON.stringify(this.buildCapacityPayload().dayEvents));
+                    body.append('sprints', JSON.stringify(targets.map(s => ({
+                        id: String(s.id),
+                        startDate: String(s.startDate).slice(0, 10),
+                        endDate: String(s.endDate).slice(0, 10),
+                    }))));
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key)
+                        + '/sprints/' + encodeURIComponent(this.sprintId) + '/capacity/day-events/propagate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body.toString(),
+                    })
+                        .then(r => r.json().catch(() => null).then(d => {
+                            if (!r.ok || !d || !d.success) throw new Error((d && d.error) || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(result => {
+                            const nameOf = id => (this.sprints.find(s => String(s.id) === String(id)) || { name: id }).name;
+                            this.eventsPropagateMsg = result.applied.length
+                                ? '✅ Événements appliqués à ' + result.applied.length + ' sprint(s) : ' + result.applied.map(nameOf).join(', ')
+                                : '';
+                            this.eventsPropagateWarn = result.skipped.length
+                                ? '⚠️ Non modifié(s), durée différente : ' + result.skipped.map(nameOf).join(', ')
+                                : '';
+                            // Les totaux enregistrés des sprints modifiés ont changé : l'agrégation PI doit les relire.
+                            result.applied.forEach(id => {
+                                if (this.piSprintIds.includes(String(id))) this.fetchPiTotals(String(id));
+                            });
+                        })
+                        .catch(err => { this.eventsPropagateWarn = '❌ ' + err.message; console.error(err); })
+                        .finally(() => { this.eventsPropagating = false; });
+                },
+
+                // Saisie de ratio : borné à [0, 100] %, puis persistance différée.
+                setRatio(id, raw) {
+                    let v = parseFloat(String(raw).replace(',', '.'));
+                    if (isNaN(v)) v = 100;
+                    this.ratio[id] = Math.min(100, Math.max(0, v));
+                    this.scheduleSave();
+                },
+
+                // Somme de présence d'un membre sur ses jours actifs (hors fériés / hors période).
+                rawPresenceSum(m) {
+                    let sum = 0;
+                    this.weekdays().forEach(day => {
+                        if (day.holiday || !this.inTenure(m, day.date)) return;
+                        sum += this.presenceValue(m.id, day.date);
+                    });
+                    return sum;
+                },
+
+                // Jours de présence d'un membre = somme stricte de la colonne présence (les 0,5 / 1).
+                // Les événements n'entrent PAS dans ce total : ils ne réduisent que la capa à faire.
+                joursPresence(m) {
+                    return Math.round(this.rawPresenceSum(m) * 100) / 100;
+                },
+
+                // Capa à faire d'un membre = (jours de présence − événements) × ratio / 100, capée à 0
+                // (une ressource absente tout le sprint ne doit jamais produire une capa négative).
+                capa(m) {
+                    const raw = (this.joursPresence(m) - this.eventsOf(m)) * this.ratioOf(m.id) / 100;
+                    return Math.max(0, Math.round(raw * 100) / 100);
+                },
+
+                // Total des jours de présence de l'équipe (tous rôles, PO/SM inclus).
+                totalPresence() {
+                    let s = 0;
+                    this.presentMembers().forEach(m => { s += this.joursPresence(m); });
+                    return Math.round(s * 100) / 100;
+                },
+
+                // Capa à faire agrégée d'un rôle (PO/SM exclus de la capa côté récap).
+                capaByRole(role) {
+                    let s = 0;
+                    this.presentMembers().forEach(m => { if (m.role === role) s += this.capa(m); });
+                    return Math.round(s * 100) / 100;
+                },
+
+                // Capa à faire totale de l'équipe = Dév + BA + QA (PO/SM exclus).
+                capaTotal() {
+                    return Math.round((this.capaByRole('Dev') + this.capaByRole('BA') + this.capaByRole('QA')) * 100) / 100;
+                },
+
+                // Construit la charge utile persistée : présence sparse (≠ 1), jours prévisionnels et ratio
+                // (≠ 100, hors PO/SM) par membre, événements par jour (> 0) au niveau sprint, et totaux
+                // (réutilisés par l'agrégation PI). Un jour n'est renvoyé prévisionnel que s'il vaut bien 0 :
+                // le marqueur ne peut ainsi jamais masquer une présence réelle.
+                buildCapacityPayload() {
+                    const members = {};
+                    this.presentMembers().forEach(m => {
+                        const entry = {};
+                        const presence = {};
+                        const forecast = [];
+                        this.weekdays().forEach(day => {
+                            if (day.holiday || !this.inTenure(m, day.date)) return;
+                            const v = this.presenceValue(m.id, day.date);
+                            if (v !== 1) presence[day.date] = v;
+                            if (v === 0 && this.isForecast(m.id, day.date)) forecast.push(day.date);
+                        });
+                        if (Object.keys(presence).length) entry.presence = presence;
+                        if (forecast.length) entry.forecast = forecast;
+                        const rt = this.ratioOf(m.id);
+                        if (rt !== 100 && m.role !== 'PO' && m.role !== 'SM') entry.ratio = rt;
+                        if (Object.keys(entry).length) members[m.id] = entry;
+                    });
+                    const dayEvents = {};
+                    this.weekdays().forEach(day => {
+                        if (day.holiday) return;
+                        const v = this.dayEvent(day.date);
+                        if (v > 0) dayEvents[day.date] = v;
+                    });
+                    return {
+                        members,
+                        dayEvents,
+                        totals: {
+                            presenceTotal: this.totalPresence(),
+                            capa: { Dev: this.capaByRole('Dev'), BA: this.capaByRole('BA'), QA: this.capaByRole('QA') },
+                            capaTotal: this.capaTotal(),
+                        },
+                    };
+                },
+
+                // Programme la persistance (debounce 700 ms) après une saisie.
+                scheduleSave() {
+                    this.capacitySaved = false;
+                    clearTimeout(this._saveTimer);
+                    this._saveTimer = setTimeout(() => { this.saveCapacity(); }, 700);
+                },
+
+                // Persiste la grille du sprint courant (corps urlencoded, JSON dans le champ « capacity »).
+                saveCapacity() {
+                    if (!this.sprintId || !this.selectedProject) return;
+                    this.capacitySaving = true;
+                    const body = new URLSearchParams();
+                    body.append('capacity', JSON.stringify(this.buildCapacityPayload()));
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key)
+                        + '/sprints/' + encodeURIComponent(this.sprintId) + '/capacity', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body.toString(),
+                    })
+                        .then(r => r.json().then(d => {
+                            if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(() => {
+                            this.capacitySaved = true;
+                            setTimeout(() => { this.capacitySaved = false; }, 2500);
+                        })
+                        .catch(err => { this.error = err.message; console.error(err); })
+                        .finally(() => { this.capacitySaving = false; });
+                },
+
+                // Adoption « à la consultation » : dès qu'un sprint est affiché avec un roster présent, on
+                // fige ses totaux de capacité (même sans absence) pour que /sprint et /team-metrics disposent
+                // des jours/homme. Idempotent par sprint : appelé après le chargement du roster ET de la grille
+                // (le second arrivé déclenche la persistance), une seule fois par sprint.
+                // Garde-fou anti-course : ne persiste que si la VRAIE grille du sprint courant est arrivée
+                // (_capacityLoadedSprintId), sinon un appel prématuré (roster chargé avant la grille) sauvegarderait
+                // les valeurs par défaut (présence 1, événements 0) et écraserait la grille existante.
+                persistIfReady() {
+                    if (!this.sprintId || !this.selectedProject) return;
+                    if (this._capacityLoadedSprintId !== this.sprintId) return;
+                    if (this._persistedSprintId === this.sprintId) return;
+                    if (!this.members.length || !this.presentMembers().length) return;
+                    this._persistedSprintId = this.sprintId;
+                    this.saveCapacity();
+                },
+
+                // ===== Import d'absences (modale) =====
+
+                // Ouvre la modale et réinitialise son état.
+                openImport() {
+                    this.importOpen = true;
+                    this.importFile = null;
+                    this.importReport = null;
+                    this.importError = '';
+                    this.dragOver = false;
+                },
+
+                // Ferme la modale.
+                closeImport() {
+                    this.importOpen = false;
+                    this.dragOver = false;
+                },
+
+                // Fichier choisi via l'input « parcourir ».
+                onImportFileChosen(files) {
+                    this.pickImportFile(files);
+                },
+
+                // Fichier déposé (drag'n'drop).
+                onImportDrop(e) {
+                    this.dragOver = false;
+                    this.pickImportFile(e.dataTransfer ? e.dataTransfer.files : null);
+                },
+
+                // Valide et retient le 1ᵉʳ fichier .xlsx sélectionné (efface tout récap précédent).
+                pickImportFile(files) {
+                    this.importError = '';
+                    if (!files || !files.length) { this.resetImportInput(); return; }
+                    const f = files[0];
+                    // On vide l'input APRÈS avoir capturé le File (l'objet reste valide) : sans ça,
+                    // re-sélectionner LE MÊME fichier après un premier import ne redéclenche pas « change »
+                    // (valeur inchangée) et le bouton resterait grisé jusqu'à un rechargement de page.
+                    // NB : $event.target.files est une FileList vivante — la vider avant lecture la viderait aussi.
+                    this.resetImportInput();
+                    if (!/\.xlsx$/i.test(f.name)) {
+                        this.importError = 'Seuls les fichiers .xlsx sont acceptés.';
+                        return;
+                    }
+                    this.importFile = f;
+                    this.importReport = null;
+                },
+
+                // Vide l'input fichier pour autoriser une nouvelle sélection (même nom) sans recharger la page.
+                resetImportInput() {
+                    if (this.$refs.importInput) this.$refs.importInput.value = '';
+                },
+
+                // Envoie le fichier + les sprints datés au serveur, puis rafraîchit la grille et l'agrégation PI.
+                doImport() {
+                    if (!this.importFile || !this.selectedProject) return;
+                    this.importing = true;
+                    this.importError = '';
+                    this.importReport = null;
+                    const body = new FormData();
+                    body.append('file', this.importFile);
+                    // Les dates Jira sont des datetime ISO : on ne garde que la partie « YYYY-MM-DD »
+                    // (comme parseYmd() côté grille), sinon la validation serveur les rejette.
+                    body.append('sprints', JSON.stringify(this.sprints.map(s => ({
+                        id: String(s.id),
+                        startDate: String(s.startDate).slice(0, 10),
+                        endDate: String(s.endDate).slice(0, 10),
+                    }))));
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/capacity/import', {
+                        method: 'POST',
+                        body,
+                    })
+                        .then(r => r.json().then(d => {
+                            if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(report => {
+                            this.importReport = report;
+                            this.importFile = null;
+                            if (report.lastImportAt) this.lastImportAt = report.lastImportAt;
+                            // Reflète l'import : grille du sprint courant + totaux PI enregistrés.
+                            this.loadCapacity();
+                            this.piSprintIds.forEach(id => {
+                                if (id !== String(this.sprintId)) this.fetchPiTotals(id);
+                            });
+                        })
+                        .catch(err => { this.importError = err.message; console.error(err); })
+                        .finally(() => { this.importing = false; });
+                },
+
+                // Affichage : tiret si null/indéfini/NaN, sinon la valeur arrondie à 2 décimales.
+                fmt(v) {
+                    return (v === null || v === undefined || isNaN(v)) ? '—' : String(Math.round(v * 100) / 100);
+                },
+
+                // N'autorise que la saisie numérique : bloque lettres, espace et symboles (e, €, +, -…).
+                // Laisse passer les chiffres, le séparateur décimal et les touches de contrôle/navigation.
+                blockNonNumericKey(e) {
+                    if (e.ctrlKey || e.metaKey || e.altKey) return;
+                    if (e.key.length > 1) return;
+                    if (!/[0-9.,]/.test(e.key)) e.preventDefault();
+                },
+
+                // Parse une date 'YYYY-MM-DD' en Date locale (évite tout décalage de fuseau).
+                parseYmd(ymd) {
+                    const parts = String(ymd).slice(0, 10).split('-');
+                    if (parts.length !== 3) return null;
+                    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                },
+
+                // Formate une Date locale en 'YYYY-MM-DD'.
+                toYmd(d) {
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    return d.getFullYear() + '-' + mm + '-' + dd;
+                },
+
+                // Formate une date 'YYYY-MM-DD' en 'JJ/MM/AAAA' pour affichage (infobulles, messages).
+                fmtYmd(ymd) {
+                    const [y, m, d] = String(ymd).slice(0, 10).split('-');
+                    return d + '/' + m + '/' + y;
+                },
+
+                // Formate lastImportAt (ISO 8601) en 'JJ/MM/AAAA hh:mm' pour l'affichage à côté du bouton d'import.
+                formatLastImport() {
+                    if (!this.lastImportAt) return '';
+                    const d = new Date(this.lastImportAt);
+                    if (isNaN(d.getTime())) return '';
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const hh = String(d.getHours()).padStart(2, '0');
+                    const mi = String(d.getMinutes()).padStart(2, '0');
+                    return dd + '/' + mm + '/' + d.getFullYear() + ' ' + hh + ':' + mi;
+                },
+
+                // ===== Agrégation par PI (multi-sprints) =====
+
+                // Sprints du PI sélectionnés, triés du plus ancien au plus récent (comme les itérations Excel).
+                piSelectedSprints() {
+                    return this.sprints
+                        .filter(s => this.piSprintIds.includes(String(s.id)))
+                        .slice()
+                        .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)));
+                },
+
+                // Sélectionne tous les sprints du board pour le PI (charge leurs totaux enregistrés).
+                piSelectAll() {
+                    this.piSprintIds = this.sprints.map(s => String(s.id));
+                    this.sprints.forEach(s => {
+                        if (String(s.id) !== String(this.sprintId)) this.fetchPiTotals(String(s.id));
+                    });
+                    this.savePiSelection();
+                },
+
+                // Désélectionne tous les sprints du PI.
+                piSelectNone() {
+                    this.piSprintIds = [];
+                    this.savePiSelection();
+                },
+
+                // Coche/décoche un sprint du PI ; charge ses totaux enregistrés à la sélection.
+                togglePiSprint(id, checked) {
+                    id = String(id);
+                    if (checked) {
+                        if (!this.piSprintIds.includes(id)) this.piSprintIds.push(id);
+                        this.fetchPiTotals(id);
+                    } else {
+                        this.piSprintIds = this.piSprintIds.filter(x => x !== id);
+                    }
+                    this.savePiSelection();
+                },
+
+                // Clé localStorage de la sélection PI, propre au projet (préférence personnelle du navigateur).
+                piStorageKey() {
+                    return 'capacityPiSelection:' + (this.selectedProject ? this.selectedProject.key : '');
+                },
+
+                // Persiste la sélection PI courante (localStorage).
+                savePiSelection() {
+                    try {
+                        localStorage.setItem(this.piStorageKey(), JSON.stringify(this.piSprintIds));
+                    } catch (e) { /* stockage indisponible : non bloquant */ }
+                },
+
+                // Restaure la sélection PI du projet, filtrée aux sprints encore présents sur le board,
+                // puis charge leurs totaux enregistrés (hors sprint courant, reflété en direct).
+                loadPiSelection() {
+                    let saved = [];
+                    try {
+                        saved = JSON.parse(localStorage.getItem(this.piStorageKey()) || '[]');
+                    } catch (e) { saved = []; }
+                    this.piSprintIds = Array.isArray(saved)
+                        ? saved.map(String).filter(id => this.sprints.some(s => String(s.id) === id))
+                        : [];
+                    this.piSprintIds.forEach(id => {
+                        if (id !== String(this.sprintId)) this.fetchPiTotals(id);
+                    });
+                },
+
+                // Charge les totaux enregistrés d'un sprint pour l'agrégation (best-effort).
+                fetchPiTotals(id) {
+                    if (!this.selectedProject) return;
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key)
+                        + '/sprints/' + encodeURIComponent(id) + '/capacity')
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => { this.piData[String(id)] = (data && data.totals) ? data.totals : null; })
+                        .catch(() => { this.piData[String(id)] = null; });
+                },
+
+                // Totaux d'un sprint pour le récap PI : live pour le sprint en cours d'édition,
+                // sinon les totaux enregistrés (rechargés à la sélection).
+                piTotals(id) {
+                    if (String(id) === String(this.sprintId)) {
+                        return this.buildCapacityPayload().totals;
+                    }
+                    return this.piData[String(id)] || null;
+                },
+
+                // Capa d'un rôle pour un sprint du PI (null si sprint sans données enregistrées).
+                piCapaRole(id, role) {
+                    const t = this.piTotals(id);
+                    return (t && t.capa) ? (t.capa[role] ?? 0) : null;
+                },
+
+                // Capa totale (Dév+BA+QA) d'un sprint du PI.
+                piCapaTotal(id) {
+                    const t = this.piTotals(id);
+                    return t ? (t.capaTotal ?? 0) : null;
+                },
+
+                // Total « TTC » (jours de présence, PO/SM inclus) d'un sprint du PI.
+                piPresence(id) {
+                    const t = this.piTotals(id);
+                    return t ? (t.presenceTotal ?? 0) : null;
+                },
+
+                // Un sprint est-il l'itération IP (Innovation & Planning) ? Détecté par son nom
+                // (convention « … ité IP ») : l'IP n'apporte pas de capacité de production « utile ».
+                isIpSprint(s) {
+                    return /\bIP\b/i.test(String((s && s.name) || ''));
+                },
+
+                // Au moins un sprint IP est-il coché ? (conditionne l'affichage « avec / sans IP »).
+                hasIpSelected() {
+                    return this.piSelectedSprints().some(s => this.isIpSprint(s));
+                },
+
+                // Sprints du PI retenus pour une somme : tous, ou hors IP si excludeIp.
+                piSumSprints(excludeIp) {
+                    const list = this.piSelectedSprints();
+                    return excludeIp ? list.filter(s => !this.isIpSprint(s)) : list;
+                },
+
+                // Somme d'un rôle sur le PI (hors IP si excludeIp).
+                piSumRole(role, excludeIp = false) {
+                    return Math.round(this.piSumSprints(excludeIp)
+                        .reduce((s, sp) => s + (this.piCapaRole(sp.id, role) || 0), 0) * 100) / 100;
+                },
+
+                // Somme des capas totales (Dév+BA+QA) sur le PI (hors IP si excludeIp).
+                piSumCapaTotal(excludeIp = false) {
+                    return Math.round(this.piSumSprints(excludeIp)
+                        .reduce((s, sp) => s + (this.piCapaTotal(sp.id) || 0), 0) * 100) / 100;
+                },
+
+                // Somme des totaux « TTC » sur le PI (hors IP si excludeIp).
+                piSumPresence(excludeIp = false) {
+                    return Math.round(this.piSumSprints(excludeIp)
+                        .reduce((s, sp) => s + (this.piPresence(sp.id) || 0), 0) * 100) / 100;
+                },
+            };
+        };
+    </script>
+</div>

@@ -1,0 +1,566 @@
+/* ============================================================
+ * Page CAPACITÉ (/capacity)
+ * Grille de présence jours × membres, récap équipe, agrégation PI,
+ * import des absences.
+ * ============================================================ */
+
+/* --- Grille jours × membres --- */
+.cap-state {
+    padding: 14px 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+.cap-state--error { color: var(--danger-text); }
+.cap-state--warn { color: var(--warning-text); }
+.cap-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+}
+.cap-select { min-width: 320px; }
+
+/* Table dense type Excel, largeur responsive : les colonnes se partagent la largeur disponible
+   (table-layout fixe) pour éviter une scrollbar horizontale même avec toute l'équipe. */
+/* Pas de conteneur de défilement : la grille (table-layout:fixed, width:100%) tient dans la
+   carte, et son en-tête à 2 lignes peut se figer en haut de la fenêtre (voir plus bas). */
+.cap-grid-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+.cap-grid {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+.cap-grid th,
+.cap-grid td {
+    border: 1px solid var(--border);
+    padding: 3px 4px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Colonne Date : figée à gauche, largeur fixe et fond plus foncé (colonne « spéciale »). */
+.cap-grid__daycol {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 84px;
+    background: var(--border);
+    text-align: left;
+    font-weight: 600;
+}
+.cap-grid__member {
+    background: var(--neutral-bg);
+    font-weight: 600;
+    word-break: break-word;
+}
+/* Colonne Date (corps) : fond uniforme foncé, iso ligne « Jours présence ». Spécificité renforcée
+   pour annuler le zébrage global (tbody tr:nth-child(even) td { background: transparent }). */
+.cap-grid tbody .cap-grid__daycol {
+    background: var(--border-strong);
+}
+.cap-grid__role {
+    color: #fff;
+    font-weight: 700;
+}
+/* En-tête figé en haut de la fenêtre. Grille à 2 lignes d'en-tête (rôles puis noms) : la 2e
+   ligne est décalée de la hauteur de la 1re pour s'empiler sans recouvrement.
+   box-shadow annulée (la grille a déjà ses bordures 1px). Le second tableau (agrégat PI) n'a
+   qu'une ligne d'en-tête : seule la règle `first-child` s'y applique. */
+.cap-grid thead th {
+    position: sticky;
+    z-index: 3;
+    box-shadow: none;
+}
+.cap-grid thead tr:first-child th {
+    top: 0;
+    height: 24px;
+}
+.cap-grid thead tr:nth-child(2) th {
+    top: 24px;
+}
+/* Coin figé (colonne Date des lignes d'en-tête) : au-dessus des noms et de la colonne gauche. */
+.cap-grid thead .cap-grid__daycol {
+    z-index: 4;
+}
+/* Colonne des événements du jour : figée à gauche juste après la colonne Date (84px). */
+.cap-grid__evcol {
+    position: sticky;
+    left: 84px;
+    z-index: 1;
+    width: 52px;
+    background: var(--neutral-bg);
+    font-weight: 600;
+}
+.cap-grid thead .cap-grid__evcol {
+    z-index: 4;
+    background: var(--border);
+}
+/* Bouton « Appliquer à tous les futurs sprints » sous l'en-tête de la colonne Événements : icône seule, pour tenir dans
+   la cellule d'en-tête figée (52px, hauteur contrainte) sans déborder sur la 1re ligne de jours.
+   Sélecteur préfixé `button` : l'emporte sur `button[type="button"]` de global.css (height 38px, padding 0 18px), de même
+   spécificité mais chargé avant. */
+button.cap-ev-propagate {
+    display: block;
+    width: 36px;
+    height: 26px;
+    margin: 4px auto 0;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+/* Survol : aucun fond ni cadre (celui du survol global de button[type="button"] est neutralisé), seule l'infobulle apparaît. */
+button.cap-ev-propagate:hover:not(:disabled) { background: transparent; border: none; }
+button.cap-ev-propagate:disabled { opacity: 0.5; cursor: not-allowed; }
+/* Cellule de présence sélectionnée (sélection multiple pour saisie groupée : congés…). */
+.cap-grid td.cap-cell--selected {
+    background: var(--info-bg);
+}
+.cap-cell--selected .cap-input {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+/* Survol croisé : la ligne (jour) et la colonne (personne) de la cellule pointée sont assombries,
+   pour situer d'un coup d'œil le couple jour × personne. */
+.cap-grid tbody tr:hover td { background: var(--info-bg); }
+.cap-grid .cap-col--hl { background: var(--info-bg); }
+/* Couleurs de bandeau par rôle (rappel de la maquette Excel). */
+.cap-role--Dev { background: #a855f7; }
+.cap-role--BA  { background: #eab308; }
+.cap-role--QA  { background: #f97316; }
+.cap-role--PO  { background: #0ea5e9; }
+.cap-role--SM  { background: #10b981; }
+/* Cellule hors période du membre (avant entrée / après sortie) ou jour férié : grisée à 0, lecture seule
+   (fond plus soutenu que --neutral-bg pour bien la distinguer d'une cellule éditable au premier coup d'œil).
+   Spécificité renforcée (.cap-grid td.cap-cell--off) pour annuler le zébrage global
+   (tbody tr:nth-child(even) td { background: transparent }, cf. global.css) qui l'écrasait une ligne sur deux. */
+.cap-grid td.cap-cell--off {
+    background: var(--border);
+    color: var(--text-light);
+    cursor: help; /* l'infobulle (title) explique le motif de l'absence */
+}
+/* Séparateur de semaine : trait gras en haut de la 1ʳᵉ ligne de chaque semaine (lundi). */
+.cap-grid__row--weekstart > td,
+.cap-grid__row--weekstart > th {
+    border-top: 3px solid var(--border-strong);
+}
+/* Ligne de jour férié : grisée et désactivée (0 partout). */
+.cap-grid__row--holiday > td {
+    background: var(--neutral-bg);
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* Champ de saisie dans une cellule (présence, événements, ratio). Occupe toute la cellule et masque
+   les flèches natives pour rester lisible (« 0.5 ») même en colonnes étroites. */
+.cap-input {
+    width: 100%;
+    min-width: 47px;
+    box-sizing: border-box;
+    padding: 2px;
+    font-size: 0.78rem;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.cap-input::-webkit-outer-spin-button,
+.cap-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.cap-input:disabled {
+    background: var(--neutral-bg);
+    color: var(--text-light);
+}
+/* Présence partielle (0 < j < 1) : orange clair. Présence nulle (absence saisie) : rouge clair.
+   Sélecteur préfixé `input` (+ hover/focus) pour battre la règle globale input[type=number]. */
+input.cap-input--partial,
+input.cap-input--partial:hover,
+input.cap-input--partial:focus { background: #fed7aa; }
+input.cap-input--absent,
+input.cap-input--absent:hover,
+input.cap-input--absent:focus { background: #fecaca; }
+
+/* Absence prévisionnelle (code « P » du fichier importé) : la journée vaut 0 comme une absence classique,
+   mais une étiquette « prév. » recouvre le champ, sur le même fond rouge clair que le 0 (la colonne est trop
+   étroite pour « Prévisionnel », repris en infobulle). L'étiquette laisse passer le clic (pointer-events) et
+   s'efface dès que la cellule prend le focus, pour laisser saisir la valeur normalement.
+   `inset` reprend exactement le padding de la cellule (3px 4px) afin de se caler sur le champ. */
+.cap-grid td.cap-cell--forecast {
+    position: relative;
+}
+.cap-grid td.cap-cell--forecast::after {
+    content: 'prév.';
+    position: absolute;
+    inset: 3px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fecaca;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.68rem;
+    color: #7f1d1d;
+    pointer-events: none;
+}
+.cap-grid td.cap-cell--forecast:focus-within::after {
+    display: none;
+}
+/* Sélection multiple : l'outline du champ étant masqué par l'étiquette, on la porte sur l'étiquette. */
+.cap-grid td.cap-cell--forecast.cap-cell--selected::after {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+/* Pied de grille (lignes spéciales) : fond plus foncé ; lignes calculées un cran plus foncées encore. */
+.cap-grid__footrow > td {
+    background: var(--border);
+    font-weight: 600;
+}
+.cap-grid__footrow--calc > td {
+    background: var(--border-strong);
+}
+
+/* Indicateurs d'enregistrement de la grille. */
+.cap-saving {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+.cap-saved {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background: var(--success-bg);
+    color: var(--success-text);
+    font-size: 0.85rem;
+    border: 1px solid var(--success-border);
+    border-radius: var(--radius-sm);
+}
+.cap-import-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+.cap-last-import {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Récap d'équipe (total présence + capa par rôle et total). */
+.cap-recap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+.cap-recap__item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 150px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--neutral-bg);
+}
+.cap-recap__item--total {
+    background: var(--info-bg);
+    border-color: var(--info-border);
+}
+.cap-recap__label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+.cap-recap__label.cap-role--Dev,
+.cap-recap__label.cap-role--BA,
+.cap-recap__label.cap-role--QA {
+    color: #fff;
+    align-self: flex-start;
+    padding: 1px 8px;
+    border-radius: var(--radius-sm);
+}
+.cap-recap__value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Agrégation par PI : sélecteur de sprints + tableau récap inter-sprints. */
+.cap-pi__actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.cap-pi__actions button {
+    font-size: 12px;
+    cursor: pointer;
+}
+.cap-pi__picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+}
+.cap-pi__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+/* Pastille de rôle dans la colonne libellé du récap PI. */
+.cap-pi__role {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-weight: 700;
+}
+/* Colonne « Total PI » : mise en avant. */
+.cap-pi__sum {
+    font-weight: 700;
+    background: var(--info-bg);
+}
+/* Valeur « sans IP » du total PI : seconde ligne discrète sous le total « avec IP ». */
+.cap-pi__noip {
+    display: block;
+    font-weight: 400;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* ============================================================
+ * Import des absences (bouton + modale)
+ * ============================================================ */
+/* Bouton « Importer » : poussé à droite de la barre d'outils. */
+.cap-import-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+.cap-import-btn:hover { background: var(--primary-dark); }
+
+/* Overlay plein écran de la modale d'import. */
+.cap-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+}
+.cap-modal__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+.cap-modal__box {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 640px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 24px 26px;
+}
+.cap-modal__box h3 { margin: 0 0 12px; }
+.cap-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.cap-modal__close:hover { color: var(--text); }
+
+/* Bloc explicatif (format attendu). */
+.cap-modal__help {
+    font-size: 0.88rem;
+    color: var(--text-light);
+}
+.cap-modal__help ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+.cap-modal__help li { margin: 4px 0; }
+.cap-modal__help code {
+    padding: 1px 5px;
+    background: var(--neutral-bg);
+    border-radius: var(--radius-sm);
+    font-size: 0.85em;
+}
+.cap-modal__note {
+    padding: 8px 10px;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-radius: var(--radius-sm);
+}
+
+/* Aperçu illustré du format attendu. */
+.cap-modal__example {
+    margin: 12px 0;
+    text-align: center;
+}
+.cap-modal__example-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 260px;
+    object-fit: contain;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fff;
+}
+.cap-modal__example figcaption {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* Zone de dépôt (drag'n'drop + clic pour parcourir). */
+.cap-dropzone {
+    margin: 14px 0;
+    padding: 26px 16px;
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--radius);
+    text-align: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.cap-dropzone:hover { background: var(--card-hover); }
+.cap-dropzone--over {
+    border-color: var(--primary);
+    background: var(--info-bg);
+    color: var(--text);
+}
+.cap-dropzone__input { display: none; }
+
+.cap-modal__error {
+    margin: 8px 0;
+    padding: 8px 10px;
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-radius: var(--radius-sm);
+    color: var(--danger-text);
+    font-size: 0.88rem;
+}
+
+/* Récap de l'import. */
+.cap-import-report { margin: 12px 0; }
+.cap-import-report p { margin: 6px 0; font-size: 0.88rem; }
+.cap-import-report__ok {
+    padding: 8px 10px;
+    background: var(--success-bg);
+    border: 1px solid var(--success-border);
+    border-radius: var(--radius-sm);
+    color: var(--success-text);
+}
+.cap-import-report__warn {
+    padding: 6px 10px;
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-radius: var(--radius-sm);
+    color: var(--warning-text);
+}
+.cap-import-report__notice {
+    padding: 6px 10px;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-radius: var(--radius-sm);
+}
+
+/* Actions de la modale. */
+.cap-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+}
+.cap-modal__actions button {
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--neutral-bg);
+    cursor: pointer;
+}
+.cap-modal__primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+}
+.cap-modal__primary:hover:not(:disabled) { background: var(--primary-dark); }
+.cap-modal__primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Overlay bloquant pendant le chargement du contexte de la page (foncement transparent).
+   Bloque l'écran le temps des fetch (sprints/roster/grille) ; la croix force sa fermeture si besoin. */
+.cap-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(1px);
+}
+.cap-loader__close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+.cap-loader__close:hover { background: #fff; }
+.cap-loader__spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: cap-loader-spin 0.8s linear infinite;
+}
+.cap-loader__text {
+    margin: 0;
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+@keyframes cap-loader-spin {
+    to { transform: rotate(360deg); }
+}

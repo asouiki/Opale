@@ -1,0 +1,1192 @@
+<?php
+
+/** @var \App\Controller\SprintController $this */
+/** @var \App\View\SprintView|null $view */
+/** @var string|null $error */
+/** @var float|null $manDays */
+/** @var bool $llmEnabled */
+$currentPage = 'sprint';
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Analyse Sprint</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/sprint.css">
+    <script>
+        /**
+         * Composant Alpine de saisie des jours/homme d'un sprint.
+         * Défini dans <head> (sans defer) pour être disponible avant qu'Alpine
+         * initialise le x-data correspondant plus bas dans la page.
+         *
+         * @param {{projectKey:string, sprintId:string, doneSp:number, businessDays:number, manDays:?number, capacityPoints:?number}} config
+         */
+        window.sprintManDays = function (config) {
+            return {
+                projectKey:     config.projectKey,
+                sprintId:       config.sprintId,
+                doneSp:         config.doneSp,
+                businessDays:   config.businessDays,
+                manDays:        config.manDays,
+                // Jours/homme pilotés par la grille de l'onglet Capacité (qui fait foi) : champ verrouillé,
+                // toute saisie manuelle serait de toute façon ignorée à la lecture.
+                manDaysReadOnly: config.manDaysReadOnly,
+                capacityPoints: config.capacityPoints,
+                timer:          null,
+                capacityTimer:  null,
+
+                // Vélocité du sprint (iso carte « Vélocité » des Métriques d'équipe).
+                // Les calculs « par jours/homme » sont réactifs à la saisie ; ceux
+                // « par jour ouvré » dérivent des jours ouvrés du sprint (fixes).
+                // SP terminés par jours/homme.
+                spPerManDay() {
+                    const md = parseFloat(this.manDays);
+                    return (md > 0) ? Math.round((this.doneSp / md) * 100) / 100 : null;
+                },
+                // SP terminés par jour ouvré.
+                spPerDay() {
+                    const bd = this.businessDays;
+                    return (bd > 0) ? Math.round((this.doneSp / bd) * 100) / 100 : null;
+                },
+                // Jours/homme pour terminer 1 SP.
+                manDaysPerSp() {
+                    const md = parseFloat(this.manDays);
+                    return (md > 0 && this.doneSp > 0) ? Math.round((md / this.doneSp) * 100) / 100 : null;
+                },
+                // Jours ouvrés pour terminer 1 SP.
+                daysPerSp() {
+                    const bd = this.businessDays;
+                    return (bd > 0 && this.doneSp > 0) ? Math.round((bd / this.doneSp) * 100) / 100 : null;
+                },
+                // SP terminés par personne (effectif estimé = jours-homme / jours ouvrés).
+                spPerPerson() {
+                    const md = parseFloat(this.manDays);
+                    const bd = this.businessDays;
+                    return (md > 0 && bd > 0) ? Math.round(((this.doneSp * bd) / md) * 100) / 100 : null;
+                },
+
+                fmt(value) {
+                    return (value === null || value === undefined || value === '') ? '—' : String(value);
+                },
+
+                // Persiste les jours/homme (debounce 700ms) ; vide/<=0 => effacement.
+                // Corps en urlencoded : l'app ne parse pas le JSON.
+                save() {
+                    if (this.manDaysReadOnly) return;
+                    clearTimeout(this.timer);
+                    this.timer = setTimeout(() => {
+                        const raw     = this.manDays;
+                        const manDays = (raw === '' || raw === null || parseFloat(raw) <= 0)
+                            ? '' : parseFloat(raw);
+                        fetch(
+                            '/api/internal/projects/' + encodeURIComponent(this.projectKey)
+                            + '/sprints/' + encodeURIComponent(this.sprintId) + '/man-days',
+                            {
+                                method:  'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body:    'manDays=' + encodeURIComponent(manDays)
+                            }
+                        ).catch(() => {});
+                    }, 700);
+                },
+
+                // Persiste la capacité en points (debounce 700ms) ; vide/<=0 => effacement.
+                saveCapacity() {
+                    clearTimeout(this.capacityTimer);
+                    this.capacityTimer = setTimeout(() => {
+                        const raw   = this.capacityPoints;
+                        const value = (raw === '' || raw === null || parseFloat(raw) <= 0)
+                            ? '' : parseFloat(raw);
+                        fetch(
+                            '/api/internal/projects/' + encodeURIComponent(this.projectKey)
+                            + '/sprints/' + encodeURIComponent(this.sprintId) + '/capacity-points',
+                            {
+                                method:  'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body:    'capacityPoints=' + encodeURIComponent(value)
+                            }
+                        ).catch(() => {});
+                    }, 700);
+                }
+            };
+        };
+    </script>
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <?php if ($view): ?><script>window.__sprintAnalyzed = true;</script><?php endif; ?>
+    <!-- Le composant rend lui-même ses deux cartes : rappel projet (défilant) puis sélecteur + toggle
+         (collant), d'où l'absence de .card ici. -->
+    <?php include __DIR__ . '/../components/sprint/form/selectSprint.phtml'; ?>
+    <?php include __DIR__ . '/../common/stickyBarScript.phtml'; ?>
+
+    <?php include __DIR__ . '/../common/errorMessage.phtml'; ?>
+
+    <?php if ($view): ?>
+        <?php
+        $stats          = $view->getStats();
+        $predictability = $view->getPredictability();
+        $range          = $stats['storyPointsRange'];
+        ?>
+
+        <!-- ============ BANDEAU CACHE (sprint clôturé) ============ -->
+        <?php if (!empty($fromCache)): ?>
+            <div class="cache-banner">
+                <span class="cache-banner__text">
+                    🗄️ Version issue du cache
+                    <?php if (!empty($cachedAt)): ?>
+                        (générée le <?= date('d/m/Y à H:i', $cachedAt) ?>)
+                    <?php endif; ?>
+                    — sprint clôturé, photo figée à la date de clôture.
+                </span>
+                <form method="POST" action="/sprint" class="cache-banner__refresh">
+                    <input type="hidden" name="sprintId" value="<?= htmlspecialchars($view->getSprintId()) ?>">
+                    <input type="hidden" name="projectKey" value="<?= htmlspecialchars($view->getProjectKey()) ?>">
+                    <input type="hidden" name="boardId" value="<?= htmlspecialchars($view->getBoardId()) ?>">
+                    <input type="hidden" name="refresh" value="1">
+                    <button type="submit">🔄 Rafraîchir depuis Jira</button>
+                </form>
+            </div>
+        <?php endif; ?>
+
+        <!-- ============ BANDEAU PHOTO « À DATE » ============ -->
+        <?php if ($view->isAsOfPhoto()): ?>
+            <div class="sprint-asof-banner">
+                <div class="sprint-asof-banner__text">
+                    📷 <strong>État reconstruit au <?= htmlspecialchars((string) $view->getAsOfLabel()) ?></strong>
+                    <?php $gap = $view->getAsOfGapLabel(); ?>
+                    <?php if ($gap !== null): ?>
+                        <span class="sprint-asof-banner__gap">(<?= htmlspecialchars($gap) ?>)</span>
+                    <?php endif; ?>
+                    <br/>
+                    <?php $reintegrated = $view->getReintegratedCount(); ?>
+                    <?php if ($reintegrated > 0): ?>
+                        <strong><?= $reintegrated ?></strong> ticket(s) sortis du sprint après cette date ont été
+                        réintégrés au périmètre. À rapprocher de la section « Tickets retirés du sprint » du rapport
+                        de sprint Jira (aux types d'issue exclus des métriques près).
+                    <?php else: ?>
+                        Aucun ticket n'a été réintégré : soit aucun n'est sorti du sprint après cette date, soit le
+                        rapport de sprint Jira n'est pas accessible (board non renseigné).
+                    <?php endif; ?>
+                </div>
+                <div class="sprint-asof-banner__actions">
+                    <?php if (!empty($asOfIsSaved)): ?>
+                        <span class="sprint-asof-banner__saved">✅ Photo enregistrée</span>
+                    <?php else: ?>
+                        <form method="POST" action="/sprint">
+                            <input type="hidden" name="sprintId" value="<?= htmlspecialchars($view->getSprintId()) ?>">
+                            <input type="hidden" name="projectKey" value="<?= htmlspecialchars($view->getProjectKey()) ?>">
+                            <input type="hidden" name="boardId" value="<?= htmlspecialchars($view->getBoardId()) ?>">
+                            <input type="hidden" name="asOfDate" value="<?= htmlspecialchars((string) $view->getAsOfInputValue()) ?>">
+                            <input type="hidden" name="saveAsOf" value="1">
+                            <button type="submit">
+                                <?= !empty($savedAsOf) ? '📌 Remplacer la photo précédente' : '📌 Enregistrer cette photo' ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                    <form method="POST" action="/sprint">
+                        <input type="hidden" name="sprintId" value="<?= htmlspecialchars($view->getSprintId()) ?>">
+                        <input type="hidden" name="projectKey" value="<?= htmlspecialchars($view->getProjectKey()) ?>">
+                        <input type="hidden" name="boardId" value="<?= htmlspecialchars($view->getBoardId()) ?>">
+                        <button type="submit" class="btn-secondary">↩️ Revenir à l'état nominal</button>
+                    </form>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- Rappel permanent : une photo existe pour ce sprint (elle fera foi dans les métriques d'équipe). -->
+        <?php if (!empty($savedAsOf) && !$view->isAsOfPhoto()): ?>
+            <?php $savedAsOfDate = \App\Service\JiraDate::toLocal($savedAsOf['data']['asOfDate'] ?? null); ?>
+            <?php if ($savedAsOfDate !== null): ?>
+                <div class="sprint-asof-banner sprint-asof-banner--saved">
+                    <div class="sprint-asof-banner__text">
+                        📷 Une photo à une date antérieure à la clôture du sprint existe pour ce sprint, au
+                        <strong><?= $savedAsOfDate->format('d/m/Y \à H:i') ?></strong>
+                        (générée le <?= date('d/m/Y à H:i', $savedAsOf['cached_at']) ?>).
+                        Sélectionnable dans les métriques d'équipe à la place de l'état de clôture.
+                        <?php if ($savedAsOf['metrics_version'] !== \App\Service\SprintCacheService::METRICS_VERSION): ?>
+                            <br/>⚠️ Calculée avec une version antérieure des métriques
+                            (v<?= (int) $savedAsOf['metrics_version'] ?>, actuelle
+                            v<?= \App\Service\SprintCacheService::METRICS_VERSION ?>) — ré-enregistrez-la pour la mettre à jour.
+                        <?php endif; ?>
+                    </div>
+                    <div class="sprint-asof-banner__actions">
+                        <form method="POST" action="/sprint">
+                            <input type="hidden" name="sprintId" value="<?= htmlspecialchars($view->getSprintId()) ?>">
+                            <input type="hidden" name="projectKey" value="<?= htmlspecialchars($view->getProjectKey()) ?>">
+                            <input type="hidden" name="boardId" value="<?= htmlspecialchars($view->getBoardId()) ?>">
+                            <input type="hidden" name="asOfDate" value="<?= $savedAsOfDate->format('Y-m-d\TH:i') ?>">
+                            <button type="submit">👁️ Voir cette photo</button>
+                        </form>
+                        <form method="POST" action="/sprint">
+                            <input type="hidden" name="sprintId" value="<?= htmlspecialchars($view->getSprintId()) ?>">
+                            <input type="hidden" name="projectKey" value="<?= htmlspecialchars($view->getProjectKey()) ?>">
+                            <input type="hidden" name="boardId" value="<?= htmlspecialchars($view->getBoardId()) ?>">
+                            <input type="hidden" name="deleteAsOf" value="1">
+                            <button type="submit" class="btn-secondary">🗑️ Supprimer la photo</button>
+                        </form>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <!-- ============ EN-TÊTE SPRINT + OBJECTIFS ============ -->
+        <div class="card">
+            <div class="card-title-row">
+            <h2>
+                🛠️
+                <?php $sprintUrl = $view->getSprintUrl(); ?>
+                <?php if ($sprintUrl !== ''): ?>
+                    <a href="<?= htmlspecialchars($sprintUrl) ?>" target="_blank" rel="noopener">
+                        <?= htmlspecialchars($view->getSprintName()) ?>
+                    </a>
+                <?php else: ?>
+                    <?= htmlspecialchars($view->getSprintName()) ?>
+                <?php endif; ?>
+                <span class="badge <?= $view->getStateBadgeClass() ?>"><?= $view->getStateLabel() ?></span>
+                <?php $remainingDays = $view->getRemainingBusinessDays(); ?>
+                <?php if ($remainingDays !== null): ?>
+                    <span class="badge <?= $remainingDays <= 2 ? 'red' : ($remainingDays <= 4 ? 'orange' : 'blue') ?>">
+                        ⏳ <?= $remainingDays ?> jours restants
+                    </span>
+                <?php endif; ?>
+            </h2>
+
+                <div class="export-prompt">
+                    <a class="btn-secondary export-prompt__btn" href="<?= htmlspecialchars($view->getExportPromptUrl()) ?>">
+                        📄 Exporter les métriques.
+                    </a>
+                    <span class="export-prompt__hint">
+                        Télécharge un .txt (prompt + métriques anonymes) à coller dans Copilot, Claude, ChatGPT, Gemini…
+                    </span>
+                </div>
+            </div>
+
+            <div class="meta-line meta-line-info sprint-header__meta">
+                <span>📅 Début : <strong><?= $view->getStartDate() ?></strong></span>
+                <span>🏁 Fin : <strong><?= $view->getEndDate() ?></strong></span>
+                <?php if ($view->isClosed()): ?>
+                    <span>📦 Clôturé le : <strong><?= $view->getCompleteDate() ?></strong></span>
+                <?php endif; ?>
+                <span>🎫 <strong><?= $view->getIssuesCount() ?></strong> tickets dans le sprint</span>
+            </div>
+
+            <div class="sprint-header__goals">
+                <h3>🎯 Objectifs du sprint</h3>
+                <?php if (trim($view->getGoal()) !== ''): ?>
+                    <p class="sprint-goal-text">
+                        <?= nl2br(htmlspecialchars($view->getGoal())) ?>
+                    </p>
+                <?php else: ?>
+                    <p><em>Aucun objectif n'est renseigné sur ce sprint dans Jira.</em></p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- ============ SYNTHÈSE IA DU SPRINT ============ -->
+        <?php if ($llmEnabled): ?>
+            <script>
+                /**
+                 * Composant Alpine de la synthèse IA du sprint.
+                 * Appelle l'endpoint d'analyse à la demande et affiche le texte généré.
+                 * Défini sans defer pour être prêt avant l'initialisation d'Alpine.
+                 *
+                 * Une analyse mémorisée est injectée via config.analysis pour s'afficher directement
+                 * au chargement, sans reclic sur « Générer ». config.isClosed distingue le badge de
+                 * fraîcheur : sprint clôturé (analyse figée) ou en cours (photo datée à régénérer).
+                 *
+                 * @param {{projectKey:string, sprintId:string, boardId:string, analysis:string, model:string, fromCache:boolean, cachedAt:string, isClosed:boolean, extraPrompt:string}} config
+                 */
+                window.sprintAiAnalysis = function (config) {
+                    return {
+                        projectKey:  config.projectKey,
+                        sprintId:    config.sprintId,
+                        boardId:     config.boardId,
+                        loading:     false,
+                        analysis:    config.analysis || '',
+                        error:       '',
+                        fromCache:   !!config.fromCache,
+                        cachedAt:    config.cachedAt || '',
+                        isClosed:    !!config.isClosed,
+                        model:       config.model || '',
+                        // Indications de la dernière génération : repeuplées pour ne pas perdre le contexte.
+                        extraPrompt: config.extraPrompt || '',
+
+                        // Libellé du badge de cache : un sprint en cours continue d'évoluer après la
+                        // génération, l'analyse mémorisée n'est donc qu'une photo datée.
+                        cacheBadgeLabel() {
+                            if (!this.cachedAt) {
+                                return '🗄️ Issu du cache';
+                            }
+                            return this.isClosed
+                                ? '🗄️ Issu du cache — généré le ' + this.cachedAt
+                                : '⚠️ Basée sur l\'état du ' + this.cachedAt + ' — sprint encore en cours, pense à régénérer';
+                        },
+
+                        // Lance la génération. refresh=true ignore le cache (bouton « Régénérer »).
+                        run(refresh) {
+                            this.loading = true;
+                            this.error   = '';
+                            let body = 'boardId=' + encodeURIComponent(this.boardId)
+                                + (refresh ? '&refresh=1' : '');
+                            if (this.extraPrompt.trim() !== '') {
+                                body += '&extraPrompt=' + encodeURIComponent(this.extraPrompt.trim());
+                            }
+                            fetch(
+                                '/api/internal/projects/' + encodeURIComponent(this.projectKey)
+                                + '/sprints/' + encodeURIComponent(this.sprintId) + '/analysis',
+                                {
+                                    method:  'POST',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body:    body
+                                }
+                            )
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.error) {
+                                    this.error    = data.error;
+                                    this.analysis = '';
+                                } else {
+                                    this.analysis  = data.analysis || '';
+                                    this.fromCache = !!data.fromCache;
+                                    this.cachedAt  = '';
+                                    this.model     = data.model || '';
+                                    // Synthèse servie depuis le cache : on restitue ses indications d'origine.
+                                    if (data.fromCache) {
+                                        this.extraPrompt = data.extraPrompt || '';
+                                    }
+                                }
+                            })
+                            .catch(() => { this.error = 'Impossible de contacter le service IA.'; })
+                            .finally(() => { this.loading = false; });
+                        }
+                    };
+                };
+            </script>
+            <?php
+$aiConfig = [
+    'projectKey' => $view->getProjectKey(),
+    'sprintId'   => $view->getSprintId(),
+    'boardId'    => $view->getBoardId(),
+    'analysis'   => $aiAnalysis['analysis'] ?? '',
+    'model'      => $aiAnalysis['model'] ?? '',
+    'fromCache'  => $aiAnalysis !== null,
+    'cachedAt'   => $aiAnalysis !== null ? date('d/m/Y à H:i', $aiAnalysis['cached_at']) : '',
+    'isClosed'   => $sprintIsClosed,
+    'extraPrompt' => $aiAnalysis['extraPrompt'] ?? '',
+];
+            ?>
+            <div class="card ai-synthesis" x-data="sprintAiAnalysis(<?= htmlspecialchars(json_encode($aiConfig), ENT_QUOTES) ?>)">
+                <h2>🤖 Synthèse IA du sprint</h2>
+                <p class="ai-synthesis__disclaimer">
+                    ⚠️ Générée par une IA <b>locale, fermée et non connectée à Internet</b>, à partir des métriques du sprint — à relire et valider par le Scrum Master.
+                </p>
+
+                <!-- État initial : champ d'indications libres + bouton de génération -->
+                <div class="ai-synthesis__actions" x-show="!loading && !analysis" x-cloak>
+                    <div class="ai-synthesis__extra-field">
+                        <label class="ai-synthesis__extra-label" for="sprint-ai-extra">
+                            Indications supplémentaires (facultatif)
+                        </label>
+                        <textarea id="sprint-ai-extra" class="ai-synthesis__extra" x-model="extraPrompt"
+                            rows="3" placeholder="Contexte (absences, changement de ressource…) ou directive d'analyse (focus sur une métrique, angle particulier)…"></textarea>
+                    </div>
+                    <button type="button" class="ai-synthesis__btn" @click="run(false)">
+                        ✨ Générer la synthèse
+                    </button>
+                </div>
+
+                <!-- Loader pendant l'appel au modèle (peut durer plusieurs dizaines de secondes) -->
+                <div class="ai-synthesis__loader" x-show="loading" x-cloak>
+                    <span class="ai-synthesis__spinner" aria-hidden="true"></span>
+                    <span>⏳ Analyse en cours… le modèle local peut prendre quelques dizaines de secondes.</span>
+                </div>
+
+                <!-- Erreur -->
+                <div class="ai-synthesis__error" x-show="error && !loading" x-cloak x-text="error"></div>
+
+                <!-- Synthèse générée -->
+                <div class="ai-synthesis__result" x-show="analysis && !loading" x-cloak>
+                    <p class="ai-synthesis__text" x-text="analysis"></p>
+                    <div class="ai-synthesis__extra-field">
+                        <label class="ai-synthesis__extra-label" for="sprint-ai-extra-regen">
+                            Indications supplémentaires (facultatif)
+                        </label>
+                        <textarea id="sprint-ai-extra-regen" class="ai-synthesis__extra" x-model="extraPrompt"
+                            rows="3" placeholder="Contexte (absences, changement de ressource…) ou directive d'analyse (focus sur une métrique, angle particulier)…"></textarea>
+                    </div>
+                    <div class="ai-synthesis__meta">
+                        <span class="badge" x-show="fromCache" :class="isClosed ? 'grey' : 'orange'"
+                            x-text="cacheBadgeLabel()"></span>
+                        <span class="ai-synthesis__model" x-text="model ? ('Modèle : ' + model) : ''"></span>
+                        <button type="button" class="ai-synthesis__regen" @click="run(true)">🔄 Régénérer</button>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- ============ PRÉDICTIBILITÉ ============ -->
+        <?php
+        $achieved  = $predictability['achievedPercent'];
+$isReached = $predictability['isReached'];
+$barColor  = $isReached ? '#10b981' : '#ef4444';
+$barWidth  = min(100, max(0, $achieved));
+?>
+        <div class="card" data-metric-toggle="sprint.predictability">
+            <h2>📈 Prédictibilité du sprint<?= \App\View\MetricTooltips::render('predictability') ?></h2>
+
+            <div class="sprint-gauge-caption">📦 Prédictibilité : Story Points terminés / planifiés au démarrage</div>
+
+            <div class="meta-line meta-line-info sprint-predict__line-sp">
+                <span>Story Points au démarrage : <strong><?= $view->formatSp($predictability['startStoryPoints']) ?></strong></span>
+                <span>🎯 Cible minimum (<?= $predictability['targetPercent'] ?>%) : <strong><?= $view->formatSp($predictability['targetStoryPoints']) ?></strong> Story Points</span>
+                <span>✅ Story Points terminés : <strong><?= $view->formatSp($predictability['completedStoryPoints']) ?></strong>
+                    <?php
+            $completed = $predictability['completedStoryPoints'];
+$planned = $predictability['startStoryPoints'];
+$total = $stats['totalStoryPoints'];
+$pctPlanned = $planned > 0 ? round($completed / $planned * 100, 1) : 0;
+$pctTotal = $total > 0 ? round($completed / $total * 100, 1) : 0;
+?>
+                    <span class="sprint-predict__ratio">🔭 <?= $pctPlanned ?>% terminés / planifiés</span>
+                    <span class="sprint-predict__ratio">🟰 <?= $pctTotal ?>% terminés / total (incl. sujets ajoutés)</span>
+                </span>
+            </div>
+            <!-- Jauge Prédictibilité (Story Points) : trait noir = cible, % centré dans le remplissage -->
+            <div class="sprint-progress">
+                <div class="sprint-progress__fill" style="width: <?= $barWidth ?>%; background: <?= $barColor ?>;"></div>
+                <div class="sprint-progress__label" style="width: <?= $barWidth ?>%;">
+                    <?= $achieved ?>% points terminés
+                    <span class="sprint-progress__label-icon">
+                        <?= $isReached ? '✅' : '⚠️' ?>
+                    </span>
+                </div>
+                <div class="sprint-progress__target" style="left: <?= $predictability['targetPercent'] ?>%;"
+                    title="Cible <?= $predictability['targetPercent'] ?>%"></div>
+            </div>
+
+            <br />
+
+            <div class="sprint-gauge-caption sprint-gauge-caption--mt">🤝 Engagement : Tickets terminés du périmètre initial (prévus en planification de sprint, hors sujets ajoutés en cours de sprint)<?= \App\View\MetricTooltips::render('engagement') ?></div>
+
+            <div class="meta-line meta-line-info sprint-predict__line-tickets">
+                <span>Tickets au démarrage : <strong><?= $predictability['startTicketCount'] ?></strong></span>
+                <span>🎯 Cible minimum (<?= $predictability['targetPercent'] ?>%) : <strong><?= (int) ceil($predictability['startTicketCount'] * $predictability['targetPercent'] / 100) ?></strong> sujets terminés</span>
+                <span>✅ Tickets terminés (périmètre initial) : <strong><?= $predictability['completedFromStartTicketCount'] ?></strong></span>
+            </div>
+            <!-- Jauge Engagement (sujets du périmètre initial) -->
+            <?php
+            $engagement      = $predictability['engagementPercent'];
+$engReached      = $predictability['isEngagementReached'];
+$engBarColor     = $engReached ? '#10b981' : '#ef4444';
+$engBarWidth     = min(100, max(0, $engagement));
+?>
+            <div class="sprint-progress">
+                <div class="sprint-progress__fill" style="width: <?= $engBarWidth ?>%; background: <?= $engBarColor ?>;"></div>
+                <div class="sprint-progress__label" style="width: <?= $engBarWidth ?>%;">
+                    <?= $engagement ?>% sujets initiaux terminés
+                    <span class="sprint-progress__label-icon">
+                        <?= $engReached ? '✅' : '⚠️' ?>
+                    </span>
+                </div>
+                <div class="sprint-progress__target" style="left: <?= $predictability['targetPercent'] ?>%;"
+                    title="Cible <?= $predictability['targetPercent'] ?>%"></div>
+            </div>
+        </div>
+
+        <!-- ============ ATTERRISSAGE DU SPRINT ============ -->
+        <?php
+        $landingRows  = $view->getLandingByStatus();
+$hasEmptyRows = (bool) array_filter($landingRows, fn ($l) => $l['count'] === 0);
+
+// Données du camembert. $landingChartData = statuts non vides (condition
+// d'affichage du canvas). $landingAllChartData = tous les statuts, passé
+// en JS pour que le toggle « Afficher les statuts vides » mette à jour
+// le graphique en temps réel.
+$landingChartData    = [];
+$landingAllChartData = [];
+foreach ($landingRows as $line) {
+    $row = [
+        'status'      => $line['status'],
+        'count'       => (int) $line['count'],
+        'storyPoints' => (float) $line['storyPoints'],
+        'totalDays'   => (float) $line['totalDays'],
+        'color'       => $view->getCategoryChartColor($line['category']),
+    ];
+    $landingAllChartData[] = $row;
+    if ($line['count'] > 0) {
+        $landingChartData[] = $row;
+    }
+}
+?>
+        <div class="card" x-data="{ showEmpty: false }" data-metric-toggle="sprint.landing">
+            <h2>🛬 <?= htmlspecialchars($view->getLandingTitle()) ?><?= \App\View\MetricTooltips::render('landing') ?></h2>
+            <p class="sprint-section-sub">Avancement du sprint :</p>
+
+            <?php
+    // Calculer les pourcentages par catégorie de statut
+    $categories = ['done' => 0, 'sprint' => 0, 'refinement' => 0, 'waiting' => 0, 'other' => 0];
+$totalTickets = 0;
+foreach ($landingRows as $line) {
+    $categories[$line['category']] += (int)$line['count'];
+    $totalTickets += (int)$line['count'];
+}
+
+// Mapper les catégories à des labels lisibles et calcul des pourcentages
+$categoryLabels = [
+    'done' => 'Terminé',
+    'sprint' => 'En cours',
+    'refinement' => 'Non démarré',
+    'waiting' => 'Bloqué',
+    'other' => 'Autre'
+];
+$categoryOrder = ['done', 'sprint', 'refinement', 'waiting', 'other'];
+$visibleCategories = [];
+foreach ($categoryOrder as $cat) {
+    if ($categories[$cat] > 0) {
+        $pct = $totalTickets > 0 ? round($categories[$cat] / $totalTickets * 100, 1) : 0;
+        $visibleCategories[] = [
+            'key' => $cat,
+            'label' => $categoryLabels[$cat],
+            'count' => $categories[$cat],
+            'percent' => $pct,
+            'color' => $view->getCategoryChartColor($cat)
+        ];
+    }
+}
+?>
+
+            <?php if (!empty($visibleCategories)): ?>
+                <!-- Barre empilée par catégorie de statut -->
+                <div class="sprint-landing__summary">
+                    <div class="sprint-landing__bar">
+                        <?php foreach ($visibleCategories as $cat): ?>
+                            <div class="sprint-landing__bar-segment"
+                                style="width: <?= $cat['percent'] ?>%; background: <?= $cat['color'] ?>;"
+                                title="<?= $cat['label'] ?> - <?= $cat['percent'] ?>%"
+                                data-category="<?= htmlspecialchars($cat['key']) ?>">
+                                <span class="sprint-landing__bar-label"><?= $cat['label'] ?> <?= $cat['percent'] ?>%</span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <br/><p class="sprint-section-sub">Nombre de tickets et total de Story Points par statut Jira :</p>
+
+            <?php if ($hasEmptyRows): ?>
+                <!-- Toggle « Afficher les statuts vides » : pilote le tableau, donc
+                     placé au-dessus de celui-ci (et au-dessus de tout en colonne). -->
+                <div class="sprint-landing__controls">
+                    <label class="sprint-empty-toggle">
+                        <span class="sprint-empty-toggle__track"
+                            @click="showEmpty = !showEmpty; $dispatch('landing-toggle-empty', { show: showEmpty })"
+                            :aria-checked="showEmpty"
+                            role="switch"
+                            :style="{ background: showEmpty ? '#10b981' : 'var(--border-strong)' }">
+                            <span class="sprint-empty-toggle__thumb"
+                                :style="{ left: showEmpty ? '19px' : '3px' }"></span>
+                        </span>
+                        <span class="sprint-empty-toggle__text">Afficher les statuts vides</span>
+                    </label>
+                </div>
+            <?php endif; ?>
+
+            <!-- Tableau (gauche, largeur réduite) + camembert de répartition (droite) -->
+            <div class="sprint-landing__layout">
+                <div class="sprint-landing__table-wrap">
+                    <table class="sprint-landing__table">
+                        <thead>
+                            <tr>
+                                <th>Statut</th>
+                                <th class="text-center">Nb de tickets</th>
+                                <th class="text-center">Total Story Points</th>
+                                <th class="text-center">Cumul temps (moy. / ticket)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($landingRows as $line): ?>
+                                <tr x-show="<?= (int)$line['count'] ?> > 0 || showEmpty">
+                                    <td>
+                                        <span class="badge <?= $view->getCategoryBadgeClass($line['category']) ?>">
+                                            <?= htmlspecialchars($line['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-center"><?= $line['count'] ?></td>
+                                    <td class="text-center"><?= $view->formatSp($line['storyPoints']) ?></td>
+                                    <td class="text-center">
+                                        <?= $view->formatDays($line['totalDays']) ?>
+                                        <?php if ($line['averageDays'] > 0): ?>
+                                            <span class="sprint-landing__avg">
+                                                (moy. <?= $view->formatDays($line['averageDays']) ?>)
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        <tfoot>
+                            <tr class="sprint-tfoot-total">
+                                <td>Total</td>
+                                <td class="text-center"><?= $view->getIssuesCount() ?></td>
+                                <td class="text-center"><?= $view->formatSp($stats['totalStoryPoints']) ?></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <?php if (!empty($landingChartData)): ?>
+                    <!-- Camembert de répartition. Le switch de métrique est placé
+                         DANS cette colonne, juste au-dessus du canvas : en mode
+                         colonne (< 1180px) l'ordre vertical devient tableau →
+                         boutons → camembert, et les boutons restent solidaires
+                         du graphique. -->
+                    <div class="sprint-landing__chart-wrap">
+                        <div class="team-scatter__filters sprint-landing__chart-filters" id="landingMetricFilters">
+                            <button type="button" class="team-filter team-filter--active" data-metric="count">🎫 Nb de tickets</button>
+                            <button type="button" class="team-filter" data-metric="totalDays">⏱️ Temps passé</button>
+                            <button type="button" class="team-filter" data-metric="storyPoints">✂️ Story Points</button>
+                        </div>
+                        <div class="sprint-landing__chart">
+                            <canvas id="landingPieChart"></canvas>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <?php if (!empty($landingChartData)): ?>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <!-- Plugin d'étiquettes DANS les parts (libellé + %). Chargé après Chart.js. -->
+            <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+            <script>
+                (function() {
+                    // Statuts NON vides (état initial) + TOUS les statuts (toggle).
+                    const rowsNonEmpty = <?= json_encode($landingChartData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+                    const rowsAll      = <?= json_encode($landingAllChartData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
+                    // Libellé + suffixe d'unité par métrique (pour titre et tooltip).
+                    const metrics = {
+                        count:       { label: 'Nb de tickets', unit: ' tickets' },
+                        totalDays:   { label: 'Temps passé total', unit: ' j ouvrés' },
+                        storyPoints: { label: 'Story Points', unit: ' SP' },
+                    };
+
+                    let metric      = 'count';
+                    let activeRows  = rowsNonEmpty; // mis à jour par rebuildChart()
+
+                    // Arrondit à 1 décimale et supprime un « .0 » superflu.
+                    const fmt = (v) => {
+                        const r = Math.round(v * 10) / 10;
+                        return Number.isInteger(r) ? String(r) : r.toFixed(1);
+                    };
+
+                    const ctx = document.getElementById('landingPieChart').getContext('2d');
+                    const chart = new Chart(ctx, {
+                        type: 'pie',
+                        // Plugin enregistré localement : n'affecte que ce graphique.
+                        plugins: [ChartDataLabels],
+                        data: {
+                            labels: activeRows.map(r => r.status),
+                            datasets: [{
+                                data: activeRows.map(r => r[metric]),
+                                backgroundColor: activeRows.map(r => r.color),
+                                borderColor: '#fff',
+                                borderWidth: 2,
+                            }],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                title: { display: true, text: 'Répartition par ' + metrics[metric].label },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (c) => {
+                                            const total = c.dataset.data.reduce((a, b) => a + b, 0);
+                                            const pct = total > 0 ? Math.round((c.parsed / total) * 1000) / 10 : 0;
+                                            return `${c.label} : ${fmt(c.parsed)}${metrics[metric].unit} (${pct} %)`;
+                                        },
+                                    },
+                                },
+                                datalabels: {
+                                    color: '#fff',
+                                    textAlign: 'center',
+                                    font: { size: 11, weight: '600' },
+                                    display: 'auto',
+                                    textStrokeColor: 'rgba(0, 0, 0, 0.45)',
+                                    textStrokeWidth: 3,
+                                    formatter: (value, c) => {
+                                        const total = c.dataset.data.reduce((a, b) => a + b, 0);
+                                        const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        return [c.chart.data.labels[c.dataIndex], pct + ' %'];
+                                    },
+                                },
+                            },
+                        },
+                    });
+
+                    // Reconstruit labels/data/couleurs selon le filtre actif.
+                    function rebuildChart(showEmpty) {
+                        activeRows = showEmpty ? rowsAll : rowsNonEmpty;
+                        chart.data.labels                        = activeRows.map(r => r.status);
+                        chart.data.datasets[0].data              = activeRows.map(r => r[metric]);
+                        chart.data.datasets[0].backgroundColor   = activeRows.map(r => r.color);
+                        chart.options.plugins.title.text         = 'Répartition par ' + metrics[metric].label;
+                        chart.update();
+                    }
+
+                    // Toggle « Afficher les statuts vides » (événement Alpine.js).
+                    document.addEventListener('landing-toggle-empty', (e) => {
+                        rebuildChart(e.detail.show);
+                    });
+
+                    // Switch de métrique : met à jour les valeurs sur activeRows.
+                    document.getElementById('landingMetricFilters').addEventListener('click', function(e) {
+                        const btn = e.target.closest('button[data-metric]');
+                        if (!btn) return;
+                        metric = btn.dataset.metric;
+
+                        this.querySelectorAll('.team-filter').forEach((b) =>
+                            b.classList.toggle('team-filter--active', b === btn)
+                        );
+
+                        chart.data.datasets[0].data      = activeRows.map(r => r[metric]);
+                        chart.options.plugins.title.text = 'Répartition par ' + metrics[metric].label;
+                        chart.update();
+                    });
+                })();
+            </script>
+        <?php endif; ?>
+
+        <!-- ============ ÉTAT DES TICKETS « OBJECTIF » ============ -->
+        <div class="card" data-metric-toggle="sprint.objectives">
+            <h2>🎯 État des tickets « objectif »<?= \App\View\MetricTooltips::render('objectives') ?></h2>
+
+            <?php if (empty($view->getObjectiveGroups())): ?>
+                <p><em>Aucun ticket du sprint ne porte d'étiquette contenant « objectif ».</em></p>
+            <?php else: ?>
+                <?php $cpt = 1; ?>
+                <?php foreach ($view->getObjectiveGroups() as $group): ?>
+                    <h3 class="sprint-group-h3">
+                        <?= $cpt++ . '. ' . htmlspecialchars($group['title']) ?>
+                        <span class="badge grey"><?= htmlspecialchars($group['label']) ?></span>
+                    </h3>
+                    <?php
+                    // Jauge d'avancement de l'objectif, puis détail des tickets replié : la progression se lit
+                    // d'un coup d'œil, le détail reste à un clic.
+                    $categoryBarRows = $view->getCategoryBreakdown($group['issues']);
+                    include __DIR__ . '/../components/sprint/categoryBar.phtml';
+                    ?>
+                    <details class="sprint-collapse">
+                        <summary>Voir le détail d'avancement</summary>
+                        <?php
+                                            $ticketsTable = [
+                                                'rows'        => $group['issues'],
+                                                'columns'     => ['priority', 'type', 'key', 'title', 'status', 'storyPoints', 'remaining', 'waitingTime', 'cycleTime', 'parent'],
+                                                'defaultSort' => 'parent',
+                                            ];
+                    include __DIR__ . '/../components/sprint/ticketsTable.phtml';
+                    ?>
+                    </details>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
+        <!-- ============ STATISTIQUES DU SPRINT ============ -->
+        <div class="card" data-metric-collapse>
+            <h2>📊 Statistiques du sprint</h2>
+
+            <div class="sprint-stats-group">
+            <div class="meta-line meta-line-metrics" data-metric-collapse>
+                <h3 class="sprint-stats-h3">📈 Story Points</h3>
+                <div class="metric" data-metric-toggle="sprint.totalStoryPoints">
+                    <span class="metric-title">✂️ Story Points<?= \App\View\MetricTooltips::render('total_story_points') ?></span>
+                    <span class="metric-value">
+                        Total : <strong><?= $view->formatSp($stats['totalStoryPoints']) ?></strong> &nbsp; &nbsp;
+                        dont <strong><?= $view->formatSp($stats['totalRemainingStoryPoints'] ?? 0) ?></strong><?= \App\View\MetricTooltips::render('remaining_work') ?> de Reste à faire
+                    </span>
+                    <?php if ($capacityPoints !== null && $capacityPoints > 0): ?>
+                        <?php
+                                            // Delta total - capacité : au-dessus (rouge), égal (orange), en-dessous (vert).
+                                            $capDelta = $stats['totalStoryPoints'] - $capacityPoints;
+                        $capState = $capDelta > 0 ? 'over' : ($capDelta < 0 ? 'under' : 'equal');
+                        $capIcon  = ['over' => '🔴', 'equal' => '🟠', 'under' => '🟢'][$capState];
+                        ?>
+                        <span class="metric-detail sprint-capacity-delta sprint-capacity-delta--<?= $capState ?>">
+                            <?= $capIcon ?> Delta Total vs Capacité : <?= $view->formatDelta($capDelta) ?> pts
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <div class="metric" data-metric-toggle="sprint.unestimated">
+                    <span class="metric-title">🚫 Tickets non estimés</span>
+                    <span class="metric-kv">Tickets non estimés <?= $view->toDateLabel(); ?> : <strong><?= $stats['issuesWithoutStoryPoints'] ?></strong><?= \App\View\MetricTooltips::render('unestimated_tickets') ?></span>
+                    <span class="metric-kv">Tickets estimés <u>après</u> leur ajout au sprint : <strong><?= $stats['estimatedAfterAdd']['count'] ?></strong><?= \App\View\MetricTooltips::render('estimated_after_add') ?></span>
+                </div>
+                <div class="metric" data-metric-toggle="sprint.spRange">
+                    <span class="metric-title">📊 Distribution des Story Points</span>
+                    <span class="metric-kv">Fourchette min – max : <strong><?= $view->formatSp($range['min']) ?> – <?= $view->formatSp($range['max']) ?> points</strong><?= \App\View\MetricTooltips::render('sp_range') ?></span>
+                    <span class="metric-kv">Médiane / Moyenne : <strong><?= $view->formatSp($range['median']) ?> / <?= $view->formatSp($range['average']) ?> points</strong><?= \App\View\MetricTooltips::render('sp_median_avg') ?></span>
+                </div>
+            </div>
+
+            <!-- b. Capacité de l'équipe : jours/homme et capacité en points saisis (partagés avec la page Team Metrics) et vélocité SP terminés / jours-homme, calculée en direct. -->
+            <?php
+            $doneSpForVelocity = (float) ($stats['doneTickets']['storyPoints'] ?? 0);
+$sprintBusinessDays = $view->getBusinessDays();
+// Valeurs initiales (fallback no-JS) des calculs de vélocité ; Alpine les
+// recalcule en direct dès qu'on modifie les jours/homme.
+$vSpPerManDay  = ($manDays > 0) ? round($doneSpForVelocity / $manDays, 2) : null;
+$vSpPerDay     = ($sprintBusinessDays > 0) ? round($doneSpForVelocity / $sprintBusinessDays, 2) : null;
+$vManDaysPerSp = ($manDays > 0 && $doneSpForVelocity > 0) ? round($manDays / $doneSpForVelocity, 2) : null;
+$vDaysPerSp    = ($sprintBusinessDays > 0 && $doneSpForVelocity > 0) ? round($sprintBusinessDays / $doneSpForVelocity, 2) : null;
+$vSpPerPerson  = ($manDays > 0 && $sprintBusinessDays > 0) ? round($doneSpForVelocity * $sprintBusinessDays / $manDays, 2) : null;
+?>
+            <div class="meta-line meta-line-metrics" data-metric-collapse
+                x-data="sprintManDays({
+                    projectKey: '<?= htmlspecialchars($view->getProjectKey(), ENT_QUOTES) ?>',
+                    sprintId: '<?= htmlspecialchars($view->getSprintId(), ENT_QUOTES) ?>',
+                    doneSp: <?= json_encode($doneSpForVelocity) ?>,
+                    businessDays: <?= json_encode($sprintBusinessDays) ?>,
+                    manDays: <?= json_encode($manDays) ?>,
+                    manDaysReadOnly: <?= json_encode($manDaysFromCapacity) ?>,
+                    capacityPoints: <?= json_encode($capacityPoints) ?>
+                })">
+                <h3 class="sprint-stats-h3">👥 Capacité &amp; vélocité</h3>
+                <!-- Carte Capacité : 2 lignes (jours/homme, points), titre à gauche et saisie à droite alignée. -->
+                <div class="metric sprint-capacity" data-metric-toggle="sprint.capacity">
+                    <div class="sprint-capacity__row">
+                        <span class="metric-title">👥 Jours/Homme du sprint<?= \App\View\MetricTooltips::render('man_days') ?> (hors PO et SM)</span>
+                        <span class="metric-value">
+                            <input type="number" min="0" step="0.5" class="mandays-input"
+                                x-model="manDays" @input="save()" placeholder="—"
+                                :readonly="manDaysReadOnly"
+                                :title="manDaysReadOnly ? 'Valeur calculée par la page Capacité équipe' : ''">
+                            <span class="mandays-source" x-show="manDaysReadOnly" x-cloak>
+                                🔒 issu de la page Capacité
+                            </span>
+                        </span>
+                    </div>
+                    <div class="sprint-capacity__row">
+                        <span class="metric-title">✂️ Capacité en points<?= \App\View\MetricTooltips::render('capacity_points') ?></span>
+                        <span class="metric-value">
+                            <input type="number" min="0" step="1" class="mandays-input"
+                                x-model="capacityPoints" @input="saveCapacity()" placeholder="—">
+                        </span>
+                    </div>
+                </div>
+                <!-- Valeur principale (ramenée au jour/homme, la seule comparable entre sprints) affichée seule ;
+                     les déclinaisons par jour ouvré et par personne sont à un clic.
+                     `x-data` imbriqué : le scope parent sprintManDays() reste accessible par héritage, les
+                     calculs restent donc réactifs à la saisie des jours/homme. -->
+                <div class="metric" data-metric-toggle="sprint.velocity" x-data="{ velocityOpen: false }">
+                    <span class="metric-title">⚡ Vélocité<?= \App\View\MetricTooltips::render('velocity') ?></span>
+                    <div class="metric-kv-line" x-show="!velocityOpen">
+                        <span>Points terminés par jours/homme = <b x-text="fmt(spPerManDay())"><?= $view->formatSp($vSpPerManDay) ?></b></span><br/>
+                        <span>Jours pour terminer 1 SP : par jours/homme = <b x-text="fmt(manDaysPerSp())"><?= $view->formatSp($vManDaysPerSp) ?></b></span>
+                    </div>
+                    <div x-show="velocityOpen" x-cloak>
+                        <div class="metric-kv-line">
+                            <span class="metric-kv-line__label">Points terminés :</span><br/>
+                            <span>par jours/homme = <b x-text="fmt(spPerManDay())"><?= $view->formatSp($vSpPerManDay) ?></b></span><br/>
+                            <span>par jour ouvrés = <b x-text="fmt(spPerDay())"><?= $view->formatSp($vSpPerDay) ?></b></span>
+                        </div>
+                        <div class="metric-kv-line">
+                            <span class="metric-kv-line__label">Jours pour terminer 1 SP :</span><br/>
+                            <span>par jours/homme = <b x-text="fmt(manDaysPerSp())"><?= $view->formatSp($vManDaysPerSp) ?></b></span><br/>
+                            <span>par jour ouvrés = <b x-text="fmt(daysPerSp())"><?= $view->formatSp($vDaysPerSp) ?></b></span>
+                        </div>
+                        <div class="metric-kv-line">
+                            <span class="metric-kv-line__label">SP terminés par personne :</span>
+                            <span><b x-text="fmt(spPerPerson())"><?= $view->formatSp($vSpPerPerson) ?></b></span>
+                        </div>
+                    </div>
+                    <button type="button" class="metric-more-btn" @click="velocityOpen = !velocityOpen"
+                        x-text="velocityOpen ? '▲ Moins de détail' : '▼ Plus de détail'">▼ Plus de détail</button>
+                </div>
+            </div>
+
+            <?php $ageStats = $view->getTicketAgeStats(); ?>
+            <div class="meta-line meta-line-metrics" data-metric-collapse>
+                <h3 class="sprint-stats-h3">🚀 Flow du sprint</h3>
+                <div class="metric" data-metric-toggle="sprint.waitingTime">
+                    <span class="metric-title">🛑 Temps de mise en attente<?= \App\View\MetricTooltips::render('waiting_time') ?></span>
+                    <!-- Chaque valeur est bornée au sprint ; son pendant « cycle de vie complet » suit en
+                         second plan : l'écart distingue un blocage né dans le sprint d'un ticket arrivé
+                         déjà empêché. -->
+                    <span class="metric-kv">⏳ Temps total d'attente : <strong><?= $view->formatDays($view->getTotalTimeSpentInWaiting()); ?></strong>
+                        <span class="waiting-full">(<?= $view->formatDays($view->getTotalTimeSpentInWaitingFull()); ?> sur tout le cycle de vie)</span>
+                        &nbsp;<em>(un jour recouvert par plusieurs causes n'est compté qu'une fois)</em></span>
+                    <span class="metric-kv">⏳ Temps moyen par ticket : <strong><?= $view->formatDays($view->getAverageTimeSpentInWaiting()); ?></strong>
+                        <span class="waiting-full">(<?= $view->formatDays($view->getAverageTimeSpentInWaitingFull()); ?> sur tout le cycle de vie)</span></span>
+                    <!-- Détail des causes porté par la carte elle-même : il reste ainsi toujours accolé à sa
+                         métrique quel que soit l'ordre des blocs de la section, et suit son masquage sans
+                         avoir à répéter le `data-metric-toggle`. -->
+                    <?php $waitingTimes = $view->getAggregatedWaitingTimes(); ?>
+                    <?php $waitingFull  = $view->getAggregatedWaitingTimesFull(); ?>
+                    <?php if (!empty($waitingTimes)): ?>
+                        <details class="sprint-collapse sprint-waiting-causes">
+                            <summary>Causes d'attente</summary>
+                            <ul class="sprint-waiting-list">
+                                <?php foreach ($waitingTimes as $cause => $days): ?>
+                                    <li>
+                                        <span class="badge <?= $view->getCategoryBadgeClass($view->getStatusCategory($cause)); ?>">
+                                            <?= $view->getWaitingCauseIcon($cause); ?><?= htmlspecialchars($view->normalizeStatusName($cause)); ?>
+                                        </span>
+                                        <strong><?= round($days, 1); ?> jours</strong>
+                                        <span class="waiting-full">(<?= round($waitingFull[$cause] ?? $days, 1); ?> j sur tout le cycle de vie)</span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </details>
+                    <?php endif; ?>
+                </div>
+                <div class="metric" data-metric-toggle="sprint.ticketAge">
+                    <span class="metric-title">👤 Âge des tickets du sprint<?= \App\View\MetricTooltips::render('ticket_age') ?></span>
+                    <span class="metric-kv">📅 Âge moyen : <strong><?= $view->formatDays($ageStats['average'] ?? 0) ?></strong></span>
+                    <span class="metric-kv">📊 Âge médian : <strong><?= $view->formatDays($ageStats['median'] ?? 0) ?></strong></span>
+                </div>
+            </div>
+
+            <!-- Évolution du périmètre : planifié au démarrage → à date. Deux cartes (Tickets / Story Points),
+                 chacune affichant le nombre (planifié → à date + delta), puis sous la valeur le % d'augmentation
+                 du périmètre et la part due aux « nouvelle_prio ».
+                 Pas de `data-metric-collapse` ici : aucune des 2 cartes n'est masquable individuellement, le
+                 repli automatique masquerait donc le bloc en permanence. -->
+            <?php $scope = $stats['scopeChange']; ?>
+            <div class="meta-line meta-line-metrics" data-metric-toggle="sprint.scopeChange">
+                <h3 class="sprint-stats-h3">📈 Évolution du périmètre depuis le démarrage<?= \App\View\MetricTooltips::render('scope_change') ?></h3>
+                <div class="metric">
+                    <span class="metric-title">🎫 Tickets : planifié → <?= $view->toDateLabel(); ?></span>
+                    <span class="metric-value">
+                        <?= $scope['plannedTicketCount'] ?> → <?= $scope['currentTicketCount'] ?>
+                        <?php $dTickets = $scope['ticketDelta']; ?>
+                        <span class="sprint-scope__delta sprint-scope__delta--<?= $dTickets > 0 ? 'up' : ($dTickets < 0 ? 'down' : 'flat') ?>">
+                            (<?= $view->formatDelta($dTickets) ?>)
+                        </span>
+                    </span>
+                    <span class="metric-detail">
+                        ⛑️ Augmentation du périmètre :
+                        <strong><?= $scope['ticketGrowthPercent'] === null ? 'N/A' : $view->formatDelta($scope['ticketGrowthPercent']) . ' % tickets' ?></strong>
+                        <?php if (!empty($stats['newPrio']['count'])): ?>
+                            &nbsp; 🚨 dont <strong><?= $stats['newPrio']['count'] ?></strong> « nouvelle_prio »
+                            <?php if (($scope['newPrioIssuesPercent'] ?? null) !== null): ?> (soit <?= $view->formatDelta($scope['newPrioIssuesPercent']) ?> % du planifié<?php
+                            if (($scope['newPrioTotalIssuesPercent'] ?? null) !== null): ?> et <?= $view->formatSp($scope['newPrioTotalIssuesPercent']) ?> % du total<?php endif; ?>)<?php endif; ?>
+                        <?php endif; ?>
+                    </span>
+                </div>
+                <div class="metric">
+                    <span class="metric-title">✂️ Story Points : planifié → <?= $view->toDateLabel(); ?></span>
+                    <span class="metric-value">
+                        <?= $view->formatSp($scope['plannedStoryPoints']) ?> → <?= $view->formatSp($scope['currentStoryPoints']) ?>
+                        <?php $dSp = $scope['storyPointsDelta']; ?>
+                        <span class="sprint-scope__delta sprint-scope__delta--<?= $dSp > 0 ? 'up' : ($dSp < 0 ? 'down' : 'flat') ?>">
+                            (<?= $view->formatDelta($dSp) ?>)
+                        </span>
+                    </span>
+                    <span class="metric-detail">
+                        ⛑️ Augmentation du périmètre :
+                        <strong><?= $scope['storyPointsGrowthPercent'] === null ? 'N/A' : $view->formatDelta($scope['storyPointsGrowthPercent']) . ' % points' ?></strong>
+                        <?php if (!empty($stats['newPrio']['count'])): ?>
+                            &nbsp; 🚨 dont <strong><?= $stats['newPrio']['count'] ?></strong> « nouvelle_prio »
+                            (<?= $view->formatSp($stats['newPrio']['storyPoints']) ?> pts<?php
+                            if (($scope['newPrioStoryPointsPercent'] ?? null) !== null): ?>, soit <?= $view->formatDelta($scope['newPrioStoryPointsPercent']) ?> % du planifié<?php endif; ?><?php
+                            if (($scope['newPrioTotalStoryPointsPercent'] ?? null) !== null): ?> et <?= $view->formatSp($scope['newPrioTotalStoryPointsPercent']) ?> % du total<?php endif; ?>)
+                        <?php endif; ?>
+                    </span>
+                </div>
+            </div>
+
+            </div><!-- /.sprint-stats-group -->
+
+            <!-- f. Tickets prioritaires ajoutés en cours de sprint (étiquette nouvelle_prio) -->
+            <div data-metric-toggle="sprint.newPrio">
+            <h3 class="sprint-stats-h3">
+                🚨 Tickets prioritaires ajoutés en cours de sprint<?= \App\View\MetricTooltips::render('new_prio') ?>
+                <?php if (!empty($stats['newPrio'])): ?>
+                    <span class="badge red">
+                        <?= $stats['newPrio']['count'] ?> ticket(s) —
+                        <?= $view->formatSp($stats['newPrio']['storyPoints']) ?> Story Points
+                    </span>
+                <?php endif; ?>
+            </h3>
+            <p>Tickets portant l'étiquette <strong>nouvelle_prio</strong> et ajoutés pendant ce sprint (les tickets reconduits d'un sprint précédent sont exclus).</p>
+            <!-- Détail replié par défaut : le badge de comptage du titre porte déjà la synthèse. Le nombre est
+                 rappelé dans le déclencheur pour savoir ce qu'on ouvre sans avoir à lire le titre. -->
+            <details class="sprint-collapse">
+                <summary><?= $view->collapseTicketsLabel((int) ($stats['newPrio']['count'] ?? 0)) ?></summary>
+                <?php
+                $ticketsTable = [
+                    'rows'         => $stats['newPrio']['issues'],
+                    'columns'      => ['priority', 'type', 'key', 'title', 'status', 'origin', 'storyPoints', 'remaining', 'spFinal', 'parent'],
+                    'defaultSort'  => 'priority',
+                    'emptyMessage' => 'Aucun ticket avec l\'étiquette « nouvelle_prio ».',
+                ];
+include __DIR__ . '/../components/sprint/ticketsTable.phtml';
+?>
+            </details>
+            </div><!-- /sprint.newPrio -->
+
+            <!-- d. Tickets ajoutés en cours de sprint -->
+            <div data-metric-toggle="sprint.added">
+            <h3 class="sprint-stats-h3">
+                ➕ Tickets ajoutés en cours de sprint (y compris les nouvelle_prio)<?= \App\View\MetricTooltips::render('added_during_sprint') ?>
+                <span class="badge orange">
+                    <?= $stats['addedDuringSprint']['count'] ?> ticket(s) —
+                    <?= $view->formatSp($stats['addedDuringSprint']['storyPoints']) ?> Story Points
+                </span>
+            </h3>
+            <details class="sprint-collapse">
+                <summary><?= $view->collapseTicketsLabel((int) ($stats['addedDuringSprint']['count'] ?? 0)) ?></summary>
+                <?php
+                $ticketsTable = [
+                    'rows'         => $stats['addedDuringSprint']['issues'],
+                    'columns'      => ['priority', 'type', 'key', 'title', 'status', 'origin', 'storyPoints', 'remaining', 'spFinal', 'parent'],
+                    'defaultSort'  => 'parent',
+                    'emptyMessage' => 'Aucun ticket ajouté après le démarrage du sprint.',
+                ];
+include __DIR__ . '/../components/sprint/ticketsTable.phtml';
+?>
+            </details>
+            </div><!-- /sprint.added -->
+
+            <!-- e. Tickets retirés en cours de sprint -->
+            <div data-metric-toggle="sprint.removed">
+            <h3 class="sprint-stats-h3">
+                ➖ Tickets retirés en cours de sprint<?= \App\View\MetricTooltips::render('removed_during_sprint') ?>
+                <span class="badge green">
+                    <?= $stats['removedDuringSprint']['count'] ?> ticket(s) —
+                    <?= $view->formatSp($stats['removedDuringSprint']['storyPoints']) ?> Story Points
+                </span>
+            </h3>
+            <details class="sprint-collapse">
+                <summary><?= $view->collapseTicketsLabel((int) ($stats['removedDuringSprint']['count'] ?? 0)) ?></summary>
+                <?php
+                $ticketsTable = [
+                    'rows'         => $stats['removedDuringSprint']['issues'],
+                    'columns'      => ['priority', 'type', 'key', 'title', 'status', 'origin', 'storyPoints', 'remaining', 'spFinal', 'parent'],
+                    'defaultSort'  => 'parent',
+                    'emptyMessage' => 'Aucun retrait de ticket détecté après le démarrage du sprint.',
+                ];
+include __DIR__ . '/../components/sprint/ticketsTable.phtml';
+?>
+            </details>
+            </div><!-- /sprint.removed -->
+        </div>
+
+        <!-- ============ AMÉLIORATION CONTINUE ET INNOVATION ============ -->
+        <div class="card" data-metric-toggle="sprint.continuousImprovement">
+            <h2>💡 Amélioration continue et Innovation<?= \App\View\MetricTooltips::render('continuous_improvement') ?></h2>
+            <p>Tickets de <strong>type "Innovation" ou "Amélioration continue"</strong>, ou portant l'étiquette <strong>amelio_continue</strong>.</p>
+            <?php if (empty($stats['continuousImprovement'])): ?>
+                <p><em>Aucun ticket de type "Innovation" ou "Amélioration continue", ou avec l'étiquette amelio_continue.</em></p>
+            <?php else: ?>
+                <ul class="sprint-list">
+                    <?php foreach ($stats['continuousImprovement'] as $ticket): ?>
+                        <?php $progressBadge = $view->getProgressBadge($ticket); ?>
+                        <li>
+                            <span class="badge <?= $progressBadge['class'] ?>" title="Statut Jira : <?= htmlspecialchars($ticket['status'] ?? '') ?>">
+                                <?= htmlspecialchars($progressBadge['label']) ?>
+                            </span>
+                            <a href="<?= htmlspecialchars($ticket['url']) ?>" target="_blank" rel="noopener">
+                                <strong><?= htmlspecialchars($ticket['key']) ?></strong>
+                            </a>
+                            — <?= htmlspecialchars($ticket['summary']) ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+
+        <!-- ============ FEATURES TRAITÉES ============ -->
+        <div class="card" data-metric-toggle="sprint.features">
+            <h2>🧩 Features traitées<?= \App\View\MetricTooltips::render('features') ?></h2>
+            <?php if (empty($view->getFeatures())): ?>
+                <p><em>Aucun ticket du sprint n'est rattaché à un parent.</em></p>
+            <?php else: ?>
+                <ul class="sprint-list">
+                    <?php foreach ($view->getFeatures() as $feature): ?>
+                        <li>
+                            <a href="<?= htmlspecialchars($view->getBrowseUrl($feature['key'])) ?>" target="_blank" rel="noopener">
+                                <strong><?= htmlspecialchars($feature['key']) ?></strong>
+                            </a>
+                            — <?= htmlspecialchars($feature['summary']) ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+
+        <!-- ============ SUJETS TERMINÉS ============ -->
+        <?php $doneTickets = $stats['doneTickets']; ?>
+        <div class="card" data-metric-toggle="sprint.doneTickets">
+            <h2>✅ Tickets terminés<?= \App\View\MetricTooltips::render('done_tickets') ?></h2>
+
+            <?php
+$ticketsTable = [
+    'rows'              => $doneTickets['issues'],
+    'columns'          => ['priority', 'type', 'key', 'title', 'status', 'origin', 'sprints', 'storyPoints', 'spFinal', 'waitingTime', 'cycleTime', 'parent'],
+    'statusSortable'   => false,
+    'sprintsExpandable' => true,
+    'defaultSort'      => 'parent',
+    'tfoot'            => [
+        'label'       => $doneTickets['count'] . ' ticket(s) terminé(s)',
+        'storyPoints' => $doneTickets['storyPoints'],
+        'remaining'   => $doneTickets['remainingStoryPoints'] ?? null,
+        'final'       => $doneTickets['finalStoryPoints'] ?? null,
+    ],
+    'emptyMessage'     => 'Aucun ticket terminé dans ce sprint.',
+];
+include __DIR__ . '/../components/sprint/ticketsTable.phtml';
+?>
+        </div>
+
+        <!-- ============ RELIQUAT ============ -->
+        <?php $reliquat = $stats['reliquat']; ?>
+        <div class="card" data-metric-toggle="sprint.reliquat">
+            <h2>📦 Tickets non terminés <?= $view->toDateLabel(); ?><?= \App\View\MetricTooltips::render('reliquat') ?></h2>
+
+            <?php
+$ticketsTable = [
+    'rows'              => $reliquat['issues'],
+    'columns'          => ['priority', 'type', 'key', 'title', 'status', 'origin', 'sprints', 'storyPoints', 'remaining', 'spFinal', 'waitingTime', 'cycleTime', 'parent'],
+    'spLabel'          => 'Story Points initiaux',
+    'sprintsExpandable' => true,
+    'defaultSort'      => 'status',
+    'tfoot'            => [
+        'label'       => $reliquat['count'] . ' ticket(s) non terminé(s)',
+        'storyPoints' => $reliquat['storyPoints'],
+        'remaining'   => $reliquat['remainingStoryPoints'],
+        'final'       => $reliquat['finalStoryPoints'] ?? null,
+    ],
+    'emptyMessage'     => '🎉 Aucun reliquat : tous les tickets du sprint sont terminés.',
+];
+include __DIR__ . '/../components/sprint/ticketsTable.phtml';
+?>
+        </div>
+
+        <?php include __DIR__ . '/../common/sortableTableScript.phtml'; ?>
+
+    <?php endif; ?>
+
+    <!-- Applique le mode de vue courant (simplifiée / complète) et câble son toggle en haut de page. -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            window.MetricPrefs.apply('sprint');
+        });
+    </script>
+
+    <?php include __DIR__ . '/../footer.phtml'; ?>
+</body>
+
+</html>

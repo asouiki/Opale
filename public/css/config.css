@@ -1,0 +1,387 @@
+/* ============================================================
+ * 21. CONFIGURATION DU WORKFLOW (popin + drag-and-drop)
+ * ============================================================ */
+
+.wf-trigger-row { margin-top: 14px; }
+/* Note : .wf-trigger / .wf-trigger--link sont définis dans global.css (utilisés
+   aussi par le bandeau projectRecap des pages Sprint / Planification / Métriques). */
+/* Confirmation affichée à côté du bouton après enregistrement du workflow d'équipe */
+.wf-configured {
+    margin-left: 12px;
+    display: inline-flex;
+    align-items: center;
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 14px;
+}
+.wf-configured strong { margin-left: 4px; }
+
+/* Note : .project-recap* et la famille modale générique (.modal-overlay /
+   .modal-content / .btn-primary / .btn-secondary) sont définis dans global.css
+   (popin d'onboarding + bandeau projectRecap présents hors /config). */
+
+/* --- Overlay & boîte modale (sous-parties propres au modal de workflow) --- */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+}
+.modal-header h2 { margin: 0; font-size: 18px; }
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-muted);
+    line-height: 1;
+}
+.modal-close:hover { color: var(--danger-text); }
+.modal-body { padding: 20px 24px; overflow-y: auto; }
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+}
+/* Note : .btn-primary / .btn-secondary sont définis dans global.css (boutons
+   génériques, utilisés aussi par le CTA d'onboarding hors /config). */
+
+/* --- Métadonnées / intro --- */
+.wf-intro { font-size: 14px; color: var(--text-muted); margin: 0 0 16px; }
+.wf-loading { padding: 24px 0; text-align: center; color: var(--text-muted); }
+.wf-meta { margin-bottom: 14px; }
+.wf-badge {
+    display: inline-block;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+}
+.wf-badge--project { background: var(--success-bg); color: var(--success-text); border-color: var(--success-border); }
+.wf-badge--global  { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-border); }
+
+/* --- Rangée d'import (haut de popin) --- */
+.wf-import-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--border-strong);
+}
+.wf-import-note { font-size: 13px; color: var(--text-muted); }
+
+/* --- Modale de confirmation (au-dessus de la popin) --- */
+.modal-overlay--confirm { z-index: 1100; align-items: center; }
+.wf-confirm { max-width: 520px; }
+.wf-confirm .modal-body p { font-size: 14px; margin: 0 0 10px; }
+.wf-confirm-note { color: var(--text-muted); }
+
+/* --- Grille des 4 catégories --- */
+.wf-categories {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.wf-category {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    background: var(--neutral-bg);
+}
+.wf-cat-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.wf-cat-title { font-weight: 600; font-size: 15px; }
+.wf-cat-hint { font-size: 12px; color: var(--text-light); }
+
+/* --- Liste ordonnée (drag-and-drop) + flèches de flux --- */
+.wf-list { list-style: none; margin: 0; padding: 0; min-height: 36px; }
+.wf-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    margin-bottom: 22px;
+    cursor: grab;
+    box-shadow: var(--shadow-sm);
+}
+.wf-item:active { cursor: grabbing; }
+/* Flèche départ → final entre deux statuts consécutifs */
+.wf-item:not(:last-child)::after {
+    content: '↓';
+    position: absolute;
+    left: 50%;
+    bottom: -19px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    line-height: 1;
+    color: var(--text-light);
+    pointer-events: none;
+}
+.wf-grip { color: var(--text-light); cursor: grab; font-size: 13px; }
+.wf-name { flex: 1; font-size: 14px; word-break: break-word; }
+.wf-remove {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    padding: 2px 4px;
+}
+.wf-remove:hover { color: var(--danger-text); }
+
+.wf-empty {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-light);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    text-align: center;
+}
+
+/* --- Champ d'ajout --- */
+.wf-add { display: flex; gap: 6px; margin-top: 10px; }
+.wf-add-input {
+    flex: 1;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    font-size: 13px;
+}
+.wf-add-btn {
+    border: 1px solid var(--border-strong);
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.wf-add-btn:hover { border-color: var(--primary); color: var(--primary-dark); }
+
+/* --- Zone des statuts non classés (pool horizontal) --- */
+.wf-unclassified {
+    margin-top: 18px;
+    border-top: 1px dashed var(--border-strong);
+    padding-top: 14px;
+}
+.wf-unclassified-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+.wf-import-btn {
+    background: var(--info-bg);
+    color: var(--info-text);
+    border: 1px solid var(--info-border);
+    border-radius: var(--radius-sm);
+    padding: 5px 11px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.wf-import-btn:hover { filter: brightness(0.97); }
+.wf-pool {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 36px;
+}
+.wf-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: grab;
+}
+.wf-chip:active { cursor: grabbing; }
+
+/* --- États de drag SortableJS --- */
+.sortable-ghost { opacity: 0.45; }
+.sortable-drag  { box-shadow: var(--shadow-md); }
+
+.wf-success {
+    margin-top: 14px;
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+@media (max-width: 900px) {
+    .wf-categories { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+ * 22. PAGE CONFIGURATION (/config)
+ * ============================================================ */
+.config-title {
+    margin: 0 0 4px;
+}
+.config-intro {
+    margin: 0 0 20px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+.config-section {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+.config-section__title {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+}
+.config-section__hint {
+    margin: 0 0 12px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+/* Consigne mise en avant (rouge) — ex. « Cochez les sprints fictifs à ignorer » */
+.config-hint-alert {
+    color: var(--danger-text);
+}
+.config-saved {
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background: var(--success-bg);
+    color: var(--success-text);
+    font-size: 0.85rem;
+    font-weight: 400;
+    border: 1px solid var(--success-border);
+    border-radius: var(--radius-sm);
+    vertical-align: middle;
+}
+.config-saving {
+    margin-left: 10px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+    vertical-align: middle;
+}
+.config-sprint-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 360px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+}
+.config-sprint-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Sprint ignoré : grisé dans les listes déroulantes et cases à cocher
+   (page config + sélecteurs Sprint, Planification, Métriques). */
+.sprint-ignored {
+    color: var(--text-light);
+}
+
+/* Types de tickets : cases à cocher (retenu = utilisé dans les métriques). */
+.config-types-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.config-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+}
+.config-type-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   Page Configuration — helpers de mise en page des sélecteurs
+   (extraits des styles inline de config.phtml)
+   ============================================================ */
+.config-option   { padding: 8px 12px; cursor: pointer; }
+.config-selected { margin-top: 8px; font-size: 14px; }
+.config-reset    { font-size: 12px; cursor: pointer; }
+.config-select   { min-width: 360px; }
+.config-loading  { margin-top: 12px; }
+
+/* ============================================================
+   Page Configuration — roster d'équipe (source de l'onglet Capacité)
+   ============================================================ */
+.config-members {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.config-member-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.config-member-name { width: 200px; }
+.config-member-role { width: 90px; }
+.config-member-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.config-member-remove {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 4px 6px;
+}
+.config-member-remove:hover { color: var(--danger-text); }
+.config-member-add {
+    border: 1px solid var(--border-strong);
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+.config-member-add:hover { border-color: var(--primary); color: var(--primary-dark); }

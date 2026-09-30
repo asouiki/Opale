@@ -1,0 +1,145 @@
+<?php
+
+/**
+ * Composant de sélection Projet Jira UNIQUEMENT (sans dropdown items).
+ *
+ * Utilisé par les pages où le projet est combiné à un autre input (ex: /pi).
+ * Le projet sélectionné est exposé dans <input type="hidden" name="projectKey">.
+ *
+ * @var string $storageKey Clé localStorage pour la persistance
+ */
+?>
+<div x-data="jiraProjectOnlySearch()" class="jira-project-search">
+    <label for="project-search-<?= htmlspecialchars($storageKey) ?>">
+        <strong>Sélectionner mon Projet Jira : </strong>
+    </label>
+
+    <div class="project-search-field">
+        <input
+            id="project-search-<?= htmlspecialchars($storageKey) ?>"
+            type="text"
+            x-model="query"
+            @input.debounce.300ms="search()"
+            @focus="open = true"
+            class="input-large"
+            placeholder="Mon projet"
+            autocomplete="off" />
+
+        <div class="project-dropdown"
+            x-show="open && projects.length"
+            @click.outside="open = false">
+            <template x-for="project in projects" :key="project.id">
+                <div @click="select(project)" class="hover-bg jira-search__option">
+                    <strong x-text="project.key"></strong>
+                    <span x-text="' – ' + project.name"></span>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <label class="persist-toggle">
+        <input type="checkbox" x-model="persistShared">
+        Persister cette sélection sur les autres pages (Feature / PI)
+    </label>
+
+    <div x-show="selected">
+        <div class="jira-search__selected">
+            ✅ Projet sélectionné : <strong x-text="selected?.key"></strong>
+            <button type="button" @click="reset()" class="jira-search__reset">
+                🔄 Changer de projet
+            </button>
+        </div>
+    </div>
+
+    <!-- Hidden input alimenté pour soumission du formulaire parent -->
+    <input type="hidden" name="projectKey" :value="selected?.key ?? ''" />
+
+    <div x-show="error" class="inline-error">❌ <span x-text="error"></span></div>
+</div>
+
+<script>
+    (function() {
+        const LOCAL_KEY = <?= json_encode($storageKey) ?>;
+        const POOL_KEY = 'jira_pool_train';
+
+        window.jiraProjectOnlySearch = function() {
+            return {
+                query: '',
+                open: false,
+                projects: [],
+                selected: null,
+                loading: false,
+                error: null,
+
+                /** Propage la sélection au pool « train » (cochée par défaut). */
+                persistShared: true,
+
+                /**
+                 * Restaure la sélection la plus récente entre la clé locale de la
+                 * page et la clé partagée du pool « train ».
+                 */
+                init() {
+                    const winner = window.jiraStore.mostRecent(
+                        window.jiraStore.read(LOCAL_KEY),
+                        window.jiraStore.read(POOL_KEY)
+                    );
+                    if (winner && winner.project) {
+                        this.selected = winner.project;
+                        this.query = winner.project.key + ' – ' + winner.project.name;
+                    }
+                },
+
+                /**
+                 * Persiste la sélection : toujours en local, et dans le pool
+                 * partagé uniquement si la case « Persister » est cochée.
+                 */
+                _saveToStorage() {
+                    window.jiraStore.write(LOCAL_KEY, { project: this.selected });
+                    if (this.persistShared) {
+                        window.jiraStore.write(POOL_KEY, { project: this.selected });
+                    }
+                },
+
+                reset() {
+                    this.selected = null;
+                    this.query = '';
+                    this.projects = [];
+                    this.error = null;
+                    window.jiraStore.remove(LOCAL_KEY);
+                    if (this.persistShared) {
+                        window.jiraStore.remove(POOL_KEY);
+                    }
+                },
+
+                search() {
+                    if (this.query.length < 2) {
+                        this.projects = [];
+                        return;
+                    }
+                    this.loading = true;
+                    fetch('/api/internal/projects/search?q=' + encodeURIComponent(this.query))
+                        .then(r => r.json().catch(() => null).then(d => {
+                            if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(data => {
+                            this.projects = data;
+                            this.open = true;
+                        })
+                        .catch(err => {
+                            this.error = err.message;
+                            console.error(err);
+                        })
+                        .finally(() => { this.loading = false; });
+                },
+
+                select(project) {
+                    this.selected = project;
+                    this.query = project.key + ' – ' + project.name;
+                    this.open = false;
+                    this._saveToStorage();
+                },
+            };
+        };
+    })();
+</script>

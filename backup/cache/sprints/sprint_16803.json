@@ -1,0 +1,1157 @@
+{
+    "cached_at": 1780662099,
+    "metrics_version": 9,
+    "data": {
+        "sprintId": "16803",
+        "projectKey": "GCS",
+        "boardId": "3493",
+        "sprintData": {
+            "id": 16803,
+            "self": "https:\/\/imsa.atlassian.net\/rest\/agile\/1.0\/sprint\/16803",
+            "state": "closed",
+            "name": "GCS PI7 it\u00e9 IP",
+            "startDate": "2026-03-16T14:00:15.441Z",
+            "endDate": "2026-03-25T17:00:00.000Z",
+            "completeDate": "2026-03-25T13:23:20.209Z",
+            "createdDate": "2025-12-02T14:01:19.127Z",
+            "originBoardId": 3493,
+            "goal": "Innovation & Pr\u00e9paration"
+        },
+        "issuesCount": 20,
+        "landingByStatus": [
+            {
+                "status": "Backlog",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 6,
+                "averageDays": 0.3
+            },
+            {
+                "status": "A affiner",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 6,
+                "averageDays": 0.3
+            },
+            {
+                "status": "\u00c0 faire",
+                "category": "sprint",
+                "count": 4,
+                "storyPoints": 0,
+                "totalDays": 59,
+                "averageDays": 3
+            },
+            {
+                "status": "En cours",
+                "category": "sprint",
+                "count": 2,
+                "storyPoints": 0,
+                "totalDays": 27.5,
+                "averageDays": 1.4
+            },
+            {
+                "status": "A Qualifier",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 3.3,
+                "averageDays": 0.2
+            },
+            {
+                "status": "Validation PO",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 3.8,
+                "averageDays": 0.2
+            },
+            {
+                "status": "Termin\u00e9(e)",
+                "category": "done",
+                "count": 9,
+                "storyPoints": 0.5,
+                "totalDays": 38,
+                "averageDays": 1.9
+            },
+            {
+                "status": "Abandonn\u00e9",
+                "category": "done",
+                "count": 4,
+                "storyPoints": 0.5,
+                "totalDays": 7.3,
+                "averageDays": 0.4
+            }
+        ],
+        "objectiveGroups": [
+            {
+                "label": "objectif_1",
+                "title": "Objectif 1",
+                "issues": [
+                    {
+                        "key": "GCS-510",
+                        "summary": "[CFS] Etude solution reprise",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-510",
+                        "issueType": "Spike",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 1,
+                        "leadTime": 74.5,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            {
+                "label": "objectif_2",
+                "title": "Objectif 2",
+                "issues": [
+                    {
+                        "key": "GCS-635",
+                        "summary": "Analyse des vues pouvant remplacer le K81MR0 dans le traitement SST M8102",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-635",
+                        "issueType": "Spike",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 2.5,
+                        "leadTime": 41,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        ],
+        "features": [
+            {
+                "key": "REP-233",
+                "summary": "Compl\u00e9tude RGCU lot1"
+            },
+            {
+                "key": "REP-263",
+                "summary": "MCO REPAIRES PI7"
+            },
+            {
+                "key": "REP-352",
+                "summary": "Am\u00e9lioration de l'installation du guide DMO en mensuel"
+            },
+            {
+                "key": "REP-382",
+                "summary": "L\u00e9gislation SST : mise en place des nouvelles donn\u00e9es sur les DPAE"
+            },
+            {
+                "key": "REP-459",
+                "summary": "Signalements remont\u00e9s par la tour de contr\u00f4le PI#7"
+            },
+            {
+                "key": "REP-461",
+                "summary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)"
+            },
+            {
+                "key": "REP-543",
+                "summary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8"
+            },
+            {
+                "key": "REP-552",
+                "summary": "Gestion des anomalies techniques du traitement K4430 "
+            }
+        ],
+        "stats": {
+            "issuesWithoutStoryPoints": 11,
+            "estimatedAfterAdd": {
+                "count": 2,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-548",
+                        "summary": "[TECH] Passage en Git des parties en Java - K49",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-548",
+                        "issueType": "Enabler Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 73.25,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-751",
+                        "summary": "Pr\u00e9pa I&A : VSM impacts + d\u00e9mos Bertrand & Pierre",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-751",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 3.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "totalStoryPoints": 1,
+            "storyPointsRange": {
+                "min": 0.5,
+                "max": 0.5,
+                "median": 0.5,
+                "average": 0.5
+            },
+            "scopeChange": {
+                "plannedTicketCount": 17,
+                "currentTicketCount": 20,
+                "ticketDelta": 3,
+                "ticketGrowthPercent": 17.6,
+                "plannedStoryPoints": 1,
+                "currentStoryPoints": 1,
+                "storyPointsDelta": 0,
+                "storyPointsGrowthPercent": 0,
+                "addedStoryPointsPercent": 0,
+                "nouvellePrioStoryPointsPercent": 0
+            },
+            "addedDuringSprint": {
+                "count": 3,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-658",
+                        "summary": "[K4430] R\u00e9g\u00e9n\u00e9r\u00e9 la mati\u00e8re d'exploit",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-658",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 21,
+                        "leadTime": 30.25,
+                        "labels": [
+                            "Taskforce"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-755",
+                        "summary": "[Inno] Mise \u00e0 jour Y30 pour lancer des traitements K4430",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-755",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-770",
+                        "summary": "[K4430] - PM56547 - Mise \u00e0 jour des TPL des Workflow",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-770",
+                        "issueType": "Bug",
+                        "status": "A Qualifier",
+                        "statusCategory": "sprint",
+                        "statusRank": 73,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 38,
+                        "leadTime": 38,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "removedDuringSprint": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "nouvellePrio": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "continuousImprovement": [
+                {
+                    "key": "GCS-703",
+                    "summary": "Pr\u00e9sentation outil VSM",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-703",
+                    "issueType": "T\u00e2che",
+                    "status": "Termin\u00e9(e)",
+                    "statusCategory": "done",
+                    "statusRank": 102,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Normal",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                        "id": "4"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 15.25,
+                    "labels": [
+                        "amelio_continue"
+                    ],
+                    "isDone": true,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-702",
+                    "summary": "[R\u00e9tro] R\u00e9tro \/ REX de la Task Force",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-702",
+                    "issueType": "T\u00e2che",
+                    "status": "\u00c0 faire",
+                    "statusCategory": "sprint",
+                    "statusRank": 47,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Normal",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                        "id": "4"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 28,
+                    "labels": [
+                        "Action_R\u00e9tro",
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-705",
+                    "summary": "[I&A] Demander une SLO GCS",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-705",
+                    "issueType": "T\u00e2che",
+                    "status": "\u00c0 faire",
+                    "statusCategory": "sprint",
+                    "statusRank": 47,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "Action_I&A",
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-706",
+                    "summary": "Faire le bilan des actions I&A + R\u00e9tros (restit en it\u00e9 IP)",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-706",
+                    "issueType": "T\u00e2che",
+                    "status": "\u00c0 faire",
+                    "statusCategory": "sprint",
+                    "statusRank": 47,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "Action_R\u00e9tro",
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-716",
+                    "summary": "[Inno] D\u00e9v d'une appli de suivi VSM\/m\u00e9triques de l'\u00e9quipe",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-716",
+                    "issueType": "Story",
+                    "status": "En cours",
+                    "statusCategory": "sprint",
+                    "statusRank": 57,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-750",
+                    "summary": "[K4430] R\u00e9tro documentation",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-750",
+                    "issueType": "T\u00e2che",
+                    "status": "En cours",
+                    "statusCategory": "sprint",
+                    "statusRank": 57,
+                    "storyPoints": null,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-755",
+                    "summary": "[Inno] Mise \u00e0 jour Y30 pour lancer des traitements K4430",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-755",
+                    "issueType": "T\u00e2che",
+                    "status": "\u00c0 faire",
+                    "statusCategory": "sprint",
+                    "statusRank": 47,
+                    "storyPoints": null,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": true,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                }
+            ],
+            "doneTickets": {
+                "count": 13,
+                "storyPoints": 1,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-86",
+                        "summary": "[compl\u00e9tude RGCU] - Pr\u00e9paration du p\u00e9rim\u00e8tre ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-86",
+                        "issueType": "Enabler Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-233",
+                        "parentSummary": "Compl\u00e9tude RGCU lot1",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 427.25,
+                        "labels": [
+                            "BA",
+                            "RGCU",
+                            "tri-amigos"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-635",
+                        "summary": "Analyse des vues pouvant remplacer le K81MR0 dans le traitement SST M8102",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-635",
+                        "issueType": "Spike",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-263",
+                        "parentSummary": "MCO REPAIRES PI7",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 2.5,
+                        "leadTime": 41,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-752",
+                        "summary": "Pr\u00e9paration du p\u00e9rim\u00e8tre K4430 PI#8",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-752",
+                        "issueType": "Spike",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-352",
+                        "parentSummary": "Am\u00e9lioration de l'installation du guide DMO en mensuel",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 7,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-754",
+                        "summary": "Suivi de la Reprise K4430",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-754",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-352",
+                        "parentSummary": "Am\u00e9lioration de l'installation du guide DMO en mensuel",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 6.75,
+                        "leadTime": 7,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-540",
+                        "summary": "Mise \u00e0 jour de la documentation du protocole - CUMA, date de fin",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-540",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-382",
+                        "parentSummary": "L\u00e9gislation SST : mise en place des nouvelles donn\u00e9es sur les DPAE",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 7.25,
+                        "leadTime": 70,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-761",
+                        "summary": "Retour du document SST",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-761",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-382",
+                        "parentSummary": "L\u00e9gislation SST : mise en place des nouvelles donn\u00e9es sur les DPAE",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 1.5,
+                        "leadTime": 1.75,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-562",
+                        "summary": "PM50686 - Rejets MOM GO1.AS",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-562",
+                        "issueType": "Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-459",
+                        "parentSummary": "Signalements remont\u00e9s par la tour de contr\u00f4le PI#7",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 71.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-658",
+                        "summary": "[K4430] R\u00e9g\u00e9n\u00e9r\u00e9 la mati\u00e8re d'exploit",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-658",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-461",
+                        "parentSummary": "[ENABLER] Optimisation de la cha\u00eene d'int\u00e9gration des r\u00e9mun\u00e9rations DSN (K4430)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 21,
+                        "leadTime": 30.25,
+                        "labels": [
+                            "Taskforce"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-717",
+                        "summary": "[Accords] - Mutualia - Fournir les codes du nouvel accord Loire Atlantique Maraichage",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-717",
+                        "issueType": "T\u00e2che",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-543",
+                        "parentSummary": "Param\u00e9trage d'accords pr\u00e9voyance et sant\u00e9 PI#8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 17.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-510",
+                        "summary": "[CFS] Etude solution reprise",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-510",
+                        "issueType": "Spike",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 1,
+                        "leadTime": 74.5,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-548",
+                        "summary": "[TECH] Passage en Git des parties en Java - K49",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-548",
+                        "issueType": "Enabler Story",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 73.25,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-703",
+                        "summary": "Pr\u00e9sentation outil VSM",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-703",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 15.25,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-751",
+                        "summary": "Pr\u00e9pa I&A : VSM impacts + d\u00e9mos Bertrand & Pierre",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-751",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 3.75,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "reliquat": {
+                "count": 7,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-770",
+                        "summary": "[K4430] - PM56547 - Mise \u00e0 jour des TPL des Workflow",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-770",
+                        "issueType": "Bug",
+                        "status": "A Qualifier",
+                        "statusCategory": "sprint",
+                        "statusRank": 73,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 38,
+                        "leadTime": 38,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-702",
+                        "summary": "[R\u00e9tro] R\u00e9tro \/ REX de la Task Force",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-702",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 28,
+                        "labels": [
+                            "Action_R\u00e9tro",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-705",
+                        "summary": "[I&A] Demander une SLO GCS",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-705",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Action_I&A",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-706",
+                        "summary": "Faire le bilan des actions I&A + R\u00e9tros (restit en it\u00e9 IP)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-706",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Action_R\u00e9tro",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-716",
+                        "summary": "[Inno] D\u00e9v d'une appli de suivi VSM\/m\u00e9triques de l'\u00e9quipe",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-716",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-750",
+                        "summary": "[K4430] R\u00e9tro documentation",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-750",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-755",
+                        "summary": "[Inno] Mise \u00e0 jour Y30 pour lancer des traitements K4430",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-755",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        },
+        "predictability": {
+            "startStoryPoints": 1,
+            "completedStoryPoints": 1,
+            "startTicketCount": 17,
+            "completedTicketCount": 13,
+            "completedFromStartTicketCount": 12,
+            "targetPercent": 80,
+            "targetStoryPoints": 0.8,
+            "achievedPercent": 100,
+            "isReached": true,
+            "engagementPercent": 70.6,
+            "isEngagementReached": false
+        }
+    }
+}

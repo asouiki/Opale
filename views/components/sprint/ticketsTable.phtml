@@ -1,0 +1,234 @@
+<?php
+
+/**
+ * Tableau de tickets — composant commun aux sections read-only de la page Sprint
+ * (Objectifs, Ajoutés, Retirés, nouvelle_prio, Terminés, Non terminés).
+ *
+ * Les colonnes sont rendues dans un ORDRE CANONIQUE fixe ; chaque appelant
+ * choisit seulement LESQUELLES activer. Cela garantit l'homogénéité des colonnes,
+ * de leur ordre (Parent toujours en dernier) et de leurs largeurs (classes
+ * .colw-* définies dans public/css/global.css).
+ *
+ * @var \App\View\SprintView $view
+ * @var array $ticketsTable Configuration du tableau :
+ *   - rows (array)              Tickets à afficher (tableaux $ticket).
+ *   - columns (string[])        Colonnes activées parmi : priority, type, key,
+ *                               title, status, origin, sprints, storyPoints,
+ *                               remaining, spFinal, waitingTime, cycleTime, parent.
+ *   - statusSortable (bool)     Colonne Statut triable (déf. true).
+ *   - spLabel (string)          En-tête de la colonne Story Points (déf. « Story Points »).
+ *   - sprintsExpandable (bool)  Chevron dépliant la liste des sprints affectés
+ *                               (déf. false ; requiert la colonne « sprints »).
+ *   - tfoot (array|null)        Totaux ['label','storyPoints','remaining','final'] ou null.
+ *   - defaultSort (string)      Clé de tri par défaut (déf. « parent »).
+ *   - emptyMessage (string)     Message affiché si aucun ticket.
+ */
+
+$cfg               = $ticketsTable ?? [];
+$rows              = $cfg['rows']              ?? [];
+$columns           = $cfg['columns']           ?? [];
+$statusSortable    = $cfg['statusSortable']    ?? true;
+$spLabel           = $cfg['spLabel']           ?? 'Story Points';
+$sprintsExpandable = $cfg['sprintsExpandable'] ?? false;
+$tfoot             = $cfg['tfoot']             ?? null;
+$defaultSort       = $cfg['defaultSort']       ?? 'parent';
+$emptyMessage      = $cfg['emptyMessage']      ?? 'Aucun ticket.';
+
+if (empty($rows)) {
+    echo '<p><em>' . htmlspecialchars($emptyMessage) . '</em></p>';
+    return;
+}
+
+// Ordre canonique : l'affichage suit cet ordre quelles que soient les colonnes
+// activées (Parent toujours en dernier, etc.).
+$canonical = ['priority', 'type', 'key', 'title', 'status', 'origin', 'sprints', 'storyPoints', 'remaining', 'spFinal', 'waitingTime', 'cycleTime', 'parent'];
+$enabled   = [];
+foreach ($columns as $c) {
+    $enabled[$c] = true;
+}
+$visible  = array_values(array_filter($canonical, static fn ($c) => isset($enabled[$c])));
+$colCount = count($visible);
+$spIndex  = array_search('storyPoints', $visible, true);
+
+// En-têtes par colonne (les classes .colw-* fixent la largeur de chaque colonne).
+$headers = [
+    'priority'    => '<th class="col-sortable colw-priorite" data-sort-key="priority" title="Trier par priorité">Priorité</th>',
+    'type'        => '<th class="colw-type">Type</th>',
+    'key'         => '<th class="colw-key">Key</th>',
+    'title'       => '<th class="colw-titre">Titre</th>',
+    'status'      => $statusSortable
+        ? '<th class="col-sortable colw-statut" data-sort-key="status" title="Trier par statut">Statut</th>'
+        : '<th class="colw-statut">Statut</th>',
+    'origin'      => '<th class="col-sortable colw-origine" data-sort-key="origin" title="Trier par origine">Origine</th>',
+    'sprints'     => '<th class="text-center">Nombre de sprints affectés</th>',
+    'storyPoints' => '<th class="text-center colw-sp">' . htmlspecialchars($spLabel) . '</th>',
+    'remaining'   => '<th class="text-center colw-reste">Reste à faire' . \App\View\MetricTooltips::render('sprint_planning_estimate') . '</th>',
+    'spFinal'     => '<th class="text-center colw-reestime">Points rééstimés (SP final)' . \App\View\MetricTooltips::render('sprint_planning_estimate') . '</th>',
+    'waitingTime' => '<th class="text-center">Temps d\'attente</th>',
+    'cycleTime'   => '<th class="text-center">Cycle Time' . \App\View\MetricTooltips::render('cycle_time_col') . '</th>',
+    'parent'      => '<th class="col-sortable colw-parent" data-sort-key="parent" title="Trier par parent">Parent</th>',
+];
+
+// Le tableau devient interactif (Alpine) si une colonne dépliable est présente :
+// « Nombre de sprints affectés » et/ou « Temps d'attente ».
+$tableInteractive = $sprintsExpandable || isset($enabled['waitingTime']);
+?>
+<table class="sprint-table-mt" data-default-sort="<?= htmlspecialchars($defaultSort) ?>"
+    <?php if ($tableInteractive): ?>x-data="{ sprintOpen: {}, waitOpen: {} }"<?php endif; ?>>
+    <thead>
+        <tr>
+            <?php foreach ($visible as $col): ?>
+                <?= $headers[$col] ?>
+            <?php endforeach; ?>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($rows as $ticket): ?>
+            <?php
+            $origin          = isset($enabled['origin']) ? $view->getOriginBadge($ticket) : null;
+            $sprintNames     = $ticket['sprintNames'] ?? [];
+            $sprintNamesList = ($sprintsExpandable && isset($enabled['sprints'])) ? $view->formatSprintNamesList($sprintNames) : '';
+            $rowKey          = $ticket['key'];
+            // Ventilation du temps d'attente par cause : chevron dépliant si non vide.
+            $waitingBreakdown = isset($enabled['waitingTime']) ? ($ticket['waitingTimes'] ?? []) : [];
+            // Pendant « cycle de vie complet » de chaque cause, affiché en second plan.
+            $waitingFull      = $ticket['waitingTimesFull'] ?? $waitingBreakdown;
+            ?>
+            <tr data-row-key="<?= htmlspecialchars($rowKey) ?>"
+                <?php if (isset($enabled['parent'])): ?>data-sort-parent="<?= htmlspecialchars($ticket['parentKey'] ?? '') ?>"<?php endif; ?>
+                <?php if (isset($enabled['priority'])): ?>data-sort-priority="<?= htmlspecialchars((string) ($ticket['priority']['id'] ?? '')) ?>"<?php endif; ?>
+                <?php if (isset($enabled['status'])): ?>data-sort-status="<?= htmlspecialchars((string) ($ticket['statusRank'] ?? PHP_INT_MAX)) ?>"<?php endif; ?>
+                <?php if ($origin !== null): ?>data-sort-origin="<?= $origin['rank'] ?>"<?php endif; ?>>
+                <?php foreach ($visible as $col): ?>
+                    <?php if ($col === 'priority'): ?>
+                        <td class="priority-cell">
+                            <?php if (!empty($ticket['priority']['icon'])): ?>
+                                <img class="priority-cell__icon" src="<?= htmlspecialchars($ticket['priority']['icon']) ?>" alt="">
+                            <?php endif; ?>
+                            <?= htmlspecialchars($ticket['priority']['name'] ?? '') ?: '—' ?>
+                        </td>
+                    <?php elseif ($col === 'type'): ?>
+                        <td class="type-cell">
+                            <?php if (!empty($ticket['issueTypeIcon'])): ?>
+                                <img class="type-cell__icon" src="<?= htmlspecialchars($ticket['issueTypeIcon']) ?>" alt="">
+                            <?php endif; ?>
+                            <?= htmlspecialchars($ticket['issueType'] ?? '') ?: '—' ?>
+                        </td>
+                    <?php elseif ($col === 'key'): ?>
+                        <td><strong><?= htmlspecialchars($ticket['key']) ?></strong></td>
+                    <?php elseif ($col === 'title'): ?>
+                        <td>
+                            <a href="<?= htmlspecialchars($ticket['url']) ?>" target="_blank" rel="noopener">
+                                <?= htmlspecialchars($ticket['summary']) ?>
+                            </a>
+                        </td>
+                    <?php elseif ($col === 'status'): ?>
+                        <td>
+                            <span class="badge <?= $view->getCategoryBadgeClass($ticket['statusCategory']) ?>">
+                                <?= htmlspecialchars($ticket['status']) ?>
+                            </span>
+                        </td>
+                    <?php elseif ($col === 'origin'): ?>
+                        <td>
+                            <span class="badge <?= $origin['class'] ?>">
+                                <?= htmlspecialchars($origin['label']) ?>
+                            </span>
+                        </td>
+                    <?php elseif ($col === 'sprints'): ?>
+                        <td class="text-center">
+                            <?php if ($sprintsExpandable && $sprintNamesList !== ''): ?>
+                                <button type="button" class="sprint-toggle"
+                                    @click="sprintOpen['<?= htmlspecialchars($rowKey) ?>'] = !sprintOpen['<?= htmlspecialchars($rowKey) ?>']"
+                                    :aria-expanded="sprintOpen['<?= htmlspecialchars($rowKey) ?>'] ? 'true' : 'false'">
+                                    <span class="sprint-toggle__chevron" :class="{ 'sprint-toggle__chevron--open': sprintOpen['<?= htmlspecialchars($rowKey) ?>'] }">▸</span>
+                                    <?= htmlspecialchars($view->formatSprintCount($sprintNames)) ?>
+                                </button>
+                            <?php else: ?>
+                                <?= htmlspecialchars($view->formatSprintCount($sprintNames)) ?>
+                            <?php endif; ?>
+                        </td>
+                    <?php elseif ($col === 'storyPoints'): ?>
+                        <td class="text-center"><?= $view->formatSp($ticket['storyPoints']) ?></td>
+                    <?php elseif ($col === 'remaining'): ?>
+                        <td class="text-center"><?= $view->formatSp($ticket['spRemaining'] ?? null) ?></td>
+                    <?php elseif ($col === 'spFinal'): ?>
+                        <td class="text-center"><?= $view->formatSp($ticket['spFinal'] ?? null) ?></td>
+                    <?php elseif ($col === 'waitingTime'): ?>
+                        <td class="text-center">
+                            <?php if (!empty($waitingBreakdown)): ?>
+                                <button type="button" class="sprint-toggle waiting-toggle"
+                                    @click="waitOpen['<?= htmlspecialchars($rowKey) ?>'] = !waitOpen['<?= htmlspecialchars($rowKey) ?>']"
+                                    :aria-expanded="waitOpen['<?= htmlspecialchars($rowKey) ?>'] ? 'true' : 'false'">
+                                    <img src="/img/jira_flagged_icon.png" alt="Voir le détail de l'attente" class="waiting-toggle__icon"
+                                        :class="{ 'waiting-toggle__icon--open': waitOpen['<?= htmlspecialchars($rowKey) ?>'] }">
+                                    <?= $view->formatDays($ticket['waitingTime'] ?? null) ?>
+                                </button>
+                            <?php else: ?>
+                                <?= $view->formatDays($ticket['waitingTime'] ?? null) ?>
+                            <?php endif; ?>
+                        </td>
+                    <?php elseif ($col === 'cycleTime'): ?>
+                        <td class="text-center"><?= $view->formatDays($ticket['cycleTime'] ?? null) ?></td>
+                    <?php elseif ($col === 'parent'): ?>
+                        <td>
+                            <?php if (!empty($ticket['parentKey'])): ?>
+                                <strong><?= htmlspecialchars($ticket['parentKey']) ?></strong>
+                                <?php if (!empty($ticket['parentSummary'])): ?>— <?= htmlspecialchars($ticket['parentSummary']) ?><?php endif; ?>
+                            <?php else: ?>
+                                —
+                            <?php endif; ?>
+                        </td>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </tr>
+            <?php if ($sprintsExpandable && $sprintNamesList !== ''): ?>
+                <tr class="sprint-detail-row" data-detail-for="<?= htmlspecialchars($rowKey) ?>"
+                    x-show="sprintOpen['<?= htmlspecialchars($rowKey) ?>']" x-cloak>
+                    <td colspan="<?= $colCount ?>">
+                        <span class="sprint-detail-row__label">🗂️ Sprints affectés :</span>
+                        <?= htmlspecialchars($sprintNamesList) ?>
+                    </td>
+                </tr>
+            <?php endif; ?>
+            <?php if (!empty($waitingBreakdown)): ?>
+                <tr class="sprint-detail-row" data-detail-for="<?= htmlspecialchars($rowKey) ?>"
+                    x-show="waitOpen['<?= htmlspecialchars($rowKey) ?>']" x-cloak>
+                    <td colspan="<?= $colCount ?>">
+                        <span class="sprint-detail-row__label">⏳ Détail de l'attente :</span>
+                        <?php foreach ($waitingBreakdown as $cause => $days): ?>
+                            <span class="badge <?= $view->getCategoryBadgeClass($view->getStatusCategory((string) $cause)) ?>">
+                                <?= $view->getWaitingCauseIcon((string) $cause) ?><?= htmlspecialchars((string) $cause) ?> — <?= $view->formatDays($days) ?>
+                            </span>
+                            <span class="waiting-full">(<?= $view->formatDays($waitingFull[$cause] ?? $days) ?> sur tout le cycle de vie)</span>
+                        <?php endforeach; ?>
+                        <span class="waiting-union-total">
+                            = <strong><?= $view->formatDays($ticket['waitingTime'] ?? null) ?></strong>
+                            <span class="waiting-full">(<?= $view->formatDays($ticket['waitingTimeFull'] ?? $ticket['waitingTime'] ?? null) ?> sur tout le cycle de vie)</span>
+                            <?php if (count($waitingBreakdown) > 1) : ?>
+                                <em>(un jour recouvert par plusieurs causes n'est compté qu'une fois)</em>
+                            <?php endif; ?>
+                        </span>
+                    </td>
+                </tr>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </tbody>
+    <?php if ($tfoot !== null && $spIndex !== false): ?>
+        <tfoot>
+            <tr class="sprint-tfoot-total">
+                <td colspan="<?= $spIndex ?>"><?= htmlspecialchars($tfoot['label'] ?? '') ?></td>
+                <?php foreach (array_slice($visible, $spIndex) as $col): ?>
+                    <?php if ($col === 'storyPoints'): ?>
+                        <td class="text-center"><?= $view->formatSp($tfoot['storyPoints'] ?? null) ?></td>
+                    <?php elseif ($col === 'remaining'): ?>
+                        <td class="text-center"><?= $view->formatSp($tfoot['remaining'] ?? null) ?></td>
+                    <?php elseif ($col === 'spFinal'): ?>
+                        <td class="text-center"><?= $view->formatSp($tfoot['final'] ?? null) ?></td>
+                    <?php else: ?>
+                        <td></td>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </tr>
+        </tfoot>
+    <?php endif; ?>
+</table>

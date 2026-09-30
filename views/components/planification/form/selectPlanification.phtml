@@ -1,0 +1,374 @@
+<?php
+
+/**
+ * Composant de sélection pour la page « Support à la planification ».
+ *
+ * Le projet et le board proviennent de la page Configuration (/config) via le
+ * pool partagé « jira_pool_team » : ils sont rappelés en lecture seule par
+ * projectRecap.phtml (avec un CTA « Configurer le projet »). Cette page ne gère
+ * plus que :
+ *   - une liste déroulante pour le sprint EN COURS (sprint actif présélectionné) ;
+ *   - une liste à cocher des sprints À VENIR (non démarrés) pour constituer
+ *     la backlog d'un ou plusieurs sprints.
+ *
+ * Le formulaire soumet `sprintId` + `backlogSprintIds[]` en POST vers /planification.
+ */
+?>
+<div x-data="planificationSelector()" class="jira-project-search">
+
+    <!-- ===== 1. Rappel projet + board (lecture seule) + CTA ===== -->
+    <?php include __DIR__ . '/../../../common/form/projectRecap.phtml'; ?>
+
+    <!-- ===== 2. Sprint en cours + backlog des sprints à venir ===== -->
+    <form method="POST" action="/planification" x-ref="analyzeForm" @submit="loading = true" x-show="sprints.length" class="jira-search__block">
+        <input type="hidden" name="projectKey" :value="selectedProject?.key ?? ''">
+        <input type="hidden" name="boardId" :value="boardId">
+
+        <label for="planif-sprint-select"><strong>Sprint en cours :</strong></label>
+        <select
+            id="planif-sprint-select"
+            name="sprintId"
+            x-model="sprintId"
+            @change="save()"
+            required
+            class="input jira-search__select">
+            <template x-for="sprint in sprints" :key="sprint.id">
+                <option :value="sprint.id" x-text="sprint.label" :class="sprint.ignored ? 'sprint-ignored' : ''"></option>
+            </template>
+        </select>
+
+        <div class="jira-search__block">
+            <strong>Backlog — sprints à venir à inclure :</strong>
+            <template x-if="futureSprints.length">
+                <div class="planif-sprint-checklist">
+                    <template x-for="sprint in futureSprints" :key="sprint.id">
+                        <label class="planif-sprint-check">
+                            <input
+                                type="checkbox"
+                                name="backlogSprintIds[]"
+                                :value="sprint.id"
+                                :checked="backlogIds.includes(String(sprint.id))"
+                                @change="toggleBacklog(sprint.id, $event.target.checked)">
+                            <span x-text="sprint.label" :class="sprint.ignored ? 'sprint-ignored' : ''"></span>
+                        </label>
+                    </template>
+                </div>
+            </template>
+            <template x-if="!futureSprints.length">
+                <p class="jira-search__note">
+                    Aucun sprint à venir n'est disponible sur ce board.
+                </p>
+            </template>
+        </div>
+
+        <button type="submit" :disabled="loading" class="jira-search__block">
+            ➡️ Récupérer les tickets des backlogs sélectionnés
+        </button>
+    </form>
+
+    <!-- Rafraîchit la LISTE des boards/sprints (cache BoardCacheService, TTL 12 h). Hors du <form>,
+         qui n'est rendu qu'une fois les sprints chargés : c'est justement quand la liste revient vide ou
+         incomplète qu'il faut pouvoir la redemander. -->
+    <p class="list-refresh" x-show="selectedProject" x-cloak>
+        <button type="button" @click="refreshLists()" :disabled="loading"
+                title="Redemande à Jira les boards et les sprints, sans attendre l'expiration du cache (12 h)">
+            ↻ Rafraîchir la liste des sprints
+        </button>
+    </p>
+
+    <div x-show="loading" aria-busy="true" class="jira-search__loading">⏳ Chargement…</div>
+
+    <div x-show="noSprints && !loading" class="jira-search__empty">
+        ⚠️ Aucun sprint trouvé pour ce board.
+    </div>
+
+    <div x-show="error" class="inline-error" x-cloak>❌ <span x-text="error"></span></div>
+</div>
+
+<script>
+    (function() {
+        const LOCAL_KEY = 'jira_planification_selector';
+        const POOL_KEY = 'jira_pool_team';
+
+        window.planificationSelector = function() {
+            return {
+                // --- Projet (résolu depuis le pool, en lecture seule sur cette page) ---
+                selectedProject: null,
+
+                // --- Boards ---
+                boards: [],
+                boardId: '',
+
+                // --- Sprints ---
+                sprints: [],
+                sprintId: '',
+
+                // --- Backlog (sprints à venir cochés) ---
+                backlogIds: [],
+
+                // --- UI ---
+                loading: false,
+                error: '',
+                noSprints: false,
+
+                /** true si le board par défaut n'est pas configuré alors que plusieurs boards Scrum existent */
+                boardNotConfigured: false,
+
+                /** ID de board mémorisé (localStorage) à re-sélectionner après chargement */
+                _savedBoardId: '',
+
+                /** ID de sprint mémorisé (localStorage) à re-sélectionner après chargement */
+                _savedSprintId: '',
+
+                /** IDs de backlog mémorisés (localStorage) à re-cocher après chargement */
+                _savedBacklogIds: [],
+
+                /** true si une sélection de backlog est déjà mémorisée ; sinon on applique la valeur par défaut */
+                _hasSavedBacklog: false,
+
+                /** true au retour sur la page : relance la récupération une fois les sprints restaurés */
+                _autoSubmit: false,
+
+                /** Libellé du board courant (alimente le rappel projectRecap.phtml) */
+                get boardName() {
+                    const board = this.boards.find(b => String(b.id) === String(this.boardId));
+                    return board ? board.label : '';
+                },
+
+                /**
+                 * Sprints à venir (non démarrés) — proposés à cocher pour la backlog.
+                 * Triés par date de démarrage croissante : le plus proche en tête,
+                 * le plus lointain en bas. À dates égales/absentes, ordre naturel par nom.
+                 */
+                get futureSprints() {
+                    return this.sprints
+                        .filter(s => s.state === 'future')
+                        .slice()
+                        .sort((a, b) => {
+                            const da = a.startDate || '';
+                            const db = b.startDate || '';
+                            if (da !== db) {
+                                if (da === '') return 1;
+                                if (db === '') return -1;
+                                return da < db ? -1 : 1;
+                            }
+                            return (a.name || '').localeCompare(b.name || '', undefined, {
+                                numeric: true
+                            });
+                        });
+                },
+
+                /**
+                 * Restauration de la sélection : on retient la plus récente entre
+                 * la clé locale de la page et la clé partagée du pool « team »
+                 * (alimenté par /config). Le board provient du gagnant ; sprint en
+                 * cours et backlog, propres à la page, ne sont restaurés que si c'est
+                 * la sélection LOCALE qui l'emporte.
+                 */
+                init() {
+                    const local = window.jiraStore.read(LOCAL_KEY);
+                    const winner = window.jiraStore.mostRecent(local, window.jiraStore.read(POOL_KEY));
+                    if (winner && winner.project) {
+                        this.selectedProject = winner.project;
+                        this._savedBoardId = winner.boardId || '';
+                        // Sprint en cours et backlog sont propres à la page (clé LOCALE).
+                        // On les restaure dès que le board local correspond au board
+                        // retenu — même si le pool partagé (mis à jour par Sprint /
+                        // Métriques) est devenu plus récent. Sans cela, un détour par une
+                        // autre page ferait perdre la sélection (cf. teamSprintsSelector).
+                        const localMatchesBoard = !!(local && local.project
+                            && local.boardId
+                            && String(local.boardId) === String(this._savedBoardId));
+                        this._savedSprintId = localMatchesBoard ? (local.sprintId || '') : '';
+                        this._savedBacklogIds = (localMatchesBoard && Array.isArray(local.backlogIds)) ? local.backlogIds : [];
+                        this._hasSavedBacklog = localMatchesBoard && Array.isArray(local.backlogIds);
+                        // Auto-récupération au retour sur la page si un sprint en cours
+                        // était mémorisé ET que les résultats ne sont pas déjà affichés
+                        // (window.__planificationAnalyzed, posé par PHP après le POST) —
+                        // évite la boucle de re-soumission. Iso comportement page Sprint.
+                        this._autoSubmit = this._savedSprintId !== '' && !window.__planificationAnalyzed;
+                        this.loadBoards();
+                    }
+                },
+
+                /**
+                 * Soumet automatiquement le formulaire (clic « Récupérer les tickets »).
+                 * Attend le prochain tick Alpine pour que le sprint restauré, les cases
+                 * de backlog et les champs cachés (projectKey, boardId) soient à jour.
+                 */
+                submitAnalysis() {
+                    this.$nextTick(() => {
+                        // loading posé ICI (après le .finally de loadSprints) pour que le
+                        // loader et le CTA grisé restent visibles pendant le POST.
+                        this.loading = true;
+                        if (this.$refs.analyzeForm) {
+                            this.$refs.analyzeForm.submit();
+                        }
+                    });
+                },
+
+                /**
+                 * Redemande boards ET sprints à Jira en ignorant le cache serveur (TTL 12 h), pour
+                 * faire apparaître un sprint tout juste créé — cas fréquent ici, la planification
+                 * suivant de près la création du sprint dans Jira.
+                 */
+                refreshLists() {
+                    this.loadBoards(true);
+                },
+
+                /**
+                 * Charge les boards du projet et résout le board courant dans l'ordre :
+                 * board mémorisé → board par défaut (config) → unique board scrum.
+                 * Le choix de board ne se fait plus sur cette page : si aucun board
+                 * n'est résoluble (0 board, ou plusieurs sans par défaut), on n'affiche
+                 * que le rappel — son CTA « Configurer le projet » renvoie vers /config.
+                 *
+                 * @param {boolean} refresh Ignore le cache serveur des boards et des sprints.
+                 */
+                loadBoards(refresh = false) {
+                    this.loading = true;
+                    this.error = '';
+                    this.noSprints = false;
+                    this.boardNotConfigured = false;
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/boards'
+                        + (refresh ? '?refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            this.boards = data;
+                            const scrumBoards = data.filter(b => b.type === 'scrum');
+                            const preferredBoard = data.find(b => b.preferred);
+
+                            let resolvedId = '';
+                            if (this._savedBoardId && data.some(b => String(b.id) === String(this._savedBoardId))) {
+                                resolvedId = String(this._savedBoardId);
+                            } else if (preferredBoard) {
+                                resolvedId = String(preferredBoard.id);
+                            } else if (scrumBoards.length === 1) {
+                                resolvedId = String(scrumBoards[0].id);
+                            }
+
+                            if (resolvedId) {
+                                this.boardId = resolvedId;
+                                this.save();
+                                this.loadSprints(refresh);
+                            } else {
+                                // Board non résoluble. Plusieurs boards Scrum sans par défaut :
+                                // message dédié invitant à configurer le projet. Sinon (0 board),
+                                // le rappel + son CTA « Configurer le projet » suffisent.
+                                this.loading = false;
+                                this.boardNotConfigured = scrumBoards.length > 0;
+                            }
+                        })
+                        .catch(err => { this.error = err.message; this.loading = false; console.error(err); });
+                },
+
+                /**
+                 * Charge les sprints du board (déjà triés du plus récent au plus ancien).
+                 * Présélectionne le sprint actif comme « sprint en cours », sinon le plus récent.
+                 * Re-coche les sprints de backlog mémorisés encore présents.
+                 *
+                 * @param {boolean} refresh Ignore le cache serveur des sprints (TTL 12 h).
+                 */
+                loadSprints(refresh = false) {
+                    if (!this.boardId) return;
+                    this.loading = true;
+                    this.error = '';
+                    this.noSprints = false;
+                    this.sprints = [];
+                    this.sprintId = '';
+                    this.backlogIds = [];
+                    fetch('/api/internal/boards/' + encodeURIComponent(this.boardId) + '/sprints?projectKey='
+                        + encodeURIComponent(this.selectedProject?.key ?? '')
+                        + (refresh ? '&refresh=1' : ''))
+                        .then(r => r.json().catch(() => null).then(d => {
+                            if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(data => {
+                            if (data && data.error) throw new Error(data.error);
+                            this.sprints = data;
+                            if (!data.length) {
+                                this.noSprints = true;
+                                return;
+                            }
+                            if (this._savedSprintId && data.some(s => String(s.id) === String(this._savedSprintId))) {
+                                this.sprintId = String(this._savedSprintId);
+                            } else {
+                                // Présélection : sprint actif, sinon le plus récent non ignoré.
+                                const active = data.find(s => s.state === 'active');
+                                this.sprintId = String(active ? active.id : (data.find(s => !s.ignored) || data[0]).id);
+                            }
+                            if (this._hasSavedBacklog) {
+                                // Re-coche les sprints de backlog mémorisés encore disponibles.
+                                this.backlogIds = this._savedBacklogIds
+                                    .map(String)
+                                    .filter(id => data.some(s => String(s.id) === id));
+                            } else {
+                                // Valeur par défaut : premier sprint à venir non ignoré.
+                                const firstFuture = this.futureSprints.find(s => !s.ignored);
+                                this.backlogIds = firstFuture ? [String(firstFuture.id)] : [];
+                            }
+                            this.save();
+
+                            // Retour sur la page avec une sélection mémorisée : on relance
+                            // la récupération automatiquement (iso page Sprint), une seule fois.
+                            if (this._autoSubmit && this.sprintId) {
+                                this._autoSubmit = false;
+                                this.submitAnalysis();
+                            }
+                        })
+                        .catch(err => {
+                            this.error = err.message;
+                            console.error(err);
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                        });
+                },
+
+                /**
+                 * Coche/décoche un sprint de backlog.
+                 *
+                 * Liaison explicite (et non `x-model`) : dans une boucle `x-for`,
+                 * `x-model` sur un tableau combiné à `:value` dynamique restaure mal
+                 * l'état au rechargement de la page. Ici `:checked` reflète toujours
+                 * `backlogIds`, et la mise à jour + `save()` sont faites dans l'ordre.
+                 *
+                 * @param {string|number} sprintId
+                 * @param {boolean}        checked
+                 */
+                toggleBacklog(sprintId, checked) {
+                    const id = String(sprintId);
+                    if (checked) {
+                        if (!this.backlogIds.includes(id)) {
+                            this.backlogIds.push(id);
+                        }
+                    } else {
+                        this.backlogIds = this.backlogIds.filter(x => x !== id);
+                    }
+                    this.save();
+                },
+
+                /**
+                 * Persiste la sélection : en local (projet + board + sprint + backlog)
+                 * et dans le pool « team » (projet + board). Le projet/board valent ce
+                 * que /config a fixé ; cette écriture préserve l'arbitrage mostRecent.
+                 * Sprint et backlog restent propres à la page (clé locale uniquement).
+                 */
+                save() {
+                    window.jiraStore.write(LOCAL_KEY, {
+                        project: this.selectedProject,
+                        boardId: this.boardId,
+                        sprintId: this.sprintId,
+                        backlogIds: this.backlogIds,
+                    });
+                    window.jiraStore.write(POOL_KEY, {
+                        project: this.selectedProject,
+                        boardId: this.boardId,
+                    });
+                },
+            };
+        };
+    })();
+</script>

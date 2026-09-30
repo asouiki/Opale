@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * Jauge de progression empilée par catégorie de statut.
+ *
+ * Un segment par catégorie présente, largeur = part des tickets, couleur = teinte de la catégorie.
+ * Les segments sont ordonnés du plus avancé au moins avancé, la jauge se lit donc comme une progression.
+ *
+ * Même habillage que la jauge « Avancement du sprint » de la section Atterrissage (classes partagées
+ * .sprint-landing__bar*, définies dans public/css/sprint.css).
+ *
+ * @var \App\View\SprintView $view
+ * @var list<array{key: string, label: string, color: string, count: int, percent: float}> $categoryBarRows
+ *      Répartition issue de SprintView::getCategoryBreakdown()
+ */
+?>
+<?php if (!empty($categoryBarRows)): ?>
+    <div class="sprint-landing__summary">
+        <div class="sprint-landing__bar">
+            <?php foreach ($categoryBarRows as $categoryBarRow): ?>
+                <div class="sprint-landing__bar-segment"
+                    style="width: <?= $categoryBarRow['percent'] ?>%; background: <?= $categoryBarRow['color'] ?>;"
+                    title="<?= htmlspecialchars($categoryBarRow['label']) ?> — <?= $categoryBarRow['count'] ?> ticket(s), <?= $categoryBarRow['percent'] ?> %"
+                    data-category="<?= htmlspecialchars($categoryBarRow['key']) ?>">
+                    <span class="sprint-landing__bar-label">
+                        <?= htmlspecialchars($categoryBarRow['label']) ?> <?= $categoryBarRow['percent'] ?>%
+                    </span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>

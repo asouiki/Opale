@@ -1,0 +1,455 @@
+<?php
+
+/**
+ * Partiel : formulaire de configuration du workflow d'issues d'un projet.
+ *
+ * Cœur réutilisable (popin OU future page dédiée). Suppose être placé à
+ * l'intérieur d'un élément portant x-data="workflowConfig()".
+ *
+ * Chaque catégorie est une liste verticale ordonnée et réordonnable par
+ * drag-and-drop (SortableJS) : le statut le plus HAUT est le statut de DÉPART,
+ * le plus BAS le statut FINAL ; une flèche ↓ matérialise la progression.
+ * Les statuts circulent aussi d'une catégorie à l'autre (group Sortable commun)
+ * et depuis la zone « Statuts du projet non classés ».
+ */
+?>
+<div class="wf-form">
+    <div class="wf-meta" x-show="!loading">
+        <span x-show="source === 'project'" class="wf-badge wf-badge--project">
+            📁 Configuration propre au projet <strong x-text="projectKey"></strong>
+        </span>
+        <span x-show="source === 'global'" class="wf-badge wf-badge--global">
+            🌐 Configuration globale par défaut (aucun fichier projet — l'enregistrement en créera un)
+        </span>
+    </div>
+
+    <div x-show="loading" class="wf-loading">⏳ Chargement du workflow…</div>
+
+    <!-- Import global depuis Jira (réinitialise la config) -->
+    <div class="wf-import-row" x-show="!loading && jiraStatuses.length > 0">
+        <button type="button" class="wf-import-btn" @click="openImportConfirm()">
+            ⤵️ Importer la configuration depuis Jira
+        </button>
+        <span class="wf-import-note">
+            Remplace la configuration actuelle par les statuts réels du projet,
+            répartis selon leur catégorie Jira.
+        </span>
+    </div>
+
+    <div x-show="!loading">
+        <!-- ===== Les 4 catégories ordonnées ===== -->
+        <div class="wf-categories">
+            <template x-for="cat in categories" :key="cat.key">
+                <div class="wf-category">
+                    <div class="wf-cat-head">
+                        <span class="wf-cat-title" x-text="cat.label"></span>
+                        <span class="wf-cat-hint">départ ↑ · final ↓</span>
+                    </div>
+
+                    <ul class="wf-list" :data-wf-list="cat.key">
+                        <template x-for="name in lists[cat.key]" :key="name">
+                            <li class="wf-item" :data-name="name">
+                                <span class="wf-grip" aria-hidden="true">⠿</span>
+                                <span class="wf-name" x-text="name"></span>
+                                <button type="button" class="wf-remove"
+                                    @click="removeItem(cat.key, name)"
+                                    title="Retirer de cette catégorie">✕</button>
+                            </li>
+                        </template>
+                    </ul>
+
+                    <div class="wf-empty" x-show="lists[cat.key].length === 0">
+                        Glissez des statuts ici…
+                    </div>
+
+                    <div class="wf-add">
+                        <input type="text" class="wf-add-input"
+                            list="wf-suggestions"
+                            x-model="addInput[cat.key]"
+                            @keydown.enter.prevent="addItem(cat.key)"
+                            placeholder="Ajouter un statut…" />
+                        <button type="button" class="wf-add-btn" @click="addItem(cat.key)">+ Ajouter</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Suggestions partagées (statuts Jira réels + statuts déjà connus) -->
+        <datalist id="wf-suggestions">
+            <template x-for="name in allKnownNames()" :key="name">
+                <option :value="name"></option>
+            </template>
+        </datalist>
+
+        <!-- ===== Zone des statuts du projet non classés ===== -->
+        <div class="wf-unclassified">
+            <div class="wf-unclassified-head">
+                <span>🧩 Statuts du projet non classés</span>
+            </div>
+            <ul class="wf-pool" data-wf-list="unclassified">
+                <template x-for="name in lists.unclassified" :key="name">
+                    <li class="wf-chip" :data-name="name">
+                        <span class="wf-grip" aria-hidden="true">⠿</span>
+                        <span class="wf-name" x-text="name"></span>
+                    </li>
+                </template>
+            </ul>
+            <div class="wf-empty" x-show="lists.unclassified.length === 0">
+                Tous les statuts du projet sont classés (ou aucun statut Jira n'a pu être récupéré).
+            </div>
+        </div>
+
+        <div x-show="error" class="inline-error">❌ <span x-text="error"></span></div>
+        <div x-show="success" class="wf-success">✅ <span x-text="success"></span></div>
+    </div>
+
+    <!-- Modale de confirmation d'import (écrase la config courante) -->
+    <div class="modal-overlay modal-overlay--confirm" x-show="confirmImport" x-cloak
+        @keydown.escape.window="cancelImport()">
+        <div class="modal-content wf-confirm">
+            <div class="modal-header">
+                <h2>⚠️ Importer depuis Jira ?</h2>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Cette action <strong>écrase la configuration actuelle</strong> du projet
+                    <strong x-text="projectKey"></strong> et la remplace par les statuts réels
+                    récupérés depuis Jira, répartis selon leur catégorie
+                    (À faire → Affinage, En cours → Sprint, Terminé → Terminés).
+                </p>
+                <p class="wf-confirm-note">
+                    Les statuts hérités de la configuration globale par défaut seront supprimés.
+                    Vous pourrez ensuite réordonner et reclasser manuellement avant d'enregistrer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" @click="cancelImport()">❌ Annuler</button>
+                <button type="button" class="btn-primary" @click="confirmImportFromJira()">
+                    ⤵️ Écraser avec la config Jira
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const LOCAL_KEY = 'jira_sprint_selector';
+        const POOL_KEY  = 'jira_pool_team';
+
+        // Catégorie Jira (statusCategory.key) → catégorie de workflow, pour l'import.
+        const JIRA_CATEGORY_MAP = {
+            new:           'refinement_statuses',
+            indeterminate: 'sprint_statuses',
+            done:          'done_statuses',
+        };
+
+        // Map { projectKey: label } — supporte plusieurs projets configurés.
+        const WF_CONFIGURED_KEY = 'wf_configured_projects';
+
+        window.workflowConfig = function() {
+            return {
+                open: false,
+                loading: false,
+                saving: false,
+                confirmImport: false,
+                error: '',
+                success: '',
+                source: '',
+                projectKey: '',
+                projectLabel: '',
+                configured: '', // projet dont le workflow vient d'être enregistré (confirmation hors popin)
+
+                categories: [
+                    { key: 'refinement_statuses', label: '🧠 Affinage' },
+                    { key: 'sprint_statuses',     label: '⚙️ Sprint (Réal + Qualif)' },
+                    { key: 'done_statuses',        label: '✅ Terminés' },
+                    { key: 'waiting_statuses',     label: '⌛ En attente / Bloqué' },
+                ],
+
+                lists: {
+                    refinement_statuses: [],
+                    sprint_statuses: [],
+                    done_statuses: [],
+                    waiting_statuses: [],
+                    unclassified: [],
+                },
+
+                addInput: {
+                    refinement_statuses: '',
+                    sprint_statuses: '',
+                    done_statuses: '',
+                    waiting_statuses: '',
+                },
+
+                jiraStatuses: [],   // [{ name, category }]
+                _sortables: [],
+                _dragOrigin: null,
+
+                /**
+                 * - Enregistre le listener pour les changements de projet (sélecteur
+                 *   de sprint → event 'jira:project-changed').
+                 * - Restaure la bannière via $nextTick : le store localStorage est
+                 *   déjà à jour quand la microtask s'exécute (init Alpine synchrone
+                 *   du sélecteur est terminé, mais ses fetch ne le sont pas encore —
+                 *   le projet stocké reste celui de la visite précédente).
+                 */
+                init() {
+                    window.addEventListener('jira:project-changed', (e) => {
+                        this.updateForProject(e.detail?.projectKey || '');
+                    });
+                    this.$nextTick(() => {
+                        const project = this.currentProjectFromStore();
+                        if (project) this.updateForProject(project.key);
+                    });
+                },
+
+                /**
+                 * Affiche ou efface la bannière "Workflow configuré" selon que le
+                 * projet donné est présent dans le map localStorage de projets configurés.
+                 *
+                 * @param {string} projectKey Clé du projet Jira (ex: 'ABC') ou '' pour effacer.
+                 */
+                updateForProject(projectKey) {
+                    try {
+                        if (!projectKey) { this.configured = ''; return; }
+                        const map = JSON.parse(localStorage.getItem(WF_CONFIGURED_KEY) || '{}');
+                        this.configured = map[projectKey] || '';
+                    } catch (_) {
+                        this.configured = '';
+                    }
+                },
+
+                /** Projet courant tel que mémorisé par le sélecteur (store partagé). */
+                currentProjectFromStore() {
+                    if (!window.jiraStore) return null;
+                    const winner = window.jiraStore.mostRecent(
+                        window.jiraStore.read(LOCAL_KEY),
+                        window.jiraStore.read(POOL_KEY)
+                    );
+                    return (winner && winner.project) ? winner.project : null;
+                },
+
+                /** Ouvre la popin pour le projet actuellement sélectionné dans l'IHM. */
+                openFromStore() {
+                    const project = this.currentProjectFromStore();
+                    if (!project || !project.key) {
+                        this.open = true;
+                        this.error = "Sélectionnez d'abord un projet Jira.";
+                        return;
+                    }
+                    this.projectKey   = project.key;
+                    this.projectLabel = project.key + (project.name ? ' – ' + project.name : '');
+                    this.open = true;
+                    this.load();
+                },
+
+                close() {
+                    this.open = false;
+                    this.error = '';
+                    this.success = '';
+                },
+
+                /** Liste de tous les statuts connus (Jira réels + déjà classés) pour l'autocomplétion. */
+                allKnownNames() {
+                    const set = new Set();
+                    this.jiraStatuses.forEach(s => set.add(s.name));
+                    Object.values(this.lists).forEach(arr => arr.forEach(n => set.add(n)));
+                    return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr'));
+                },
+
+                /** Ensemble des statuts déjà rangés dans une des 4 catégories. */
+                classifiedNames() {
+                    const set = new Set();
+                    this.categories.forEach(c => this.lists[c.key].forEach(n => set.add(n)));
+                    return set;
+                },
+
+                /** Recalcule la zone « non classés » = statuts Jira absents des 4 catégories. */
+                recomputeUnclassified() {
+                    const classified = this.classifiedNames();
+                    this.lists.unclassified = this.jiraStatuses
+                        .map(s => s.name)
+                        .filter(n => !classified.has(n));
+                },
+
+                load() {
+                    this.loading = true;
+                    this.error = '';
+                    this.success = '';
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.projectKey) + '/workflow')
+                        .then(r => r.json().then(d => {
+                            if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(d => {
+                            this.source = d.source || '';
+                            const c = d.categories || {};
+                            this.lists.refinement_statuses = (c.refinement_statuses || []).slice();
+                            this.lists.sprint_statuses     = (c.sprint_statuses || []).slice();
+                            this.lists.done_statuses       = (c.done_statuses || []).slice();
+                            this.lists.waiting_statuses    = (c.waiting_statuses || []).slice();
+                            this.jiraStatuses = d.jiraStatuses || [];
+                            this.recomputeUnclassified();
+                            this.$nextTick(() => this.initSortables());
+                        })
+                        .catch(e => { this.error = e.message; })
+                        .finally(() => { this.loading = false; });
+                },
+
+                /** Instancie SortableJS sur les 4 listes + la zone non classés (group commun). */
+                initSortables() {
+                    if (typeof Sortable === 'undefined') return;
+                    this._sortables.forEach(s => s.destroy());
+                    this._sortables = [];
+
+                    const self = this;
+                    this.$root.querySelectorAll('[data-wf-list]').forEach(el => {
+                        this._sortables.push(new Sortable(el, {
+                            group: 'wf',
+                            animation: 150,
+                            draggable: '.wf-item, .wf-chip',
+                            filter: '.wf-remove',
+                            preventOnFilter: false,
+                            ghostClass: 'sortable-ghost',
+                            dragClass: 'sortable-drag',
+                            onStart(evt) {
+                                // Mémorise la position d'origine exacte pour pouvoir l'annuler.
+                                self._dragOrigin = { parent: evt.from, next: evt.item.nextSibling };
+                            },
+                            onEnd(evt) {
+                                // On annule le déplacement DOM fait par Sortable : Alpine reste
+                                // la seule source de vérité et re-render depuis le state.
+                                if (self._dragOrigin) {
+                                    self._dragOrigin.parent.insertBefore(evt.item, self._dragOrigin.next);
+                                    self._dragOrigin = null;
+                                }
+                                const fromKey = evt.from.getAttribute('data-wf-list');
+                                const toKey   = evt.to.getAttribute('data-wf-list');
+                                if (fromKey === null || toKey === null) return;
+                                if (fromKey === toKey && evt.oldIndex === evt.newIndex) return;
+
+                                const moved = self.lists[fromKey].splice(evt.oldIndex, 1)[0];
+                                if (moved === undefined) return;
+                                self.lists[toKey].splice(evt.newIndex, 0, moved);
+                            },
+                        }));
+                    });
+                },
+
+                addItem(key) {
+                    const value = (this.addInput[key] || '').trim();
+                    if (value === '') return;
+                    if (!this.lists[key].includes(value)) {
+                        this.lists[key].push(value);
+                    }
+                    const u = this.lists.unclassified.indexOf(value);
+                    if (u > -1) this.lists.unclassified.splice(u, 1);
+                    this.addInput[key] = '';
+                },
+
+                removeItem(key, name) {
+                    const i = this.lists[key].indexOf(name);
+                    if (i > -1) this.lists[key].splice(i, 1);
+                    // Si c'est un vrai statut Jira, on le renvoie dans le pool « non classés ».
+                    const isJira = this.jiraStatuses.some(s => s.name === name);
+                    if (isJira && !this.lists.unclassified.includes(name)) {
+                        this.lists.unclassified.push(name);
+                    }
+                },
+
+                /** Ouvre la confirmation d'écrasement par la config Jira. */
+                openImportConfirm() {
+                    this.confirmImport = true;
+                },
+
+                cancelImport() {
+                    this.confirmImport = false;
+                },
+
+                /**
+                 * Écrase la configuration courante (héritée du global ou en cours
+                 * d'édition) par les statuts réels du projet récupérés depuis Jira,
+                 * répartis selon leur catégorie. Les statuts sans catégorie mappée
+                 * atterrissent dans la zone « non classés ».
+                 *
+                 * En complément, les statuts dont le nom évoque une attente ou un
+                 * blocage (« attente », « bloqué »…) sont AUSSI copiés dans la
+                 * catégorie « En attente / Bloqué » : c'est une sous-catégorie qui
+                 * recoupe généralement le Sprint (le statut reste dans sa catégorie
+                 * principale et apparaît en plus dans Attente / Bloqué).
+                 */
+                confirmImportFromJira() {
+                    this.categories.forEach(c => { this.lists[c.key] = []; });
+
+                    const remaining = [];
+                    this.jiraStatuses.forEach(status => {
+                        const target = JIRA_CATEGORY_MAP[status.category];
+                        if (target) {
+                            this.lists[target].push(status.name);
+                        } else {
+                            remaining.push(status.name);
+                        }
+                        if (this.looksLikeWaiting(status.name)
+                            && !this.lists.waiting_statuses.includes(status.name)) {
+                            this.lists.waiting_statuses.push(status.name);
+                        }
+                    });
+                    this.lists.unclassified = remaining;
+
+                    this.confirmImport = false;
+                    this.success = '';
+                    this.$nextTick(() => this.initSortables());
+                },
+
+                /**
+                 * Détecte un statut d'attente / blocage d'après son nom, sans tenir
+                 * compte de la casse ni des accents (« En Attente », « Bloqué »,
+                 * « Qualif Bloquée », « ATTENTE INFO METIER »…).
+                 */
+                looksLikeWaiting(name) {
+                    const normalized = (name || '')
+                        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+                        .toLowerCase();
+                    return normalized.includes('attente') || normalized.includes('bloqu');
+                },
+
+                save() {
+                    this.saving = true;
+                    this.error = '';
+                    this.success = '';
+                    const body = new URLSearchParams();
+                    this.categories.forEach(c => {
+                        this.lists[c.key].forEach(n => body.append(c.key + '[]', n));
+                    });
+                    fetch('/api/internal/projects/' + encodeURIComponent(this.projectKey) + '/workflow', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body.toString(),
+                    })
+                        .then(r => r.json().then(d => {
+                            if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(d => {
+                            // Succès : on mémorise le projet configuré pour la confirmation
+                            // affichée au niveau du bouton déclencheur, puis on ferme la popin.
+                            this.source     = 'project';
+                            this.configured = this.projectLabel || this.projectKey;
+                            this.open       = false;
+                            this.error      = '';
+                            this.success    = '';
+                            // Ajoute ce projet au map { projectKey: label } persisté.
+                            try {
+                                const map = JSON.parse(localStorage.getItem(WF_CONFIGURED_KEY) || '{}');
+                                map[this.projectKey] = this.configured;
+                                localStorage.setItem(WF_CONFIGURED_KEY, JSON.stringify(map));
+                            } catch (_) {}
+                        })
+                        .catch(e => { this.error = e.message; })
+                        .finally(() => { this.saving = false; });
+                },
+            };
+        };
+    })();
+</script>

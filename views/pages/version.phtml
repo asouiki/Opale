@@ -1,0 +1,119 @@
+﻿<?php
+
+/** @var \App\Controller\VersionController $this */
+/** @var \App\View\VersionView $view */
+$currentPage = 'release';
+
+$versionsApiEndpoint = '/api/internal/projects/{key}/versions';
+$releasesApiEndpoint = '/api/internal/projects/{key}/releases';
+$formAction          = '/release';
+$inputName           = 'releaseOrVersionId';
+$storageKey          = 'jira_project_release_or_version';
+// Projet à pré-sélectionner (deep-link « Analyse » d'une Release rattachée à un projet donné).
+$forcedProjectKey    = $data['projectKey'] ?? '';
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Release ou Version Jira</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/metrics.css">
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <div class="card">
+        <?php include __DIR__ . '/../components/version/form/selectJiraProjectWithReleases.phtml'; ?>
+
+        <form method="POST" action="/release">
+            <label><em>Ou directement par nom exact ou ID/Key d'une Release (ex: ABC-123) ou Version :</em></label>
+            <input type="text" name="releaseOrVersionId" class="input-large" required
+                placeholder="ID, Key (ex: ABC-123) ou nom exact de la Release ou Version"
+                value="<?= htmlspecialchars($data['releaseOrVersionId'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            <button type="submit">OK</button>
+            <button type="submit" name="refresh" value="1"
+                title="Vider le cache et recharger les Releases / Versions depuis Jira">
+                🔄
+            </button>
+        </form>
+
+        <?php include __DIR__ . '/../common/form/submitLoader.phtml'; ?>
+    </div>
+
+    <?php include __DIR__ . '/../common/errorMessage.phtml'; ?>
+
+    <?php if ($view): ?>
+        <!-- ============ BANDEAU CACHE ============ -->
+        <?php /* Renseigné uniquement quand l'analyse a été servie du cache : une entité terminée y reste
+                 indéfiniment, l'utilisateur doit donc pouvoir dater ce qu'il regarde et forcer une relecture. */ ?>
+        <?php if (!empty($cachedAt)): ?>
+            <div class="cache-banner">
+                <span class="cache-banner__text">
+                    🗄️ Version issue du cache (générée le <?= date('d/m/Y à H:i', $cachedAt) ?>)
+                    — les Releases et Versions terminées y sont conservées sans expiration.
+                </span>
+                <form method="POST" action="/release" class="cache-banner__refresh">
+                    <input type="hidden" name="releaseOrVersionId"
+                        value="<?= htmlspecialchars($data['releaseOrVersionId'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="projectKey"
+                        value="<?= htmlspecialchars($data['projectKey'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="refresh" value="1">
+                    <button type="submit">🔄 Rafraîchir depuis Jira</button>
+                </form>
+            </div>
+        <?php endif; ?>
+
+        <div class="card">
+            <h2>
+                <a href="<?= $view->getVersionUrl(); ?>" target="_blank">
+                    <?= $view->getVersionName(); ?> (<?= $view->getIdentifierLabel() . $view->getVersionId(); ?>)
+                </a>
+            </h2>
+
+            <p class="version-description">
+                <?= $view->getVersionDescription(); ?>
+            </p>
+
+            <div class="meta">
+                <!-- Infos Release ou Version -->
+                <div class="meta-line meta-line-info">
+                    <span>📅 Date de démarrage : <?= $view->getVersionStartDate() ?? '—'; ?></span>
+                    <span>🎯 Date cible de livraison : <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
+
+                    <?php if ($view->isVersionOverdue()): ?>
+                        <span class="badge red">🕗Deadline dépassée</span>
+                    <?php endif; ?>
+
+                    <?php if ($view->isVersionReleased()): ?>
+                        <span class="badge green">Statut : Terminée 🚀</span>
+                    <?php else: ?>
+                        <span class="badge orange">Statut : En cours</span>
+                    <?php endif; ?>
+                </div>
+
+                <?php include __DIR__ . '/../common/metrics/totals.phtml'; ?>
+            </div>
+        </div>
+
+        <div class="timeline-grid">
+            <!-- Timeline par statut -->
+            <?php include __DIR__ . '/../common/metrics/timelineChart.phtml'; ?>
+        </div>
+
+        <div class="card">
+            <h2><?= $view->getIssuesCount(); ?> tickets rattachés :</h2>
+            <?php include __DIR__ . '/../common/issuesList.phtml'; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php include __DIR__ . '/../footer.phtml'; ?>
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+/* ============================================================
+ * 9. TIMELINE / CHART LAYOUT
+ * ============================================================ */
+.timeline-grid {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+.timeline-grid .card { flex: 1; margin-bottom: 0; }
+
+.vsm-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding-top: 12px;
+}
+.vsm-text {
+    width: 400px;
+    flex-shrink: 0;
+    font-size: 0.82rem;
+}
+.vsm-text ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.vsm-text li { color: var(--text-muted); }
+.vsm-text li strong { color: var(--text); }
+
+.vsm-chart {
+    flex: 1;
+    min-width: 500px;
+    max-width: 900px;
+}
+
+/* ============================================================
+ * 10. VSM STEPS TIMELINE
+ * ============================================================ */
+.vsm-timeline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.vsm-step {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    min-width: 120px;
+    max-width: 150px;
+    border: 1px solid transparent;
+}
+
+.vsm-timeline-label  { font-size: 0.78rem; font-weight: 500; color: #0f172a; }
+.vsm-timeline-metric { font-size: 0.72rem; font-style: italic; color: #475569; margin-top: 2px; }
+
+.vsm-timeline-refinement { background: #bfdbfe; border-color: #93c5fd; } /* blue-200/300 */
+.vsm-timeline-sprint      { background: #fde68a; border-color: #fbbf24; } /* amber-200/400 */
+.vsm-timeline-done        { background: #bbf7d0; border-color: #4ade80; } /* green-200/400 */
+.vsm-timeline-other       { background: #e9d5ff; border-color: #c084fc; } /* purple-200/400 */
+.vsm-timeline-waiting     { background: #fecaca; border-color: #f87171; } /* red-200/400 */
+
+.vsm-arrow { font-size: 1rem; color: var(--text-light); flex-shrink: 0; }
+
+/* ============================================================
+ * 11. WAITING TIMES SUMMARY
+ * ============================================================ */
+.waiting-times-summary { margin: 12px 0 20px; }
+.waiting-times-summary h4 {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.waiting-times-summary ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.waiting-times-summary li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fecaca;         /* red-200 — plus visible */
+    border: 1px solid #f87171;   /* red-400 */
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    color: #7f1d1d;              /* red-900 */
+}
+.waiting-label { font-weight: 500; }
+
+
+/* Description d'une Release/Version (extrait du style inline de version.phtml) */
+.version-description { margin-top: 12px; }

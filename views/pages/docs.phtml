@@ -1,0 +1,639 @@
+﻿<?php $currentPage = 'docs'; ?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Manuel Utilisateur</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/docs.css">
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <div class="card docs-page">
+
+        <h1 class="docs-title">📙 Manuel Utilisateur — OPALE</h1>
+        <p class="docs-subtitle">
+            <strong>O</strong>util <strong>P</strong>our l'<strong>A</strong>mélioration
+            <strong>L</strong>ean des <strong>É</strong>quipes
+        </p>
+        <p class="docs-intro">
+            OPALE analyse vos données Jira pour vous donner une lecture objective et factuelle de vos sprints et de votre flux de valeur.<br/>
+            Toutes les métriques sont issues de Jira — leur pertinence dépend du niveau de mise à jour de votre projet par l'équipe.
+        </p>
+        <p class="docs-intro docs-intro--note">
+            ℹ️ Cet outil n'a <b>pas vocation à évaluer ou surveiller la performance des individus</b>.<br/>
+            Il <b>aide l'équipe à mieux comprendre son système de travail</b> afin d'améliorer sa prédictibilité et <b>d'identifier des leviers d'amélioration continue</b>.
+        </p>
+        <p class="docs-intro docs-intro--note">
+            ❓Qui en est l'auteur de cet outil ?<br/>
+            Je suis Hugues-Arnaud Lamot, Scrum Master Senior.<br/>
+            J'ai développé cet outil afin d'aider mon équipe a mieux visualiser, et de manière objective et factuelle, sa bonne santé.<br/>
+            Il me permet d'identifier plus facilement les leviers d'amélioration pour mon équipe. Et surtout de me faire gagner un temps considérable, puis qu'il récupère et calcule pour moi des infos disséminées sur Jira, en quelques clics.<br/>
+            Je le partage et met à disposition de tout Scrum Master intéressé(e) pour aider son équipe à accélérer !<br/>
+            N'hésitez surtout pas à me contacter, pour me faire part de vos suggestions, si vous rencontrez un bug, ou simplement pour discuter du projet.
+            <?php include __DIR__ . '/../footer.phtml'; ?><br/>
+        </p>
+
+
+        <!-- ===== SOMMAIRE ===== -->
+        <nav class="docs-toc">
+            <h2 class="docs-toc__title">Sommaire</h2>
+            <ol class="docs-toc__list">
+                <li><a href="#getting-started">🚀 Démarrage rapide</a></li>
+                <li><a href="#config">⚙️ Configuration du projet</a></li>
+                <li><a href="#sprint">🛠️ Analyse du sprint</a></li>
+                <li><a href="#capacity">🗓️ Capacité de l'équipe</a></li>
+                <li><a href="#planification">🧮 Support à la planification</a></li>
+                <li><a href="#team-metrics">📊 Métriques équipe</a></li>
+                <li><a href="#vsm">🚀 VSM (flux de valeur)</a></li>
+                <li><a href="#ai">🤖 Synthèse IA &amp; export</a></li>
+                <li><a href="#lean-metrics">📐 Métriques Lean — pour aller plus loin</a></li>
+                <li><a href="#faq">❓ Questions fréquentes</a></li>
+            </ol>
+        </nav>
+
+        <!-- ===== 1. DÉMARRAGE RAPIDE ===== -->
+        <section class="docs-section" id="getting-started">
+            <h2>🚀 Démarrage rapide</h2>
+            <p>Première utilisation ? Trois étapes suffisent :</p>
+            <ol>
+                <li>
+                    <strong>Configurez votre projet Jira</strong> — Cliquez sur <a href="/config">⚙️ Configuration du projet</a> et sélectionnez votre projet.
+                    Définissez votre board par défaut et vérifiez le workflow (correspondance statuts Jira → catégories OPALE).
+                </li>
+                <li>
+                    <strong>Lancez l'analyse du sprint</strong> — Rendez-vous sur <a href="/sprint">🛠️ Analyse du Sprint</a>, sélectionnez votre projet et votre sprint, puis cliquez sur <em>Analyser</em>.
+                </li>
+                <li>
+                    <strong>Explorez au fur et à mesure</strong> — Les autres pages (métriques équipe, planification, VSM) s'utilisent de la même façon.
+                </li>
+            </ol>
+            <p class="docs-note">
+                💡 Vos sélections (projet, board) sont mémorisées dans votre navigateur.
+                Vous n'avez pas à les ressaisir à chaque visite.
+            </p>
+        </section>
+
+        <!-- ===== 2. CONFIGURATION ===== -->
+        <section class="docs-section" id="config">
+            <h2>⚙️ Configuration du projet</h2>
+            <p>La configuration est <strong>par projet Jira</strong> et est sauvegardée côté serveur (partagée entre tous les utilisateurs de l'outil pour ce projet).</p>
+
+            <div class="docs-config-grid">
+                <div class="docs-config-item">
+                    <h3>⚙️ Projet Jira</h3>
+                    <p>
+                        Sélectionner votre projet Jira (Espace). Cette info sera persistée entre toutes les pages.
+                    </p>
+                </div>
+
+                <div class="docs-config-item">
+                    <h3>📋 Board par défaut</h3>
+                    <p>
+                        Le board présélectionné dans les pages Sprint, Planification et Métriques.<br/>
+                        Si votre projet a plusieurs boards de type Scrum, choisissez celui qui sert pour suivre vos sprints et backlogs.
+                    </p>
+                </div>
+
+                <div class="docs-config-item">
+                    <h3>🛠️ Workflow Jira</h3>
+                    <p>
+                        Associez chaque statut Jira à une catégorie : <strong>Affinage</strong>, <strong>Sprint</strong>, <strong>Terminé</strong>, <strong>Bloqué</strong>.<br/>
+                        Cette correspondance est essentielle pour que les métriques d'atterrissage et de cycle time soient correctes.<br/>
+                        <b>Par défaut, une liste de status est proposée, mais il est possible d'importer son workflow réel (bouton "⤵️ Importer la configuration depuis Jira"
+)</b>
+                    </p>
+                    <p class="docs-note">
+                        ⚠️ Un statut non catégorisé apparaît en <em>Autre</em> dans les graphiques.
+                        Pensez à vérifier ce paramètre après toute évolution de votre workflow Jira.
+                    </p>
+                </div>
+
+                <div class="docs-config-item">
+                    <h3>🏷️ Types de tickets</h3>
+                    <p>
+                        Définissez quels types Jira sont inclus dans les calculs (ex. Story, Bug, Task) et lesquels sont exclus (ex. Epic, Sub-task, Spike).<br/>
+                        Les types exclus n'impactent ni les Story Points ni les comptages.
+                    </p>
+                </div>
+
+                <div class="docs-config-item">
+                    <h3>🚫 Sprints à ignorer</h3>
+                    <p>
+                        Excluez les sprints fictifs, sprints IP, sprints de transition ou tout sprint qui ne représente pas une itération réelle.<br/>
+                        Ils seront masqués des graphiques d'évolution et des calculs de vélocité. Ils ne seront pas non plus pris en compte dans l'historique des sprints affectés à vos tickets.
+                    </p>
+                </div>
+
+                <div class="docs-config-item">
+                    <h3>👥 Équipe</h3>
+                    <p>
+                        Composez la <strong>composition</strong> de votre équipe : nom, rôle (Dév, BA, QA, PO, SM) et dates d'entrée/sortie (facultatives).<br/>
+                        Il alimente l'onglet <strong>Capacité</strong> des Métriques équipe (présence et capacité par sprint).
+                    </p>
+                </div>
+
+                <div class="docs-config-item">
+                    <h3>🔗 Projet parent (Releases &amp; Features)</h3>
+                    <p>
+                        Pour les contextes <strong>SAFe</strong> où les Releases et Features vivent dans un projet Jira distinct de votre équipe : indiquez la clé de ce projet « parent », ainsi que le <strong>nom d'équipe</strong> (champ « Équipe » de Jira) qui filtre les Releases vous concernant.<br/>
+                        Laisser vide si tout se trouve dans le même projet.
+                    </p>
+                </div>
+
+                <div class="docs-config-item">
+                    <h3>🎚️ Configuration de la Vue Simplifiée</h3>
+                    <p>
+                        Permet de masquer les métriques que vous n'utilisez pas, si vous souhaitez alléger l'affichage.<br/>
+                        Ce réglage est <strong>personnel</strong> (stocké dans votre navigateur) et n'affecte pas les autres utilisateurs.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== 3. ANALYSE DU SPRINT ===== -->
+        <section class="docs-section" id="sprint">
+            <h2>🛠️ Analyse du Sprint</h2>
+            <p>
+                Vue centrale pour animer votre <strong>daily</strong> et préparer vos <strong>revues de sprint</strong> et <strong>rétrospectives</strong>.<br/>
+                Elle répond factuellement à la question : <em>"Où en est-on, et quelle direction prenons-nous vis à vis de notre plan initial ?"</em>
+            </p>
+
+            <h3>Métriques disponibles</h3>
+            <div class="docs-metrics-grid">
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">📈</div>
+                    <div>
+                        <strong>Prédictibilité</strong>
+                        <p>
+                            % de Story Points terminés par rapport aux SP planifiés au démarrage du sprint.<br/>
+                            Les bonnes pratiques conseillent de viser un minimum de 80 %.<br/>
+                            <b>Indique la fiabilité de l'estimation de la capacité à faire.</b>
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">🤝</div>
+                    <div>
+                        <strong>Engagement</strong>
+                        <p>
+                            % de tickets du <em>périmètre initial</em> terminés (hors sujets ajoutés en cours de sprint).<br/>
+                            <b>Mesure la tenue des engagements pris en planification.</b>
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">🛬</div>
+                    <div>
+                        <strong>Atterrissage</strong>
+                        <p>
+                            Répartition des tickets par statut Jira (Terminé / En cours / Non démarré / Bloqué).<br/>
+                            <b>Donne une vue instantanée de l'avancement réel du sprint.</b>
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">📊</div>
+                    <div>
+                        <strong>Statistiques du sprint</strong>
+                        <p>
+                            Comprend des métriques utiles sur la bonne santé du sprint (Story Points, Tickets dont l'estimation est tardive ou manquante, Vélocité, âge des tickets et temps d'attente/blocage).<br/>
+                            <b>Donne une vue instantanée de l'avancement réel du sprint.</b>
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">〰️</div>
+                    <div>
+                        <strong>Évolution du périmètre</strong>
+                        <p>
+                            Tickets et Story Points ajoutés ou retirés après le démarrage du sprint.<br/>
+                            <b>Permet de visualiser la dérive du périmètre et d'en discuter en rétrospective.</b>
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">📦</div>
+                    <div>
+                        <strong>Reste à faire</strong>
+                        <p>
+                            Liste des tickets non terminés avec leur statut actuel et leurs Story Points.<br/>
+                            <b>Utile pour le daily, pour identifier les points de blocage et pour anticiper la planification du prochain sprint (reliquat).</b>
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">🎯</div>
+                    <div>
+                        <strong>Objectifs du sprint</strong>
+                        <p>
+                            Complétion (terminés / total) de chaque objectif du sprint.<br/>
+                            Les objectifs sont déduits des étiquettes <code>objectif_N</code> / <code>goal_N</code> / <code>sprint_goal_N</code> posées sur les tickets ; leur titre est repris de la N<sup>e</sup> ligne de la liste du <em>goal</em> du sprint (renseigné dans Jira).
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">💡</div>
+                    <div>
+                        <strong>Amélioration continue et Innovation</strong>
+                        <p>
+                            Tickets de type <em>Innovation</em> / <em>Amélioration continue</em>, ou portant l'étiquette <code>amelio_continue</code>.<br/>
+                            <b>Permet de vérifier la part de capacité investie dans l'amélioration, et pas uniquement dans la production.</b>
+                        </p>
+                    </div>
+                </div>
+                <!-- <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">⏱️</div>
+                    <div>
+                        <strong>Cycle Time (par ticket)</strong>
+                        <p>
+                            Durée réelle entre le passage <em>En cours</em> et <em>Terminé</em> pour chaque ticket.
+                            Exprimé en jours ouvrés. Permet d'identifier les tickets anormalement longs.
+                        </p>
+                        <p class="docs-metric-level">🔵 SM confirmé — indicateur de flux Lean</p>
+                    </div>
+                </div> -->
+            </div>
+
+            <h3>ℹ️ Mise en cache des Sprints clôturés</h3>
+            <p>
+                Pour un sprint clôturé, OPALE affiche une version mise en cache (photo figée à la date de clôture) afin d'éviter des appels API Jira inutiles.<br/>
+                <b>Page Sprint :</b> un bandeau l'indique en haut de page. Vous pouvez forcer un rafraîchissement depuis Jira via le bouton "🔄 Rafraîchir depuis Jira".<br/>
+                <b>Page Métriques :</b> une icône⚡l'indique dans la liste des sprints. Vous pouvez forcer un rafraîchissement depuis Jira via le bouton "🔄 Recalculer depuis Jira".
+            </p>
+        </section>
+
+        <!-- ===== 4. CAPACITE ===== -->
+        <section class="docs-section" id="capacity">
+            <h2>🗓️ Capacité de l'équipe</h2>
+            <p>
+                Permet de calculer la capacité de l'équipe par sprint en renseignant les jours de présence et les jours d'événements de l'équipe.
+            </p>
+            <ul>
+                <li><b>Visualisez la capacité (jours/homme)</b> par personne, par rôle, par sprint, par PI.</li>
+                <li><b>Importer en quelques secondes le fichier des absences</b> du train pour avoir la capacité de tous les sprints de l'année.</li>
+            </ul>
+        </section>
+		
+		
+		
+        <!-- ===== 4. PLANIFICATION ===== -->
+        <section class="docs-section" id="planification">
+            <h2>🧮 Support à la planification</h2>
+            <p>
+                Aide à la préparation du prochain sprint.
+                Affiche le reliquat du sprint actif et les tickets du backlog déjà affectés à des sprints futurs.
+            </p>
+            <ul>
+                <li>Visualisez la capacité disponible (jours/homme) et le delta avec le volume de tickets prévu.</li>
+                <li>Cochez les tickets que vous envisagez d'inclure — le total en Story Points se recalcule en temps réel pour vous aider à ajuster.</li>
+                <li>Vous pouvez ajuster le reste à faire estimé par l'équipe, ainsi que les rééstimer post-mortem ("Points rééstimés (SP final)").</li>
+                <li>
+                    En cas de delta entre la valeur affichée et Jira, il est possible soit de réimporter depuis Jira, soit de mettre à jour Jira.<br/>
+                    En cas de mise à jour Jira, un commentaire automatique sera ajouté au ticket.
+                </li>
+                <li><b>Comparez votre capacité avec le volume planifié pour détecter un sur-engagement avant même le début du sprint.</b></li>
+            </ul>
+        </section>
+
+        <!-- ===== 5. MÉTRIQUES ÉQUIPE ===== -->
+        <section class="docs-section" id="team-metrics">
+            <h2>📊 Métriques équipe</h2>
+            <p>
+                Vue multi-sprints organisée en <strong>4 onglets</strong> : <strong>📊 Sprints</strong>,
+                <strong>🚀 Releases</strong>, <strong>⭐ Features</strong> et <strong>📋 Capacité</strong>.
+            </p>
+
+            <h3>📊 Onglet Sprints</h3>
+            <p>
+                Sélectionnez les <strong>sprints clôturés</strong> à analyser (seuls les sprints terminés donnent des moyennes fiables), puis cliquez sur <em>Calculer les métriques d'équipe</em>.<br/>
+                Une pastille <strong>⚡</strong> signale un sprint déjà en cache (chargement instantané), <strong>⏳</strong> un sprint à charger depuis Jira. Le bouton <em>🔄 Recalculer depuis Jira</em> force le rechargement des sprints cachés ; <em>✋ Stopper le chargement</em> interrompt un calcul trop long (réduisez alors votre sélection avant de relancer).
+            </p>
+
+            <div class="docs-metrics-grid">
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">⚡</div>
+                    <div>
+                        <strong>Vélocité</strong>
+                        <p>
+                            Moyenne des Story Points terminés par sprint.<br/>
+                            Indicateur central pour affiner la planification et la prévisibilité.
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">🤝</div>
+                    <div>
+                        <strong>Engagement</strong>
+                        <p>
+                            Évolution du % de tickets initiaux terminés par sprint.<br/>
+                            Permet de voir si la tenue des engagements s'améliore.
+                        </p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">🚀</div>
+                    <div>
+                        <strong>Temps de traversée</strong>
+                        <p>
+                            <b>🏗️ Lead Time :</b> temps écoulé entre la création du ticket et sa résolution (en jours ouvrés).<br/>
+                            <b>⏱️ Cycle time :</b> temps écoulé entre le démarrage du ticket et sa résolution (en jours ouvrés).<br/>
+                            <b>⌛ Waiting Time :</b> temps cumulés des motifs de blocages et de mises en attente (status ou étiquettes).<br/>
+                            Les vieux tickets révèlent souvent des blocages ou du travail en parallèle excessif.<br/>
+                            Un Lead Time important mais un Cycle Time faible indique souvent un travail prévu trop longtemps en avance (potentiel gaspillage).
+                        </p>
+                        <p class="docs-metric-level">🔵 SM confirmé — indicateur Lean</p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">⏳</div>
+                    <div>
+                        <strong>Temps d'attente</strong>
+                        <p>
+                            Durée passée dans les statuts <em>non actifs</em> (file d'attente, bloqué).<br/>
+                            Un temps d'attente élevé ou récurrent indique des goulots dans le flux de travail.
+                        </p>
+                        <p class="docs-metric-level">🔵 SM confirmé — indicateur de flux</p>
+                    </div>
+                </div>
+                <div class="docs-metric-card">
+                    <div class="docs-metric-card__icon">📈</div>
+                    <div>
+                        <strong>Cycle Time par Estimation</strong>
+                        <p>
+                            Distribution du temps de réalisation de chaque ticket sur la période.<br/>
+                            Visualise la variabilité du flux et permet d'identifier des points d'amélioration, notamment en terme d'estimation par type de travail.
+                        </p>
+                        <p class="docs-metric-level">🔵 SM confirmé — indicateur de flux</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Jours/homme &amp; capacité</h3>
+            <p>
+                Le nombre de <strong>jours/homme</strong> disponibles par sprint (congés/absences déduits, hors PO et SM) permet une <strong>vélocité normalisée</strong> plus fiable.
+                Vous pouvez le saisir directement dans le tableau <em>Détail par sprint</em>, <strong>ou</strong> le laisser calculer automatiquement par l'onglet <strong>Capacité</strong> : si une grille de capacité existe pour le sprint, sa valeur <strong>fait foi</strong> et le champ devient verrouillé (🔒).
+            </p>
+
+            <h3>🚀 Onglet Releases</h3>
+            <p>
+                Flux de valeur des <strong>Releases et Versions</strong> Jira démarrées ou terminées sur la période des sprints sélectionnés.<br/>
+                Cartes d'en-tête (Terminées/Total, Lead/Cycle/Waiting Time, Flow Efficiency) et tableau détaillé. Vous pouvez <strong>inclure/exclure</strong> chaque ligne (recalcul en direct), <em>Recalculer depuis Jira</em>, ou <em>Ajouter jusqu'à aujourd'hui</em>. Le lien <em>Analyse →</em> ouvre la page VSM par Release.
+            </p>
+
+            <h3>⭐ Onglet Features</h3>
+            <p>
+                Même principe pour les <strong>Features</strong> de la période (projet courant + projet parent, filtrées sur votre équipe). Le lien <em>Analyse →</em> ouvre la page VSM par Feature.
+            </p>
+
+            <h3>📋 Onglet Capacité</h3>
+            <p>
+                Calcule la <strong>capacité réelle</strong> de l'équipe par sprint, à partir de la <strong>composition</strong> configurée dans <a href="/config">⚙️ Configuration</a> (section Équipe).
+            </p>
+            <ul>
+                <li>La grille présente une ligne par <strong>jour ouvré</strong> du sprint et une colonne par membre, regroupés par rôle (Dév / BA / QA / PO / SM). Les jours fériés et hors période de présence du membre sont grisés.</li>
+                <li>Saisissez la <strong>présence</strong> de chaque membre (1 = présent, 0 = absent, 0,5 = demi-journée) et les <strong>événements</strong> d'équipe du jour (planif, démo, rétro…), déduits de la capacité.</li>
+                <li>La <strong>capacité à faire</strong> = (jours de présence − événements) × ratio. Les rôles <strong>Dév / BA / QA</strong> portent la capacité ; <strong>PO / SM</strong> comptent en présence mais pas en capacité.</li>
+                <li>La <strong>capacité à faire</strong> (donc hors PO et SM) alimente automatiquement les <strong>jours/homme</strong> des pages Sprint et Métriques. Un tableau d'<strong>agrégation par PI</strong> additionne les sprints choisis (avec et sans itération IP).</li>
+            </ul>
+            <h4>📥 Import des absences depuis Excel</h4>
+            <p>
+                Le bouton <strong>« 📥 Importer les absences »</strong> remplit la présence de plusieurs sprints d'un coup à partir d'un fichier <strong>.xlsx</strong> (matrice mensuelle des congés).
+            </p>
+            <ul>
+                <li>Les <strong>noms</strong> du fichier sont rapprochés de la composition dans OPALE (correspondance <strong>exacte, insensible aux accents et à la casse</strong> — « Loic » ↔ « Loïc »). Les noms non reconnus sont ignorés et listés dans le récap.</li>
+                <li>Une cellule non vide = absence (<code>1/2A</code> ou <code>0.5</code> = demi-journée) ; une cellule vide = présent. <strong>Le fichier fait foi sur ses dates couvertes</strong> : une date non listée efface une absence précédemment saisie ; les dates <strong>hors</strong> de la plage du fichier ne sont pas touchées.</li>
+                <li>Week-ends, fériés et jours hors période du membre sont ignorés. Le fichier importé est <strong>supprimé automatiquement</strong> après traitement.</li>
+                <li>Un récap indique les membres reconnus / non reconnus, les jours importés, les cellules ignorées et les onglets lus/masqués. Un fichier d'<strong>exemple</strong> est téléchargeable depuis la fenêtre d'import.</li>
+            </ul>
+        </section>
+
+        <!-- ===== 6. VSM ===== -->
+        <section class="docs-section" id="vsm">
+            <h2>🚀 VSM — Flux de valeur</h2>
+            <p>
+                Les pages <strong>VSM par Release / Version</strong> et <strong>VSM par Feature</strong> offrent une vue du flux de valeur au-delà du sprint.<br/>
+                Elles s'adressent principalement aux SM travaillant dans un contexte SAFe ou avec des livrables multi-sprints.
+            </p>
+            <ul>
+                <li>
+                    <strong>VSM par Release / Version</strong> — Analyse le flux de valeur d'une release Jira ou d'une version fixe.<br/>
+                    Visualise le temps de traversée des tickets à travers le workflow, de la création à la livraison.
+                </li>
+                <li>
+                    <strong>VSM par Feature</strong> — Même analyse à l'échelle d'une Feature (Epic de niveau programme dans SAFe).<br/>
+                    Utile pour mesurer le lead time d'une fonctionnalité bout-en-bout.
+                </li>
+                <li>
+                    <strong>Métriques du PI</strong> — Vue d'ensemble d'un Program Increment (SAFe).
+                </li>
+            </ul>
+            <!-- <p class="docs-note">
+                💡 Si vous n'utilisez pas SAFe ni les Versions Jira, ces pages ne vous seront probablement pas utiles dans un premier temps.
+            </p> -->
+        </section>
+
+        <!-- ===== IA & EXPORT ===== -->
+        <section class="docs-section" id="ai">
+            <h2>🤖 Synthèse IA &amp; export de prompt</h2>
+            <p>
+                Les pages <strong>Analyse du Sprint</strong> et <strong>Métriques équipe</strong> proposent deux aides à l'analyse, toutes deux fondées sur un <strong>digest chiffré et anonyme</strong> de vos métriques (aucun ticket brut, aucun nom).
+            </p>
+            <div class="docs-config-grid">
+                <div class="docs-config-item">
+                    <h3>📄 Export de prompt</h3>
+                    <p>
+                        Télécharge un fichier <strong>.txt</strong> (prompt + métriques anonymes) prêt à coller dans l'assistant IA de votre choix (Copilot, Claude, ChatGPT, Gemini…).<br/>
+                        <strong>Toujours disponible</strong>, même si la synthèse IA locale n'est pas activée.
+                    </p>
+                </div>
+                <div class="docs-config-item">
+                    <h3>✨ Synthèse IA locale</h3>
+                    <p>
+                        Génère une analyse en langage naturel de vos sprints via un modèle <strong>local, fermé et non connecté à Internet</strong>.<br/>
+                        Vous pouvez ajouter des <em>indications</em> (contexte, angle d'analyse). Le résultat est <strong>à relire et valider</strong> par le Scrum Master.<br/>
+                        <br/>
+                        <em>ℹ️Fonctionnalité désactivée par défaut, réservée à la version standalone d'OPALE, et à la condition que vous ayiez installé et configuré votre propre LLM local.</em>
+                    </p>
+                </div>
+            </div>
+            <p class="docs-note">
+                🔒 Dans les deux cas, seules des <strong>données agrégées et anonymisées</strong> sont utilisées — jamais le détail des tickets ni des personnes.
+            </p>
+        </section>
+
+        <!-- ===== 7. MÉTRIQUES LEAN ===== -->
+        <section class="docs-section" id="lean-metrics">
+            <h2>📐 Métriques Lean — pour aller plus loin</h2>
+            <p>
+                Ces métriques sont moins intuitives que la vélocité ou l'atterrissage, mais très puissantes pour comprendre et améliorer le système de travail.
+            </p>
+
+            <div class="docs-lean-grid">
+                <div class="docs-lean-card">
+                    <h3>⏱️ Cycle Time</h3>
+                    <p>
+                        Temps entre le début du travail effectif (<em>En cours</em>) et la fin (<em>Terminé</em>).
+                        Mesure la durée de réalisation d'un ticket.
+                    </p>
+                    <p>
+                        <strong>Ce que ça révèle :</strong> si le cycle time est élevé ou très variable, l'équipe fait trop de choses en parallèle (trop de WIP) ou les tickets sont trop gros.
+                    </p>
+                    <p><strong>Levier :</strong> réduire la taille des tickets, limiter le WIP.</p>
+                </div>
+
+                <div class="docs-lean-card">
+                    <h3>⏳ Temps d'attente</h3>
+                    <p>
+                        Temps passé dans des statuts inactifs (file d'attente, bloqué, en attente de review).<br/>
+                        Ce temps ne produit pas de valeur et génére du multi-tasking (s'éparpiller entre plusieurs sujets est toujours moins efficace que rester focus sur un sujet à la fois).
+                    </p>
+                    <p>
+                        <strong>Ce que ça révèle :</strong> des goulots d'étranglement dans le workflow (ex. code review systématiquement lente, tickets bloqués faute de réponse).
+                    </p>
+                    <p><strong>Levier :</strong> identifier et réduire les files d'attente, améliorer les handoffs entre membres de l'équipe.</p>
+                </div>
+
+                <div class="docs-lean-card">
+                    <h3>👶 Âge des tickets</h3>
+                    <p>
+                        Ancienneté d'un ticket encore ouvert, calculée depuis son passage à <em>En cours</em>.<br/>
+                        Plus un ticket vieillit, plus il est coûteux à finir.
+                    </p>
+                    <p>
+                        <strong>Ce que ça révèle :</strong> du travail abandonné, des tickets bloqués non visibles, du multitâche excessif.
+                    </p>
+                    <p><strong>Levier :</strong> finir avant de commencer (<em>Stop starting, start finishing</em>).</p>
+                </div>
+
+                <div class="docs-lean-card">
+                    <h3>🔀 Throughput</h3>
+                    <p>
+                        Nombre de tickets terminés par sprint (ou par semaine), indépendamment des Story Points.
+                        Mesure le débit réel du système.
+                    </p>
+                    <p>
+                        <strong>Ce que ça révèle :</strong> la capacité stable de l'équipe à livrer des éléments de valeur, sans biais lié à l'estimation.
+                    </p>
+                    <p><strong>Levier :</strong> visible sur la page Métriques équipe via la vélocité en nombre de tickets.</p>
+                </div>
+            </div>
+
+            <p class="docs-note">
+                💡 Ces métriques sont complémentaires et se lisent ensemble.
+                Un cycle time élevé avec un temps d'attente élevé indique un problème de flux, pas un problème d'équipe.
+                Utilisez-les en rétrospective pour lancer des expérimentations d'amélioration continue.
+            </p>
+        </section>
+
+        <!-- ===== 8. FAQ ===== -->
+        <section class="docs-section" id="faq">
+            <h2>❓ Questions fréquentes</h2>
+
+            <div class="docs-faq">
+                <div class="docs-faq-item">
+                    <h3>Les données ne s'affichent pas, sont vides ou ne semblent pas fiables.</h3>
+                    <p>
+                        Vérifiez d'abord que votre projet est bien configuré (workflow, types de tickets...).<br/>
+                        Si le workflow n'est pas renseigné, les statuts Jira ne sont pas tous reconnus et les métriques restent vides ou ne sont pas fiables (basées sur des statuts par défaut).
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>J'ai bien configuré mon projet, mais des données semblent manquantes ou obsolètes. Elles ne correspondent pas à ce que je vois dans Jira.</h3>
+                    <p>
+                        Un sprint clos est mis en cache (icône⚡ou🗄️) lors de sa première analyse, afin de limiter les appels serveurs et gagner en rapiditié d'affichage.<br/>
+                        Si des informations ont été modifiées dans Jira depuis la mise en cache, ou en cas de doute, utilisez le bouton "🔄 Rafraîchir depuis Jira" pour resynchroniser avec Jira.<br/>
+                        Sinon, contactez moi pour que l'on regarde ensemble !
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>Les Story Points sont à 0 sur plusieurs tickets</h3>
+                    <p>
+                        OPALE lit les estimations directement depuis Jira.<br/>
+                        Si des tickets ne sont pas estimés dans Jira, ils apparaîtront sans valeur. S'ils sont explicitement estimés à 0, ils apparaîtront à 0.
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>Un sprint fictif (exemple un sprint "Prochaines priorités"), ou une Itération IP, fausse mes métriques</h3>
+                    <p>
+                        Ajoutez-le dans la liste des <em>Sprints à ignorer</em> dans <a href="/config">⚙️ Configuration du projet</a>.<br/>
+                        Il sera exclu de tous les calculs et graphiques.
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>La prédictibilité et l'engagement cibles sont à 80 % — comment changer cette valeur ?</h3>
+                    <p>
+                        La valeur minimale de 80 % est une référence courante en Scrum et SAFe. Ce sont les frameworkfs eux-même qui préconisent de se stabiliser entre 80 et 100%.<br/>
+                        Si vous souhaitez réellement la changer, n'hésitez pas à me contacter 😉 (lien dans le bas de page).
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>Mes métriques "favorites" ont disparu</h3>
+                    <p>
+                        Les préférences de métriques sont stockées dans votre navigateur (localStorage).<br/>
+                        Vider le cache du navigateur ou changer de navigateur réinitialise ces préférences.
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>La configuration que j'ai faite est-elle visible par d'autres ?</h3>
+                    <p>
+                        La <a href="/config">Configuration projet</a> (board par défaut, workflow, types, sprints ignorés, équipe, projet parent...) est stockée sur le serveur : elle est <strong>partagée</strong> entre tous les utilisateurs de l'outil <u>pour ce projet</u>.<br/>
+                        Les préférences d'affichage des métriques sont, elles, <strong>personnelles</strong> (navigateur uniquement).
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>Ma capacité importée depuis Excel ne s'affiche pas sur tous les sprints</h3>
+                    <p>
+                        L'import ne met à jour que les sprints <strong>couverts</strong> par la plage de dates du fichier, et uniquement les membres <strong>reconnus</strong> dans votre composition d'équipe (section Équipe de la <a href="/config">Configuration</a>).<br/>
+                        Assurez vous que les sprints et leurs dates sont bien renseignés <u>dans Jira</u>.<br/>
+                        Vérifiez le récap affiché après l'import (noms non reconnus, onglets masqués ignorés) : il vous indique ce qui a été importé, et ce qui n'a pas pu l'être.
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>Où sont stockées ces métriques ? Mes données ?</h3>
+                    <p>
+                        Tout d'abord, il n'y a rien de stocké dans le Cloud ou chez Elon Musk : tout ce qui est stocké l'est en local, dans les dossiers de l'application, sous forme de fichiers .json<br/>
+                        <br/>
+                        Les seules données "personnelles" qui sont stockées sont l'email et le token API Jira <u>de l'administrateur d'OPALE</u>. Elles sont dans un fichier .env qui n'est <u>pas versionné</u> (il est présent uniquement sur le serveur).<br/>
+                        C'est nécessaire pour qu'OPALE puisse communiquer avec Jira, pour récupérer et calculer les métriques affichées.<br/>
+                        <br/>
+                        - La mise en cache des métriques des sprints, des releases, des features etc, se fait via des fichiers .json, dans le dossier cache/<br/>
+                        - La configuration générale de l'application est stockée dans le dossier config_files/<br/>
+                        - la configuration de votre projet (y compris la composition de votre équipe : nom prénom, date d'entrée/sortie), est stockée dans le dossier config_files/teams/<br/>
+                        <br/>
+                        Si vous voulez y accéder pour les vérifier, ou les supprimer, contactez moi !
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>L'outil OPALE envoit-il mes données Jira à l'extérieur ? Utilise-t-il l'IA en autonomie ?</h3>
+                    <p>
+                        Non. L'<strong>export de prompt</strong> produit un simple fichier texte que <em>vous</em> choisissez (ou non) de coller dans un outil externe.<br/>
+                        Il contient uniquement une proposition de prompt par défaut et des <strong>métriques agrégées et anonymes</strong> (pas d'objectifs de sprint -seulement leur nombre, pas de titre de ticket Jira, pas de nom de feature...).<br/>
+                        Vous pouvez (et devriez) <strong>vérifier le contenu du fichier</strong>, et éventuellement le modifier, <strong>avant de le copier dans une IA</strong>. <br/>
+                        Assurez-vous aussi d'utiliser une IA "compliant" avec la stratégie d'entreprise (ex: Copilot avec votre compte d'entreprise).<br/>
+                        <br/>
+                        Quant à la <strong>synthèse IA locale</strong> (désactivée par défaut et non disponible sur la version serveur d'OPALE), elle utilise un modèle fermé, installé en local sur l'ordinateur, et non connecté à Internet.<br/>
+                        <em>ℹ️Cette fonctionnalité est réservée à la version standalone d'OPALE, et à la condition que vous ayiez installé et configuré votre propre LLM local. Si cette fonctionnalité vous intéresse, lisez mon Readme spécifique "install_local_llm".</em><br/>
+                        <br/>
+                        <b>💡Important :</b> L'accès à OPALE se fait exclusivement par la connexion VPN de l'entreprise. Aucun utilisateur extérieur ne peut donc y accéder.
+                    </p>
+                </div>
+                <div class="docs-faq-item">
+                    <h3>Je n'ai pas trouvé mon bonheur : j'ai encore un problème, j'ai remarqué un bug ou une incohérence, je veux faire une suggestion ou simplement parler du projet.</h3>
+                    <p>
+                        Contactez-moi ! <?php include __DIR__ . '/../footer.phtml'; ?>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

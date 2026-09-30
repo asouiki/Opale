@@ -1,0 +1,676 @@
+{
+    "cached_at": 1780661684,
+    "metrics_version": 9,
+    "data": {
+        "sprintId": "23326",
+        "projectKey": "LIEVRE",
+        "boardId": "1153",
+        "sprintData": {
+            "id": 23326,
+            "self": "https:\/\/imsa.atlassian.net\/rest\/agile\/1.0\/sprint\/23326",
+            "state": "closed",
+            "name": "PI#8 IT3",
+            "startDate": "2026-05-07T13:22:14.835Z",
+            "endDate": "2026-05-28T23:00:00.000Z",
+            "completeDate": "2026-06-01T12:11:01.618Z",
+            "createdDate": "2026-03-18T08:30:11.451Z",
+            "originBoardId": 1153,
+            "goal": "Livrer en production la s\u00e9curisation du KDS10"
+        },
+        "issuesCount": 14,
+        "landingByStatus": [
+            {
+                "status": "Sujet \u00e0 venir",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 1.8,
+                "averageDays": 0.1
+            },
+            {
+                "status": "\u00c0 faire",
+                "category": "refinement",
+                "count": 2,
+                "storyPoints": 1,
+                "totalDays": 44.3,
+                "averageDays": 3.2
+            },
+            {
+                "status": "A pr\u00e9senter \u00e0 l'\u00e9quipe",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 18.3,
+                "averageDays": 1.3
+            },
+            {
+                "status": "En cours",
+                "category": "sprint",
+                "count": 6,
+                "storyPoints": 1,
+                "totalDays": 72,
+                "averageDays": 5.1
+            },
+            {
+                "status": "Validation PO",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 23.5,
+                "averageDays": 1.7
+            },
+            {
+                "status": "Termin\u00e9(e)",
+                "category": "done",
+                "count": 5,
+                "storyPoints": 4,
+                "totalDays": 34.3,
+                "averageDays": 2.4
+            },
+            {
+                "status": "EN ATTENTE",
+                "category": "waiting",
+                "count": 1,
+                "storyPoints": 0,
+                "totalDays": 13.3,
+                "averageDays": 1
+            }
+        ],
+        "objectiveGroups": [
+            {
+                "label": "Objectif",
+                "title": "Objectif",
+                "issues": [
+                    {
+                        "key": "LIEVRE-2687",
+                        "summary": "S\u00e9curisation du KDS10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2687",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-471",
+                        "parentSummary": "[Dette] KDS10 : s\u00e9curisation de la reprise suite \u00e0 plantage",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Objectif",
+                            "PI7",
+                            "securKDS10"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        ],
+        "features": [
+            {
+                "key": "TCRE-258",
+                "summary": "E-707 Transmission des cr\u00e9ances conventionnelles aux organismes ext\u00e9rieurs (DSN)"
+            },
+            {
+                "key": "TCRE-470",
+                "summary": "Int\u00e9gration des DSN : lever certains contr\u00f4les GE historiques"
+            },
+            {
+                "key": "TCRE-471",
+                "summary": "[Dette] KDS10 : s\u00e9curisation de la reprise suite \u00e0 plantage"
+            },
+            {
+                "key": "TCRE-479",
+                "summary": "[EPIC AAF CSP] Flux CSP : alimentation des donn\u00e9es pr\u00e9voyance dans le cas d'un individu multi contrat"
+            },
+            {
+                "key": "TCRE-576",
+                "summary": "E-775 Gestion du num\u00e9ro de fraction en DSN (CT 2027)"
+            },
+            {
+                "key": "TCRE-625",
+                "summary": "[Qualification] Tesa S : rectification de cotisations"
+            }
+        ],
+        "stats": {
+            "issuesWithoutStoryPoints": 8,
+            "estimatedAfterAdd": {
+                "count": 1,
+                "storyPoints": 2,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-3319",
+                        "summary": "REJEU petit pool post for\u00e7age 034",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3319",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "totalStoryPoints": 6,
+            "storyPointsRange": {
+                "min": 1,
+                "max": 2,
+                "median": 1,
+                "average": 1.2
+            },
+            "scopeChange": {
+                "plannedTicketCount": 12,
+                "currentTicketCount": 14,
+                "ticketDelta": 2,
+                "ticketGrowthPercent": 16.7,
+                "plannedStoryPoints": 5,
+                "currentStoryPoints": 6,
+                "storyPointsDelta": 1,
+                "storyPointsGrowthPercent": 20,
+                "addedStoryPointsPercent": 20,
+                "nouvellePrioStoryPointsPercent": 0
+            },
+            "addedDuringSprint": {
+                "count": 2,
+                "storyPoints": 1,
+                "remainingStoryPoints": 0.5,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-3170",
+                        "summary": "Assistance Socle Donn\u00e9e contrat Prevoyance",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3170",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-479",
+                        "parentSummary": "[EPIC AAF CSP] Flux CSP : alimentation des donn\u00e9es pr\u00e9voyance dans le cas d'un individu multi contrat",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3376",
+                        "summary": "Rejeu des cotisations 140 et 141",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3376",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 0.5,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "removedDuringSprint": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "nouvellePrio": {
+                "count": 0,
+                "storyPoints": 0,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": []
+            },
+            "continuousImprovement": [],
+            "doneTickets": {
+                "count": 5,
+                "storyPoints": 4,
+                "remainingStoryPoints": 2,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-2995",
+                        "summary": "Test sur la Cr\u00e9ance Transmise au LIEVRE",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2995",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-258",
+                        "parentSummary": "E-707 Transmission des cr\u00e9ances conventionnelles aux organismes ext\u00e9rieurs (DSN)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2725",
+                        "summary": "[Assistance Qualification] Tesa S : rectification de cotisations",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2725",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 2,
+                        "parentKey": "TCRE-625",
+                        "parentSummary": "[Qualification] Tesa S : rectification de cotisations",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3091",
+                        "summary": "Actions pr\u00e9paratoires aux rejeux concernant le PM tiers inconnu sur cr\u00e9ances Pr\u00e9voyance",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3091",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3182",
+                        "summary": "[LIEVRE][TIERS PREVOYANCE INCONNU] - Suivi mise \u00e0 jour convention",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3182",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3319",
+                        "summary": "REJEU petit pool post for\u00e7age 034",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3319",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 14,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "reliquat": {
+                "count": 9,
+                "storyPoints": 2,
+                "remainingStoryPoints": 0.5,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "LIEVRE-2201",
+                        "summary": "Lev\u00e9e les Anomalies bloquantes GE pour faciliter l'int\u00e9gration des validit\u00e9s",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2201",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-470",
+                        "parentSummary": "Int\u00e9gration des DSN : lever certains contr\u00f4les GE historiques",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "PI8"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2687",
+                        "summary": "S\u00e9curisation du KDS10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2687",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-471",
+                        "parentSummary": "[Dette] KDS10 : s\u00e9curisation de la reprise suite \u00e0 plantage",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Objectif",
+                            "PI7",
+                            "securKDS10"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3170",
+                        "summary": "Assistance Socle Donn\u00e9e contrat Prevoyance",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3170",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-479",
+                        "parentSummary": "[EPIC AAF CSP] Flux CSP : alimentation des donn\u00e9es pr\u00e9voyance dans le cas d'un individu multi contrat",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3306",
+                        "summary": "Etude d\u00e9taill\u00e9e sur la gestion de la fraction dans le Li\u00e8vre",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3306",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "TCRE-576",
+                        "parentSummary": "E-775 Gestion du num\u00e9ro de fraction en DSN (CT 2027)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3312",
+                        "summary": "REJEU pour TIERS PREVOYANCE INCONNU",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3312",
+                        "issueType": "Story",
+                        "status": "EN ATTENTE",
+                        "statusCategory": "waiting",
+                        "statusRank": 9223372036854775807,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3181",
+                        "summary": "Assistance Qualif TESA + r\u00e9aligner les r\u00e8gles de calcul des cotisations sociales partie 2",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3181",
+                        "issueType": "Story",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "refinement",
+                        "statusRank": 3,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 42,
+                        "labels": [
+                            "PI8"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3242",
+                        "summary": "[LIEVRE] [AUTOMATISATION TNR]  - mise en place de l'automatisation des TNR",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3242",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-3376",
+                        "summary": "Rejeu des cotisations 140 et 141",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-3376",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 11,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": 0.5,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "LIEVRE-2336",
+                        "summary": "Mettre \u00e0 jour de board POST-DOD",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/LIEVRE-2336",
+                        "issueType": "Story",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "refinement",
+                        "statusRank": 3,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        },
+        "predictability": {
+            "startStoryPoints": 5,
+            "completedStoryPoints": 4,
+            "startTicketCount": 12,
+            "completedTicketCount": 5,
+            "completedFromStartTicketCount": 5,
+            "targetPercent": 80,
+            "targetStoryPoints": 4,
+            "achievedPercent": 80,
+            "isReached": false,
+            "engagementPercent": 41.7,
+            "isEngagementReached": false
+        }
+    }
+}

@@ -1,0 +1,92 @@
+<table>
+    <thead>
+        <tr>
+            <th>Priorité</th>
+            <th>Type</th>
+            <th>Key</th>
+            <th>Titre</th>
+            <th>Statut</th>
+            <th>Date de création</th>
+            <th>Date de 1er ajout à un sprint</th>
+            <th>1er passage à En cours</th>
+            <th>Date de résolution (Terminé)</th>
+            <th>Lead time métier</th>
+            <th>Cycle time équipe</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($view->getIssues() as $issue): ?>
+            <?php /** @var \App\Model\Issue $issue */ ?>
+            <tr>
+                <td><img src="<?= htmlspecialchars($issue->getPriorityIcon() ?? '') ?>" /><?= htmlspecialchars($issue->getPriorityName() ?? '—'); ?></td>
+                <td><img src="<?= htmlspecialchars($issue->getIssueTypeIcon() ?? '') ?>" /><?= htmlspecialchars($issue->getIssueTypeName() ?? '—'); ?></td>
+                <td><strong><?= $issue->getKey(); ?></strong></td>
+                <td><a href="<?= $issue->getIssueUrl(); ?>" target="_blank"><?= htmlspecialchars($issue->getSummary()); ?></a></td>
+                <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
+                <td><?= $issue->getCreatedDate() ?? '—'; ?></td>
+                <td>
+                    <?= $issue->getFirstAddToSprintDate() ?? '—'; ?><br />
+                    (<?= $issue->getFirstSprint() ?? ''; ?>)
+                </td>
+                <td><?= $issue->getFirstInProgressDate() ?? '—'; ?></td>
+                <td><?= $issue->getDoneDate() ?? '—'; ?></td>
+                <td><?= $issue->getLeadTime() > 0 ? $issue->getLeadTime() . ' jours' : '—'; ?></td>
+                <td><?= $issue->getCycleTime() > 0 ? $issue->getCycleTime() . ' jours' : '—'; ?></td>
+            </tr>
+            <tr>
+                <td colspan="11">
+                    <!-- Affichage des étiquettes "attente", indiquant un blocage temporaire -->
+                    <?php if ($issue->getWaitingTimes()): ?>
+                        ⏳ Mises en attente :
+                        <?php foreach ($issue->getWaitingTimes() as $label => $days): ?>
+                            <span class="badge red"><?= $view->getWaitingCauseIcon($label); ?><?= htmlspecialchars($label); ?> — <?= round($days, 1); ?> jours</span>
+                        <?php endforeach; ?>
+                        <?php if (count($issue->getWaitingTimes()) > 1): ?>
+                            => Total : <strong><?= round($issue->getTimeSpentInWaiting(), 1); ?> jours d'attente</strong>
+                            <em>(un jour recouvert par plusieurs causes n'est compté qu'une fois)</em>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <!-- Détails temps par statut -->
+                    <details>
+                        <summary>Détails du temps passé par statut, hors Terminés</summary>
+                        <ul>
+                            <?php $issueTimelineData = $issue->getTimeByStatus(true); ?>
+                            <?php if (is_array($issueTimelineData['workflowStatuses']) && !empty($issueTimelineData['workflowStatuses'])): ?>
+                                <?php foreach ($issueTimelineData['workflowStatuses'] as $status => $days): ?>
+                                    <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+
+                            <?php if (is_array($issueTimelineData['otherStatuses']) && !empty($issueTimelineData['otherStatuses'])): ?>
+                                <br />
+                                Autres statuts :
+                                <?php foreach ($issueTimelineData['otherStatuses'] as $status => $days): ?>
+                                    <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+
+                            <?php if (count($issue->getRevertCount()) > 0): ?>
+                                <br />
+                                🔙 Nombre de retours arrières dans les statuts :
+                                <?php foreach ($issue->getRevertCount() as $status => $count): ?>
+                                    <li><?= $view->normalizeStatusName($status); ?> : <?= $count; ?> fois</li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </ul>
+                    </details>
+
+                    <!-- Détails temps par catégorie de statut -->
+                    <details>
+                        <summary>Totaux temps passé par étapes du cycle de vie du ticket</summary>
+                        <ul>
+                            <li>🧠 Affinage : <strong><?= $issue->getTimeSpentInRefinement(); ?> jours</strong></li>
+                            <li>⚙️ Réal + Qualif : <strong><?= $issue->getTimeSpentInSprint(); ?> jours</strong></li>
+                            <li>❓ Autre : <strong><?= $issue->getTimeSpentInOther(); ?> jours</strong></li>
+                        </ul>
+                    </details>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

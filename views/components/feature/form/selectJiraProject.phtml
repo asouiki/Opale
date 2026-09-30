@@ -1,0 +1,364 @@
+<?php
+
+/**
+ * Composant générique de sélection Projet + Item (Version ou Feature)
+ *
+ * @var string $itemApiEndpoint  URL API des items avec placeholder {key} pour la project key
+ * @var string $formAction       Action du formulaire de soumission
+ * @var string $inputName        Nom du champ soumis (contient l'ID numérique de l'item)
+ * @var string $storageKey       Clé localStorage pour la persistance (différente par page)
+ * @var bool   $enablePiFilter   Active le filtre par Planning Interval (false par défaut)
+ * @var bool   $enableTeamFilter Active le filtre par équipe (checkboxes, false par défaut)
+ */
+?>
+<div x-data="jiraProjectSearch()" class="jira-project-search">
+    <label for="project-search-<?= htmlspecialchars($storageKey) ?>">
+        <strong>Sélectionner mon Projet Jira : </strong>
+    </label>
+
+    <div class="project-search-field">
+        <input
+            id="project-search-<?= htmlspecialchars($storageKey) ?>"
+            type="text"
+            x-model="query"
+            @input.debounce.300ms="search()"
+            @focus="open = true"
+            class="input-large"
+            placeholder="Mon projet"
+            autocomplete="off" />
+
+        <div class="project-dropdown"
+            x-show="open && projects.length"
+            @click.outside="open = false">
+            <template x-for="project in projects" :key="project.id">
+                <div @click="select(project)" class="hover-bg jira-search__option">
+                    <strong x-text="project.key"></strong>
+                    <span x-text="' – ' + project.name"></span>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <label class="persist-toggle">
+        <input type="checkbox" x-model="persistShared">
+        Persister cette sélection sur les autres pages (Feature / PI)
+    </label>
+
+    <div x-show="selected">
+        <div class="jira-search__selected">
+            ✅ Projet sélectionné : <strong x-text="selected?.key"></strong>
+            <button type="button" @click="reset()" class="jira-search__reset">
+                🔄 Changer de projet
+            </button>
+        </div>
+
+        <!-- Filtre PI — affiché uniquement si $enablePiFilter est actif -->
+        <?php if ($enablePiFilter ?? false): ?>
+            <div x-show="items.length" class="jira-search__block">
+                <label><strong>Filtrer par PI :</strong></label>
+                <input
+                    type="number"
+                    min="1"
+                    x-model="piFilter"
+                    class="input jira-search__input-sm"
+                    placeholder="Ex: 7" />
+                <button
+                    type="button"
+                    x-show="piFilter !== ''"
+                    @click="piFilter = ''"
+                    class="jira-search__clear">
+                    ✕ Effacer
+                </button>
+                <span><em>Affiche les Features qui sont, ou ont été, affectées à ce PI</em></span>
+                <span
+                    x-show="piFilter !== '' && filteredItems.length === 0"
+                    class="jira-search__inline-warn">
+                    Aucune feature pour ce PI
+                </span>
+            </div>
+        <?php endif; ?>
+
+        <!-- Filtre Équipe — affiché uniquement si $enableTeamFilter est actif -->
+        <?php if ($enableTeamFilter ?? false): ?>
+            <div x-show="availableTeams.length" class="team-filter jira-search__block">
+                <label class="team-filter-label"><strong>Filtrer par équipe :</strong></label>
+                <label class="team-filter-option team-filter-all">
+                    <input
+                        type="checkbox"
+                        :checked="teamFilter.length === availableTeams.length && availableTeams.length > 0"
+                        @change="toggleAllTeams($event)">
+                    <em>Sélectionner toutes</em>
+                </label>
+                <template x-for="team in availableTeams" :key="team">
+                    <label class="team-filter-option">
+                        <input type="checkbox" :value="team" x-model="teamFilter">
+                        <span x-text="team"></span>
+                    </label>
+                </template>
+            </div>
+        <?php endif; ?>
+
+        <div x-show="filteredItems.length" class="jira-search__block">
+            <form method="POST" action="<?= htmlspecialchars($formAction) ?>" class="jira-search__block">
+                <label><strong>Sélectionner :</strong></label>
+                <select
+                    name="<?= htmlspecialchars($inputName) ?>"
+                    class="input"
+                    required
+                    @change="$el.form.requestSubmit()">
+                    <option value="" disabled selected>-- Choisir --</option>
+                    <template x-for="item in filteredItems" :key="item.id">
+                        <option :value="item.id" x-text="item.label"></option>
+                    </template>
+                </select>
+            </form>
+        </div>
+
+        <div x-show="!itemLoading && filteredItems.length === 0 && !itemError"
+            class="jira-search__empty">
+            ⚠️ Aucun élément trouvé pour ce projet
+        </div>
+
+        <div x-show="itemLoading" aria-busy="true">⏳ Chargement…</div>
+
+        <div x-show="error" class="inline-error">❌ <span x-text="error"></span></div>
+        <div x-show="itemError" class="inline-error">❌ <span x-text="itemError"></span></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const ITEM_API_ENDPOINT = <?= json_encode($itemApiEndpoint) ?>;
+        const LOCAL_KEY = <?= json_encode($storageKey) ?>;
+        const POOL_KEY = 'jira_pool_train';
+        const ENABLE_PI_FILTER = <?= json_encode($enablePiFilter ?? false) ?>;
+        const ENABLE_TEAM_FILTER = <?= json_encode($enableTeamFilter ?? false) ?>;
+
+        window.jiraProjectSearch = function() {
+            return {
+                query: '',
+                open: false,
+                projects: [],
+                selected: null,
+                loading: false,
+                error: null,
+                items: [],
+                itemLoading: false,
+                itemError: null,
+                piFilter: '',
+
+                /** Équipes sélectionnées dans le filtre checkboxes (toutes par défaut). */
+                teamFilter: [],
+
+                /**
+                 * Filtre équipe restauré depuis le localStorage, en attente d'application.
+                 * Appliqué une seule fois après le chargement des items (les équipes
+                 * disponibles n'étant connues qu'à ce moment), puis remis à null.
+                 */
+                _pendingTeamFilter: null,
+
+                /** Propage la sélection au pool « train » (cochée par défaut). */
+                persistShared: true,
+
+                /**
+                 * Computed property : retourne les items filtrés par PI puis par équipe.
+                 *
+                 * - Filtre PI : actif si ENABLE_PI_FILTER et piFilter non vide ; un item passe
+                 *   si son tableau "PIs" (entiers normalisés côté back) contient la valeur saisie.
+                 * - Filtre équipe : actif si ENABLE_TEAM_FILTER et qu'un sous-ensemble strict
+                 *   d'équipes est coché ; un item passe s'il appartient à au moins une équipe cochée.
+                 *   Si toutes les équipes sont cochées (défaut), aucun filtrage équipe n'est appliqué.
+                 */
+                get filteredItems() {
+                    let result = this.items;
+
+                    if (ENABLE_PI_FILTER && this.piFilter !== '') {
+                        const pi = parseInt(this.piFilter, 10);
+                        if (!isNaN(pi)) {
+                            result = result.filter(item => Array.isArray(item.PIs) && item.PIs.includes(pi));
+                        }
+                    }
+
+                    if (ENABLE_TEAM_FILTER
+                        && this.availableTeams.length > 0
+                        && this.teamFilter.length < this.availableTeams.length) {
+                        result = result.filter(item =>
+                            Array.isArray(item.teams) && item.teams.some(t => this.teamFilter.includes(t))
+                        );
+                    }
+
+                    return result;
+                },
+
+                /**
+                 * Computed property : liste dédoublonnée et triée des équipes présentes
+                 * dans les features chargées (champ "teams"). Sert à peupler les checkboxes.
+                 */
+                get availableTeams() {
+                    const set = new Set();
+                    this.items.forEach(item => {
+                        if (Array.isArray(item.teams)) {
+                            item.teams.forEach(t => set.add(t));
+                        }
+                    });
+                    return Array.from(set).sort();
+                },
+
+                /**
+                 * Coche / décoche toutes les équipes via la case « Sélectionner toutes ».
+                 * @param {Event} event Événement change de la checkbox maîtresse
+                 */
+                toggleAllTeams(event) {
+                    this.teamFilter = event.target.checked ? this.availableTeams.slice() : [];
+                },
+
+                /**
+                 * Restaure la sélection la plus récente entre la clé locale de la
+                 * page et la clé partagée du pool « train », puis recharge les
+                 * features du projet (items non mis en cache : toujours refetch).
+                 *
+                 * Restaure aussi les filtres (PI + équipe) persistés localement, mais
+                 * uniquement si le projet retenu est bien celui auquel ils se rapportent
+                 * (sinon des équipes d'un autre projet fausseraient le filtre).
+                 * Des $watch persistent ensuite tout changement de filtre.
+                 */
+                init() {
+                    const local = window.jiraStore.read(LOCAL_KEY);
+                    const winner = window.jiraStore.mostRecent(local, window.jiraStore.read(POOL_KEY));
+
+                    const sameProject = local && winner && local.project && winner.project
+                        && local.project.key === winner.project.key;
+                    if (sameProject) {
+                        this.piFilter = local.piFilter ?? '';
+                        this._pendingTeamFilter = Array.isArray(local.teamFilter) ? local.teamFilter : null;
+                    }
+
+                    // Persiste tout changement ultérieur des filtres
+                    this.$watch('piFilter', () => this._saveToStorage());
+                    this.$watch('teamFilter', () => this._saveToStorage());
+
+                    if (winner && winner.project) {
+                        this.selected = winner.project;
+                        this.query = winner.project.key + ' – ' + winner.project.name;
+                        this.loadItems();
+                    }
+                },
+
+                /**
+                 * Persiste la sélection : toujours en local (avec les filtres PI et
+                 * équipe propres à cette page), et dans le pool partagé uniquement si
+                 * la case « Persister » est cochée. Le pool ne contient que le projet :
+                 * les filtres restent spécifiques à la page.
+                 * Ne persiste rien tant qu'aucun projet n'est sélectionné, afin de ne
+                 * pas écraser une sélection partagée par une entrée locale vide.
+                 */
+                _saveToStorage() {
+                    if (!this.selected) {
+                        return;
+                    }
+                    window.jiraStore.write(LOCAL_KEY, {
+                        project: this.selected,
+                        piFilter: this.piFilter,
+                        teamFilter: this.teamFilter,
+                    });
+                    if (this.persistShared) {
+                        window.jiraStore.write(POOL_KEY, { project: this.selected });
+                    }
+                },
+
+                reset() {
+                    this.selected = null;
+                    this.items = [];
+                    this.query = '';
+                    this.projects = [];
+                    this.error = null;
+                    this.itemError = null;
+                    this.piFilter = '';
+                    this.teamFilter = [];
+                    this._pendingTeamFilter = null;
+                    window.jiraStore.remove(LOCAL_KEY);
+                    if (this.persistShared) {
+                        window.jiraStore.remove(POOL_KEY);
+                    }
+                },
+
+                search() {
+                    if (this.query.length < 2) {
+                        this.projects = [];
+                        return;
+                    }
+                    this.loading = true;
+                    this.itemLoading = true;
+                    fetch('/api/internal/projects/search?q=' + encodeURIComponent(this.query))
+                        .then(r => r.json().catch(() => null).then(d => {
+                            if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(data => {
+                            this.projects = data;
+                            this.open = true;
+                        })
+                        .catch(err => {
+                            this.error = err.message;
+                            console.error(err);
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                            this.itemLoading = false;
+                        });
+                },
+
+                select(project) {
+                    this.selected = project;
+                    this.query = project.key + ' – ' + project.name;
+                    this.open = false;
+                    this._saveToStorage();
+                    this.loadItems();
+                },
+
+                loadItems() {
+                    this.loading = true;
+                    this.itemLoading = true;
+                    this.itemError = null;
+                    this.items = [];
+
+                    const url = ITEM_API_ENDPOINT.replace('{key}', this.selected.key);
+
+                    fetch(url)
+                        .then(r => r.json().catch(() => null).then(d => {
+                            if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status));
+                            return d;
+                        }))
+                        .then(data => {
+                            this.items = data;
+                            const allTeams = this.availableTeams;
+                            if (this._pendingTeamFilter !== null) {
+                                // Restaure le filtre persisté, en ne gardant que les
+                                // équipes encore présentes dans le projet courant.
+                                const restored = this._pendingTeamFilter.filter(t => allTeams.includes(t));
+                                // Si les équipes ciblées n'existent plus (intersection vide
+                                // alors qu'on visait des équipes), on retombe sur « toutes »
+                                // pour éviter une liste vide déroutante. Un décochage
+                                // volontaire ([] persisté) est en revanche respecté.
+                                this.teamFilter = (this._pendingTeamFilter.length > 0 && restored.length === 0)
+                                    ? allTeams.slice()
+                                    : restored;
+                                this._pendingTeamFilter = null;
+                            } else {
+                                // Sélectionne toutes les équipes par défaut
+                                this.teamFilter = allTeams.slice();
+                            }
+                        })
+                        .catch(err => {
+                            this.itemError = err.message;
+                            console.error(err);
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                            this.itemLoading = false;
+                        });
+                },
+            };
+        };
+    })();
+</script>

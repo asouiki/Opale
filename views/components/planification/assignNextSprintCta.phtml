@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * CTA « Ajouter les tickets cochés au prochain sprint » + retours d'exécution.
+ *
+ * Rendu plusieurs fois sur la page (bandeau de synthèse + au-dessus de chaque tableau) pour rester à portée
+ * de clic sans remonter en haut.
+ * Le périmètre d'action reste GLOBAL quel que soit le CTA cliqué : tous les exemplaires sont liés au même
+ * `x-data="planificationTotals(...)"` racine, donc au même `tickets[]` couvrant toute la page.
+ *
+ * Ce partiel étant inclus N+1 fois, il ne doit contenir aucun `id` HTML.
+ */
+?>
+<button type="button" class="btn-primary"
+    :disabled="checkedCount === 0 || assignSprint.loading"
+    @click="askAssignNextSprint()">
+    ➡️ Ajouter les tickets cochés au prochain sprint
+</button>
+<span x-show="assignSprint.error" class="inline-error" x-text="assignSprint.error"></span>
+<span x-show="assignSprint.successMessage" class="planif-summary__success" x-text="assignSprint.successMessage"></span>

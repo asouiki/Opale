@@ -1,0 +1,798 @@
+﻿<?php $currentPage = 'config'; ?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>OPALE - Configuration</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/config.css">
+</head>
+
+<body>
+    <?php include __DIR__ . '/../topNavigation.phtml'; ?>
+
+    <div class="card" x-data="projectConfig()">
+        <h1 class="config-title">⚙️ Configuration du projet</h1>
+        <p class="config-intro">
+            Sélectionnez un projet Jira pour configurer son board par défaut, son workflow,
+            ses types de tickets et les sprints à ignorer.
+        </p>
+
+        <!-- ===== 1. Recherche du projet ===== -->
+        <div class="jira-project-search">
+            <label for="project-search-config">
+                <strong>Sélectionner mon Projet Jira (Espace) : </strong>
+            </label>
+
+            <div class="project-search-field">
+                <input
+                    id="project-search-config"
+                    type="text"
+                    x-model="query"
+                    @input.debounce.300ms="search()"
+                    @focus="open = true"
+                    class="input-large"
+                    placeholder="Mon projet"
+                    autocomplete="off" />
+
+                <div class="project-dropdown"
+                    x-show="open && projects.length"
+                    @click.outside="open = false">
+                    <template x-for="project in projects" :key="project.id">
+                        <div @click="selectProject(project)" class="hover-bg config-option">
+                            <strong x-text="project.key"></strong>
+                            <span x-text="' – ' + project.name"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="selectedProject" class="config-selected">
+                ✅ Projet sélectionné : <strong x-text="selectedProject?.key"></strong>
+                <button type="button" @click="reset()" class="config-reset">
+                    🔄 Changer de projet
+                </button>
+            </div>
+
+            <div x-show="error" class="inline-error">❌ <span x-text="error"></span></div>
+        </div>
+
+        <!-- ===== 2. Projet parent (Releases & Features) ===== -->
+        <div class="config-section" x-show="selectedProject" x-cloak>
+            <h2 class="config-section__title">🔗 Projet parent (Releases &amp; Features)
+                <span x-show="savingParent" class="config-saving">⏳</span>
+                <span x-show="parentSaved && !savingParent" class="config-saved">✅ Enregistré</span>
+            </h2>
+            <p class="config-section__hint">
+                Clé du projet Jira portant les tickets de type <strong>Release</strong> et <strong>Feature</strong>, pour la page Métriques d'équipe.
+                Laisser vide si c'est le même projet que celui sélectionné ci-dessus.
+            </p>
+            <div class="config-parent-project">
+                <input type="text" class="input" style="text-transform:uppercase;width:120px"
+                    x-model="parentProjectKey"
+                    @blur="saveParentProject()"
+                    @keydown.enter.prevent="saveParentProject()"
+                    placeholder="Ex : XYZ" maxlength="20">
+                <span x-show="parentError" class="inline-error" style="margin-left:10px" x-text="parentError"></span>
+            </div>
+
+            <!-- Filtre Équipe : visible seulement quand un projet parent est défini (il porte
+                 les Releases de plusieurs équipes → on ne garde que celles de cette équipe). -->
+            <div class="config-parent-project" x-show="parentProjectKey" x-cloak style="margin-top:14px">
+                <label class="config-section__hint" style="display:block;margin-bottom:6px">
+                    Nom d'équipe de rattachement aux Releases (champ « Équipe » dans <strong x-text="parentProjectKey || 'le projet parent'"></strong>)
+                    <span x-show="savingReleaseTeam" class="config-saving">⏳</span>
+                    <span x-show="releaseTeamSaved && !savingReleaseTeam" class="config-saved">✅ Enregistré</span>
+                </label>
+                <input type="text" class="input" style="width:220px"
+                    x-model="releaseTeamName"
+                    @blur="saveReleaseTeam()"
+                    @keydown.enter.prevent="saveReleaseTeam()"
+                    :placeholder="selectedProject?.key" maxlength="60">
+                <span x-show="releaseTeamError" class="inline-error" style="margin-left:10px" x-text="releaseTeamError"></span>
+            </div>
+        </div>
+
+        <!-- ===== 3. Board par défaut ===== -->
+        <div class="config-section" x-show="selectedProject && boards.length" x-cloak>
+            <h2 class="config-section__title">📋 Board par défaut
+                <span x-show="savingBoard" class="config-saving">⏳</span>
+                <span x-show="boardSaved && !savingBoard" class="config-saved">✅ Enregistré</span>
+            </h2>
+            <p class="config-section__hint">
+                Ce board sera présélectionné par défaut dans les pages Sprint, Planification et Métriques.
+            </p>
+
+            <select
+                id="preferred-board-select"
+                x-model="boardId"
+                @change="saveBoard()"
+                class="input config-select">
+                <option value="">-- Aucun board par défaut --</option>
+                <template x-for="board in boards" :key="board.id">
+                    <option :value="String(board.id)" x-text="board.label"></option>
+                </template>
+            </select>
+        </div>
+
+        <!-- Rafraîchit la LISTE des boards et des sprints (cache BoardCacheService, TTL 12 h), pour voir
+             un board ou un sprint tout juste créé dans Jira. Hors de la section ci-dessus, masquée quand
+             boards est vide : c'est justement là qu'on a besoin de redemander la liste. -->
+        <p class="list-refresh" x-show="selectedProject" x-cloak>
+            <button type="button" @click="refreshLists()" :disabled="loading"
+                    title="Redemande à Jira les boards et les sprints, sans attendre l'expiration du cache (12 h)">
+                ↻ Rafraîchir la liste des boards
+            </button>
+        </p>
+
+        <!-- ===== 3. Workflow ===== -->
+        <div class="config-section" x-show="selectedProject" x-cloak>
+            <h2 class="config-section__title">🛠️ Workflow</h2>
+            <p class="config-section__hint">
+                Classez les statuts Jira du projet dans les catégories de workflow
+                (Affinage, Sprint, Terminés, En attente). La configuration est propre au projet.
+            </p>
+            <?php $workflowInline = true;
+include __DIR__ . '/../components/config/workflowConfigModal.phtml'; ?>
+        </div>
+
+        <!-- ===== 3 bis. Types de tickets ===== -->
+        <div class="config-section" x-show="selectedProject && issueTypesAvailable.length" x-cloak>
+            <h2 class="config-section__title">🏷️ Types de tickets du projet
+                <span x-show="issueTypesLoading || savingIssueTypes" class="config-saving">⏳</span>
+                <span x-show="issueTypesSaved && !savingIssueTypes" class="config-saved">✅ Enregistré</span>
+            </h2>
+            <p class="config-section__hint">
+                <b>Cochez les types à prendre en compte</b> dans les métriques de ce projet (la liste est
+                propre au projet). Les types détectés alimentent aussi la liste globale par défaut.
+            </p>
+            <div class="config-types-actions">
+                <button type="button" @click="selectAllIssueTypes()">Tout cocher</button>
+                <button type="button" @click="selectNoneIssueTypes()">Tout décocher</button>
+            </div>
+            <div class="config-types">
+                <template x-for="t in issueTypesAvailable" :key="t">
+                    <label class="config-type-check">
+                        <input type="checkbox"
+                            :checked="issueTypesSelected.includes(t)"
+                            @change="toggleIssueType(t, $event.target.checked)">
+                        <span x-text="t" :class="issueTypesSelected.includes(t) ? '' : 'sprint-ignored'"></span>
+                    </label>
+                </template>
+            </div>
+            <p class="config-section__hint" x-show="issueTypesAdded.length" x-cloak>
+                ✨ Nouveaux types ajoutés à la liste globale : <strong x-text="issueTypesAdded.join(', ')"></strong>
+            </p>
+        </div>
+
+        <!-- ===== 4. Sprints à ignorer ===== -->
+        <div class="config-section" x-show="selectedProject && boardId && sprints.length" x-cloak>
+            <h2 class="config-section__title">🚫 Sprints à ignorer
+                <span x-show="savingIgnored" class="config-saving">⏳</span>
+                <span x-show="ignoredSaved && !savingIgnored" class="config-saved">✅ Enregistré</span>
+            </h2>
+            <p class="config-section__hint">
+                <span class="config-hint-alert"><b>Cochez les sprints « fictifs » à ignorer</b> (backlog de priorisation…, ou les itérations IP).</span><br/>
+                Ils apparaîtront grisés dans les listes (Sprint, Planification, Métriques) et seront exclus de l'option « Tout cocher » des Métriques. Il sera toujours possible de les sélectionner manuellement.<br/>
+                Ils seront également exclus de l'historique des sprints affectés aux tickets, pour ne compter que les sprints de réalisation.
+            </p>
+
+            <div class="config-sprint-list">
+                <template x-for="sprint in sprints" :key="sprint.id">
+                    <label class="config-sprint-check">
+                        <input type="checkbox"
+                            :checked="isIgnored(sprint.id)"
+                            @change="toggleIgnore(sprint, $event.target.checked)">
+                        <span x-text="sprint.label" :class="isIgnored(sprint.id) ? 'sprint-ignored' : ''"></span>
+                    </label>
+                </template>
+            </div>
+        </div>
+
+        <!-- ===== 5. Équipe (roster de la page Capacité) ===== -->
+        <div class="config-section" x-show="selectedProject" x-cloak>
+            <h2 class="config-section__title">👥 Équipe
+                <span x-show="savingMembers" class="config-saving">⏳</span>
+                <span x-show="membersSaved && !savingMembers" class="config-saved">✅ Enregistré</span>
+            </h2>
+            <p class="config-section__hint">
+                Membres de l'équipe, utilisé par la page <strong><a href="/capacity">Capacité équipe</a></strong>. Renseignez le nom et le rôle. <br/>
+                Les dates d'entrée/sortie sont facultatives : une personne n'est comptée présente qu'entre ces dates
+                (entrée seule = présente à partir de cette date ; sortie seule = présente jusqu'à cette date ; aucune = toujours présente).
+            </p>
+
+            <div class="config-members" x-show="members.length" x-cloak>
+                <template x-for="(member, idx) in members" :key="member.id">
+                    <div class="config-member-row">
+                        <input type="text" class="input config-member-name" x-model="member.name"
+                            @input.debounce.600ms="saveMembers()" placeholder="Nom" maxlength="60">
+                        <select class="input config-member-role" x-model="member.role" @change="saveMembers()">
+                            <option value="Dev">Dév</option>
+                            <option value="BA">BA</option>
+                            <option value="QA">QA</option>
+                            <option value="PO">PO</option>
+                            <option value="SM">SM</option>
+                        </select>
+                        <label class="config-member-date">Entrée
+                            <input type="date" class="input" x-model="member.entryDate" @change="saveMembers()">
+                        </label>
+                        <label class="config-member-date">Sortie
+                            <input type="date" class="input" x-model="member.exitDate" @change="saveMembers()">
+                        </label>
+                        <button type="button" class="config-member-remove" @click="removeMember(idx)"
+                            title="Retirer ce membre">✕</button>
+                    </div>
+                </template>
+            </div>
+
+            <button type="button" class="config-member-add" @click="addMember()">➕ Ajouter un membre</button>
+            <span x-show="membersError" class="inline-error" style="margin-left:10px" x-text="membersError"></span>
+        </div>
+
+        <div x-show="loading" aria-busy="true" class="config-loading">⏳ Chargement…</div>
+    </div>
+
+    <!-- ===== Métriques affichées par défaut (préférence personnelle, localStorage) ===== -->
+    <div class="card" x-data="metricPrefsConfig()" x-cloak>
+        <h1 class="config-title">🎚️ Configuration de la Vue Simplifiée</h1>
+        <p class="config-intro">
+            Choisissez les métriques et sections affichées par défaut sur les pages Sprint et
+            Métriques d'équipe. Les autres seront masquées en <strong>Vue simplifiée</strong> et affichées
+            en <strong>Vue complète</strong>, au choix via le toggle en haut de ces pages.<br/>
+            <b>Cette préférence est personnelle à ce navigateur (elle n'est pas partagée avec l'équipe).</b>
+        </p>
+
+        <template x-for="p in pages" :key="p.page">
+            <div class="config-section">
+                <h2 class="config-section__title">
+                    <span x-text="p.title"></span>
+                    <span x-show="saved[p.page]" class="config-saved">✅ Enregistré</span>
+                </h2>
+                <div class="config-types-actions">
+                    <button type="button" @click="selectAll(p.page)">Tout cocher</button>
+                    <button type="button" @click="selectNone(p.page)">Tout décocher</button>
+                </div>
+                <template x-for="grp in groups(p.page)" :key="grp.name">
+                    <div class="config-metric-group">
+                        <h3 class="config-metric-group__title" x-text="grp.name"></h3>
+                        <div class="config-types">
+                            <template x-for="item in grp.items" :key="item.id">
+                                <label class="config-type-check">
+                                    <input type="checkbox"
+                                        :checked="isOn(p.page, item.id)"
+                                        @change="toggle(p.page, item.id, $event.target.checked)">
+                                    <span x-text="item.label"
+                                        :class="isOn(p.page, item.id) ? '' : 'sprint-ignored'"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        (function() {
+            /**
+             * Composant Alpine de sélection des métriques préférées (pages Sprint et
+             * Métriques d'équipe). La sélection est persistée dans le localStorage via
+             * window.MetricPrefs (préférence personnelle, jamais côté serveur).
+             */
+            window.metricPrefsConfig = function() {
+                return {
+                    // Pages couvertes par la sélection de métriques préférées.
+                    pages: [
+                        { page: 'sprint', title: '🛠️ Page Analyse du Sprint' },
+                        { page: 'team_metrics', title: '📊 Page Métriques d\'équipe' },
+                    ],
+                    // Sélection courante par page (liste des id affichés par défaut).
+                    selected: { sprint: [], team_metrics: [] },
+                    // Indicateur « Enregistré » transitoire par page.
+                    saved: { sprint: false, team_metrics: false },
+
+                    /**
+                     * Initialise la sélection depuis le localStorage. Sans préférence
+                     * enregistrée (primo-accédant), on retombe sur la sélection par défaut
+                     * (vue simplifiée : tout coché sauf les métriques marquées `defaultOff`).
+                     */
+                    init() {
+                        this.pages.forEach((p) => {
+                            const prefs = window.MetricPrefs.getPrefs(p.page);
+                            this.selected[p.page] = prefs === null
+                                ? window.MetricPrefs.getDefaultPrefs(p.page)
+                                : prefs;
+                        });
+                    },
+
+                    /** Regroupe le catalogue d'une page par `group` (pour l'affichage). */
+                    groups(page) {
+                        const result = [];
+                        window.MetricPrefs.catalog[page].forEach((item) => {
+                            let grp = result.find((g) => g.name === item.group);
+                            if (!grp) { grp = { name: item.group, items: [] }; result.push(grp); }
+                            grp.items.push(item);
+                        });
+                        return result;
+                    },
+
+                    /** Indique si une métrique est affichée par défaut. */
+                    isOn(page, id) {
+                        return this.selected[page].includes(id);
+                    },
+
+                    /** Coche/décoche une métrique de la page, puis persiste. */
+                    toggle(page, id, checked) {
+                        if (checked) {
+                            if (!this.selected[page].includes(id)) {
+                                this.selected[page].push(id);
+                            }
+                        } else {
+                            this.selected[page] = this.selected[page].filter((x) => x !== id);
+                        }
+                        this.save(page);
+                    },
+
+                    /** Coche toutes les métriques de la page, puis persiste. */
+                    selectAll(page) {
+                        this.selected[page] = window.MetricPrefs.catalog[page].map((e) => e.id);
+                        this.save(page);
+                    },
+
+                    /** Décoche toutes les métriques de la page, puis persiste. */
+                    selectNone(page) {
+                        this.selected[page] = [];
+                        this.save(page);
+                    },
+
+                    /** Persiste la sélection de la page dans le localStorage. */
+                    save(page) {
+                        window.MetricPrefs.setPrefs(page, this.selected[page]);
+                        this.saved[page] = true;
+                        setTimeout(() => { this.saved[page] = false; }, 1500);
+                    },
+                };
+            };
+        })();
+    </script>
+
+    <script>
+        (function() {
+            const POOL_KEY = 'jira_pool_team';
+
+            window.projectConfig = function() {
+                return {
+                    // --- Projet ---
+                    query: '',
+                    open: false,
+                    projects: [],
+                    selectedProject: null,
+
+                    // --- Board par défaut ---
+                    boards: [],
+                    boardId: '',
+
+                    // --- Sprints à ignorer ---
+                    sprints: [],
+                    ignored: [], // liste complète stockée [{ id, name }]
+                    savingIgnored: false,
+                    ignoredSaved: false,
+
+                    // --- Équipe (roster de la page Capacité) ---
+                    members: [], // liste stockée [{ id, name, role, entryDate, exitDate }]
+                    savingMembers: false,
+                    membersSaved: false,
+                    membersError: '',
+
+                    // --- Types de tickets ---
+                    issueTypesAvailable: [], // types existants sur le projet (Jira ∪ stockés)
+                    issueTypesSelected: [],  // types retenus pour les métriques
+                    issueTypesAdded: [],     // types nouvellement ajoutés au global
+                    issueTypesLoading: false,
+                    savingIssueTypes: false,
+                    issueTypesSaved: false,
+
+                    // --- UI ---
+                    loading: false,
+                    savingBoard: false,
+                    boardSaved: false,
+                    parentProjectKey: '',
+                    savingParent: false,
+                    parentSaved: false,
+                    parentError: '',
+                    releaseTeamName: '',
+                    savingReleaseTeam: false,
+                    releaseTeamSaved: false,
+                    releaseTeamError: '',
+                    error: '',
+
+                    /**
+                     * Pré-remplit le projet depuis le pool partagé « team » (sélection
+                     * faite sur une autre page) pour éviter de le re-rechercher.
+                     */
+                    init() {
+                        const winner = window.jiraStore
+                            ? window.jiraStore.read(POOL_KEY)
+                            : null;
+                        if (winner && winner.project) {
+                            this.selectedProject = winner.project;
+                            this.query = winner.project.key + ' – ' + winner.project.name;
+                            this.loadProjectConfig();
+                        }
+                    },
+
+                    /** Recherche de projets Jira (réutilise l'API existante). */
+                    search() {
+                        if (this.query.length < 2) {
+                            this.projects = [];
+                            return;
+                        }
+                        fetch('/api/internal/projects/search?q=' + encodeURIComponent(this.query))
+                            .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                            .then(data => { this.projects = data; this.open = true; })
+                            .catch(err => { this.error = err.message; console.error(err); });
+                    },
+
+                    /** Sélection d'un projet → chargement de sa config. */
+                    selectProject(project) {
+                        this.selectedProject = project;
+                        this.query = project.key + ' – ' + project.name;
+                        this.open = false;
+                        this.error = '';
+                        this.boards = [];
+                        this.boardId = '';
+                        this.boardSaved = false;
+                        this.sprints = [];
+                        this.ignored = [];
+                        this.ignoredSaved = false;
+                        this.issueTypesAvailable = [];
+                        this.issueTypesSelected = [];
+                        this.issueTypesAdded = [];
+                        this.parentProjectKey = '';
+                        this.parentSaved = false;
+                        this.parentError = '';
+                        this.releaseTeamName = '';
+                        this.releaseTeamSaved = false;
+                        this.releaseTeamError = '';
+                        // Partage le projet courant avec les autres pages.
+                        if (window.jiraStore) {
+                            window.jiraStore.write(POOL_KEY, { project: project, boardId: '' });
+                        }
+                        // Informe la modale de workflow du projet courant (bannière + ciblage).
+                        window.dispatchEvent(new CustomEvent('jira:project-changed', { detail: { projectKey: project.key } }));
+                        this.loadProjectConfig();
+                    },
+
+                    /** Réinitialise la sélection. */
+                    reset() {
+                        this.selectedProject = null;
+                        this.query = '';
+                        this.projects = [];
+                        this.boards = [];
+                        this.boardId = '';
+                        this.boardSaved = false;
+                        this.sprints = [];
+                        this.ignored = [];
+                        this.ignoredSaved = false;
+                        this.issueTypesAvailable = [];
+                        this.issueTypesSelected = [];
+                        this.issueTypesAdded = [];
+                        this.parentProjectKey = '';
+                        this.parentSaved = false;
+                        this.parentError = '';
+                        this.releaseTeamName = '';
+                        this.releaseTeamSaved = false;
+                        this.releaseTeamError = '';
+                        this.error = '';
+                        window.dispatchEvent(new CustomEvent('jira:project-changed', { detail: { projectKey: '' } }));
+                    },
+
+                    /**
+                     * Redemande boards ET sprints à Jira en ignorant le cache serveur (TTL 12 h).
+                     * Utile ici pour voir un board tout juste créé avant de le désigner par défaut.
+                     */
+                    refreshLists() {
+                        this.loadProjectConfig(true);
+                    },
+
+                    /**
+                     * Charge les boards du projet puis sa config (board par défaut).
+                     *
+                     * @param {boolean} refresh Ignore le cache serveur des boards et des sprints.
+                     */
+                    loadProjectConfig(refresh = false) {
+                        if (!this.selectedProject) return;
+                        const key = this.selectedProject.key;
+                        this.loading = true;
+                        this.error = '';
+                        this.members = [];
+                        this.membersSaved = false;
+                        this.loadIssueTypes();
+                        Promise.all([
+                            fetch('/api/internal/projects/' + encodeURIComponent(key) + '/boards'
+                                + (refresh ? '?refresh=1' : ''))
+                                .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; })),
+                            fetch('/api/internal/projects/' + encodeURIComponent(key) + '/team-config')
+                                .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; })),
+                        ])
+                            .then(([boards, config]) => {
+                                if (boards && boards.error) throw new Error(boards.error);
+                                this.boards = boards;
+                                this.boardId = (config && config.preferredBoardId != null)
+                                    ? String(config.preferredBoardId)
+                                    : '';
+                                this.ignored = (config && Array.isArray(config.ignoredSprints))
+                                    ? config.ignoredSprints
+                                    : [];
+                                this.parentProjectKey = (config && config.parentProjectKey)
+                                    ? config.parentProjectKey
+                                    : '';
+                                // Défaut renvoyé par le backend = projectKey si non configuré.
+                                this.releaseTeamName = (config && config.releaseTeamName)
+                                    ? config.releaseTeamName
+                                    : (this.selectedProject ? this.selectedProject.key : '');
+                                this.members = (config && Array.isArray(config.members))
+                                    ? config.members
+                                    : [];
+                                if (this.boardId) {
+                                    this.loadSprints(refresh);
+                                }
+                            })
+                            .catch(err => { this.error = err.message; console.error(err); })
+                            .finally(() => { this.loading = false; });
+                    },
+
+                    /** Persiste la clé du projet parent (Releases & Features) via l'API team-config. */
+                    saveParentProject() {
+                        if (!this.selectedProject) return;
+                        const val = this.parentProjectKey.trim().toUpperCase();
+                        this.parentProjectKey = val;
+                        this.savingParent = true;
+                        this.parentSaved = false;
+                        this.parentError = '';
+                        const body = new URLSearchParams();
+                        body.append('parentProjectKey', val);
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/team-config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: body.toString(),
+                        })
+                            .then(r => r.json().then(d => {
+                                if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                                return d;
+                            }))
+                            .then(() => {
+                                this.parentSaved = true;
+                                setTimeout(() => { this.parentSaved = false; }, 3000);
+                            })
+                            .catch(err => { this.parentError = err.message; console.error(err); })
+                            .finally(() => { this.savingParent = false; });
+                    },
+
+                    /** Persiste le nom d'équipe filtrant les Releases du projet parent (champ Équipe). */
+                    saveReleaseTeam() {
+                        if (!this.selectedProject) return;
+                        const val = this.releaseTeamName.trim();
+                        this.releaseTeamName = val;
+                        this.savingReleaseTeam = true;
+                        this.releaseTeamSaved = false;
+                        this.releaseTeamError = '';
+                        const body = new URLSearchParams();
+                        body.append('releaseTeamName', val);
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/team-config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: body.toString(),
+                        })
+                            .then(r => r.json().then(d => {
+                                if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                                return d;
+                            }))
+                            .then(() => {
+                                this.releaseTeamSaved = true;
+                                setTimeout(() => { this.releaseTeamSaved = false; }, 3000);
+                            })
+                            .catch(err => { this.releaseTeamError = err.message; console.error(err); })
+                            .finally(() => { this.savingReleaseTeam = false; });
+                    },
+
+                    /**
+                     * Charge les types de tickets du projet (et enrichit le global
+                     * des types inédits côté serveur).
+                     */
+                    loadIssueTypes() {
+                        if (!this.selectedProject) return;
+                        this.issueTypesLoading = true;
+                        this.issueTypesAvailable = [];
+                        this.issueTypesSelected = [];
+                        this.issueTypesAdded = [];
+                        this.issueTypesSaved = false;
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/issue-types')
+                            .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                            .then(d => {
+                                if (d && d.error) throw new Error(d.error);
+                                this.issueTypesAvailable = d.available || [];
+                                this.issueTypesSelected = d.selected || [];
+                                this.issueTypesAdded = d.added || [];
+                            })
+                            .catch(err => { this.error = err.message; console.error(err); })
+                            .finally(() => { this.issueTypesLoading = false; });
+                    },
+
+                    /** Coche/décoche un type de ticket retenu pour les métriques, puis persiste. */
+                    toggleIssueType(type, checked) {
+                        if (checked) {
+                            if (!this.issueTypesSelected.includes(type)) {
+                                this.issueTypesSelected.push(type);
+                            }
+                        } else {
+                            this.issueTypesSelected = this.issueTypesSelected.filter(t => t !== type);
+                        }
+                        this.saveIssueTypes();
+                    },
+
+                    /** Coche tous les types disponibles, puis persiste. */
+                    selectAllIssueTypes() {
+                        this.issueTypesSelected = this.issueTypesAvailable.slice();
+                        this.saveIssueTypes();
+                    },
+
+                    /** Décoche tous les types, puis persiste. */
+                    selectNoneIssueTypes() {
+                        this.issueTypesSelected = [];
+                        this.saveIssueTypes();
+                    },
+
+                    /** Enregistre la liste des types retenus propre au projet. */
+                    saveIssueTypes() {
+                        if (!this.selectedProject) return;
+                        this.savingIssueTypes = true;
+                        this.issueTypesSaved = false;
+                        this.error = '';
+                        const body = new URLSearchParams();
+                        body.append('issueTypes', JSON.stringify(this.issueTypesSelected));
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/team-config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: body.toString(),
+                        })
+                            .then(r => r.json().then(d => {
+                                if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                                return d;
+                            }))
+                            .then(() => { this.issueTypesSaved = true; })
+                            .catch(err => { this.error = err.message; console.error(err); })
+                            .finally(() => { this.savingIssueTypes = false; });
+                    },
+
+                    /**
+                     * Charge les sprints du board sélectionné (pour la liste à ignorer).
+                     *
+                     * @param {boolean} refresh Ignore le cache serveur des sprints (TTL 12 h).
+                     */
+                    loadSprints(refresh = false) {
+                        if (!this.boardId) { this.sprints = []; return; }
+                        fetch('/api/internal/boards/' + encodeURIComponent(this.boardId) + '/sprints'
+                            + (refresh ? '?refresh=1' : ''))
+                            .then(r => r.json().catch(() => null).then(d => { if (!r.ok) throw new Error((d && d.error) || ('HTTP ' + r.status)); return d; }))
+                            .then(data => {
+                                if (data && data.error) throw new Error(data.error);
+                                this.sprints = data;
+                            })
+                            .catch(err => { this.error = err.message; console.error(err); });
+                    },
+
+                    /** Indique si un sprint est marqué comme ignoré. */
+                    isIgnored(sprintId) {
+                        return this.ignored.some(s => String(s.id) === String(sprintId));
+                    },
+
+                    /** Coche/décoche un sprint à ignorer puis persiste la liste. */
+                    toggleIgnore(sprint, checked) {
+                        const id = String(sprint.id);
+                        if (checked) {
+                            if (!this.isIgnored(id)) {
+                                this.ignored.push({ id: id, name: sprint.name });
+                            }
+                        } else {
+                            this.ignored = this.ignored.filter(s => String(s.id) !== id);
+                        }
+                        this.saveIgnored();
+                    },
+
+                    /** Enregistre la liste complète des sprints ignorés. */
+                    saveIgnored() {
+                        if (!this.selectedProject) return;
+                        this.savingIgnored = true;
+                        this.ignoredSaved = false;
+                        this.error = '';
+                        const body = new URLSearchParams();
+                        body.append('ignoredSprints', JSON.stringify(this.ignored));
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/team-config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: body.toString(),
+                        })
+                            .then(r => r.json().then(d => {
+                                if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                                return d;
+                            }))
+                            .then(() => { this.ignoredSaved = true; })
+                            .catch(err => { this.error = err.message; console.error(err); })
+                            .finally(() => { this.savingIgnored = false; });
+                    },
+
+                    /** Génère un identifiant stable pour un nouveau membre du roster. */
+                    genMemberId() {
+                        return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+                    },
+
+                    /** Ajoute une ligne membre vierge (persistée une fois le nom saisi, côté serveur). */
+                    addMember() {
+                        this.members.push({ id: this.genMemberId(), name: '', role: 'Dev', entryDate: '', exitDate: '' });
+                    },
+
+                    /** Retire un membre du roster puis persiste la liste. */
+                    removeMember(idx) {
+                        this.members.splice(idx, 1);
+                        this.saveMembers();
+                    },
+
+                    /** Enregistre le roster complet (les entrées sans nom sont ignorées côté serveur). */
+                    saveMembers() {
+                        if (!this.selectedProject) return;
+                        this.savingMembers = true;
+                        this.membersSaved = false;
+                        this.membersError = '';
+                        const body = new URLSearchParams();
+                        body.append('members', JSON.stringify(this.members));
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/team-config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: body.toString(),
+                        })
+                            .then(r => r.json().then(d => {
+                                if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                                return d;
+                            }))
+                            .then(() => {
+                                this.membersSaved = true;
+                                setTimeout(() => { this.membersSaved = false; }, 3000);
+                            })
+                            .catch(err => { this.membersError = err.message; console.error(err); })
+                            .finally(() => { this.savingMembers = false; });
+                    },
+
+                    /** Enregistre le board par défaut (et inscrit le projet aux projets suivis). */
+                    saveBoard() {
+                        if (!this.selectedProject) return;
+                        this.savingBoard = true;
+                        this.boardSaved = false;
+                        this.error = '';
+                        const body = new URLSearchParams();
+                        body.append('preferredBoardId', this.boardId);
+                        fetch('/api/internal/projects/' + encodeURIComponent(this.selectedProject.key) + '/team-config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: body.toString(),
+                        })
+                            .then(r => r.json().then(d => {
+                                if (!r.ok || !d.success) throw new Error(d.error || ('HTTP ' + r.status));
+                                return d;
+                            }))
+                            .then(() => { this.boardSaved = true; this.loadSprints(); })
+                            .catch(err => { this.error = err.message; console.error(err); })
+                            .finally(() => { this.savingBoard = false; });
+                    },
+                };
+            };
+        })();
+    </script>
+</body>
+
+</html>

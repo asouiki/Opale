@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Rappel (une ligne) du projet + board sélectionnés, avec le CTA
+ * « Configurer le projet ». Utilisé en tête des sélecteurs des pages Sprint,
+ * Planification et Métriques d'équipe.
+ *
+ * Le projet/board ne se modifient plus sur ces pages : ils proviennent de la
+ * page Configuration (/config) via le pool partagé « jira_pool_team ». Ce
+ * partiel ne fait qu'AFFICHER l'état courant ; il s'appuie sur l'état Alpine
+ * exposé par le composant parent (sprintSelector / planificationSelector /
+ * teamSprintsSelector) :
+ *   - selectedProject : { key, name } | null
+ *   - boardName       : libellé du board courant (getter)
+ *   - loading         : true pendant la résolution du board / des sprints
+ *
+ * Affichages :
+ *   - rappel              (x-show="selectedProject")
+ *   - état vide           (x-show="!selectedProject && !loading") : aucun projet configuré
+ *   - board non configuré (x-show="boardNotConfigured") : projet OK mais board par défaut
+ *     absent alors que plusieurs boards Scrum existent (choix impossible ici → /config)
+ */
+?>
+<!-- Rappel projet + board (lecture seule) -->
+<div class="project-recap" x-show="selectedProject" x-cloak>
+    <span class="project-recap__item">
+        📂 Projet Jira sélectionné :
+        <strong x-text="selectedProject ? (selectedProject.key + (selectedProject.name ? ' – ' + selectedProject.name : '')) : ''"></strong>
+    </span>
+    <span class="project-recap__sep" x-show="boardName" x-cloak>·</span>
+    <span class="project-recap__item" x-show="boardName" x-cloak>
+        📋 Board par défaut : <strong x-text="boardName"></strong>
+    </span>
+    <a href="/config" class="wf-trigger wf-trigger--link project-recap__cta">⚙️ Configurer le projet</a>
+</div>
+
+<!-- État vide : aucun projet configuré -->
+<div class="project-recap project-recap--empty" x-show="!selectedProject && !loading" x-cloak>
+    <span class="project-recap__empty-text">
+        ⚠️ Aucun projet configuré. Configurez d'abord un projet pour analyser ses sprints.
+    </span>
+    <a href="/config" class="wf-trigger wf-trigger--link project-recap__cta">⚙️ Configurer le projet</a>
+</div>
+
+<!-- Board par défaut non configuré alors que plusieurs boards Scrum existent -->
+<div class="project-recap project-recap--empty" x-show="boardNotConfigured" x-cloak>
+    <span class="project-recap__empty-text">
+        ⚠️ Le board par défaut n'est pas configuré. Configurez d'abord le projet pour analyser ses sprints.
+    </span>
+    <a href="/config" class="wf-trigger wf-trigger--link project-recap__cta">⚙️ Configurer le projet</a>
+</div>

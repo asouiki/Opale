@@ -1,0 +1,199 @@
+<?php
+
+/**
+ * Tableau des sujets à planifier.
+ *
+ * Réutilisé pour le reliquat du sprint en cours et pour chaque sprint de backlog.
+ * Chaque ligne porte :
+ *   - une case à cocher (cochée par défaut) reliée à `tickets[N].checked`,
+ *   - un champ numérique « Reste à faire » relié à `tickets[N].remaining`
+ *     (initialisé à la valeur des Story Points du ticket).
+ *
+ * L'en-tête porte une case « tout cocher / décocher » qui agit sur la plage
+ * de lignes [tableStart, tableEnd[ propre à CE tableau.
+ *
+ * Le tableau s'auto-trie au chargement selon `data-default-sort` (par défaut
+ * « parent », surchargé en « status » pour le reliquat).
+ *
+ * Le titre du tableau est rendu comme PREMIÈRE LIGNE du <thead> : il devient ainsi collant avec les
+ * en-têtes de colonnes, ce qui garde le sprint concerné sous les yeux en défilant une longue liste.
+ * Le CTA d'assignation est placé APRÈS le tableau : il ne s'intercale donc pas dans l'en-tête collant.
+ *
+ * @var \App\View\PlanificationView $view
+ * @var array{count:int, storyPoints:float, issues:array} $bucket        Tickets à afficher
+ * @var string|null $emptyMessage  Message affiché si $bucket['issues'] est vide
+ * @var int $rowIndex              Compteur de lignes global, partagé entre les includes
+ * @var string|null $defaultSortKey Colonne de tri par défaut ('parent', 'status'…)
+ * @var string|null $tableTitle    Titre collant du tableau (nom du sprint concerné)
+ * @var array{total:int, ready:int, percent:?float}|null $tableReadiness Préparation de CE sprint (backlog
+ *                                                        uniquement ; absent pour le reliquat du sprint en cours)
+ */
+?>
+<?php if (empty($bucket['issues'])): ?>
+    <p><em><?= htmlspecialchars($emptyMessage ?? 'Aucun sujet.') ?></em></p>
+<?php else: ?>
+    <?php
+    // Plage de lignes couverte par ce tableau dans le compteur global Alpine.
+    $tableStart       = $rowIndex;
+    $tableEnd         = $rowIndex + $bucket['count'];
+    $tableDefaultSort = $defaultSortKey ?? 'parent';
+    ?>
+    <table class="sprint-table-mt planif-table" data-default-sort="<?= htmlspecialchars($tableDefaultSort) ?>">
+        <thead>
+            <?php if (($tableTitle ?? '') !== ''): ?>
+                <tr>
+                    <th class="planif-table__title" colspan="11">
+                        <?= htmlspecialchars($tableTitle) ?>
+                        <span class="badge blue">
+                            <?= $bucket['count'] ?> sujet(s) — <?= $view->formatSp($bucket['storyPoints']) ?> Story Points
+                        </span>
+                        <?php if (($tableReadiness ?? null) !== null && $tableReadiness['percent'] !== null): ?>
+                            <span class="badge <?= $view->getReadinessBadgeClass($tableReadiness['percent']) ?>">
+                                <?= $view->formatPercent($tableReadiness['percent']) ?> prêt
+                            </span>
+                        <?php endif; ?>
+                    </th>
+                </tr>
+            <?php endif; ?>
+            <tr>
+                <th class="planif-check-col">
+                    <input type="checkbox"
+                        title="Tout cocher / décocher ce tableau"
+                        :checked="allChecked(<?= $tableStart ?>, <?= $tableEnd ?>)"
+                        x-effect="$el.indeterminate =
+                            someChecked(<?= $tableStart ?>, <?= $tableEnd ?>) &&
+                            !allChecked(<?= $tableStart ?>, <?= $tableEnd ?>)"
+                        @change="toggleRange(<?= $tableStart ?>, <?= $tableEnd ?>, $event.target.checked)">
+                </th>
+                <th class="col-sortable colw-priorite" data-sort-key="priority" title="Trier par priorité">Priorité</th>
+                <th class="colw-type">Type</th>
+                <th class="colw-key">Key</th>
+                <th class="colw-titre">Titre</th>
+                <th class="col-sortable colw-statut" data-sort-key="status" title="Trier par statut">Statut</th>
+                <th class="text-center">Nombre de sprints affectés</th>
+                <th class="text-center colw-sp">Story Points</th>
+                <th class="text-center colw-reste">Reste à faire</th>
+                <th class="text-center colw-reestime">Points rééstimés (SP final)</th>
+                <th class="col-sortable colw-parent" data-sort-key="parent" title="Trier par parent">Parent</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($bucket['issues'] as $ticket): ?>
+                <?php $i = $rowIndex++; ?>
+                <tr data-sort-parent="<?= htmlspecialchars($ticket['parentKey'] ?? '') ?>"
+                    data-sort-priority="<?= htmlspecialchars((string) ($ticket['priority']['id'] ?? '')) ?>"
+                    data-sort-status="<?= htmlspecialchars((string) ($ticket['statusRank'] ?? PHP_INT_MAX)) ?>">
+                    <td class="planif-check-cell">
+                        <input type="checkbox" checked
+                            x-model="tickets[<?= $i ?>].checked"
+                            @change="save()">
+                    </td>
+                    <td class="priority-cell">
+                        <?php if (!empty($ticket['priority']['icon'])): ?>
+                            <img class="priority-cell__icon"
+                                src="<?= htmlspecialchars($ticket['priority']['icon']) ?>" alt="">
+                        <?php endif; ?>
+                        <?= htmlspecialchars($ticket['priority']['name'] ?? '') ?: '—' ?>
+                    </td>
+                    <td class="type-cell">
+                        <?php if (!empty($ticket['issueTypeIcon'])): ?>
+                            <img class="type-cell__icon"
+                                src="<?= htmlspecialchars($ticket['issueTypeIcon']) ?>" alt="">
+                        <?php endif; ?>
+                        <?= htmlspecialchars($ticket['issueType'] ?? '') ?: '—' ?>
+                    </td>
+                    <td><strong><?= htmlspecialchars($ticket['key']) ?></strong></td>
+                    <td>
+                        <a href="<?= htmlspecialchars($ticket['url']) ?>" target="_blank" rel="noopener">
+                            <?= htmlspecialchars($ticket['summary']) ?>
+                        </a>
+                    </td>
+                    <td>
+                        <span class="badge <?= $view->getTicketStatusBadgeClass($ticket) ?>">
+                            <?= htmlspecialchars($ticket['status']) ?>
+                        </span>
+                    </td>
+                    <td class="text-center"><?= htmlspecialchars($view->formatSprintCount($ticket['sprintNames'] ?? [])) ?></td>
+                    <td class="text-center"><?= $view->formatSp($ticket['storyPoints']) ?></td>
+                    <td class="text-center planif-remaining">
+                        <input type="number" min="0" step="0.5" class="planif-remaining__input"
+                            :value="tickets[<?= $i ?>].remaining"
+                            @input="tickets[<?= $i ?>].remaining = parseFieldValue($event.target.value); markEdited(<?= $i ?>)"
+                            @change="tickets[<?= $i ?>].remaining = parseFieldValue($event.target.value); markEdited(<?= $i ?>); save()">
+                        <div class="planif-remaining__warn"
+                            x-show="tickets[<?= $i ?>].remaining !== tickets[<?= $i ?>].jiraRemaining && !tickets[<?= $i ?>].synced"
+                            title="La valeur diffère de la valeur Jira (Story Points Restant, ou Story Points à défaut — vide si non renseignée)">
+                            ⚠️ Delta avec Jira
+                        </div>
+                        <div class="planif-remaining__ok" x-show="tickets[<?= $i ?>].synced">
+                            ✅ Jira mis à jour
+                        </div>
+                    </td>
+                    <td class="text-center planif-remaining">
+                        <!-- Input + logo Jira sur la même ligne ; l'input reste épinglé à
+                             droite (flex-end) pour ne pas être décalé quand le logo apparaît. -->
+                        <div class="planif-remaining__row">
+                            <!-- Actions de synchro (centrées dans l'espace à gauche de l'input),
+                                 affichées tant que la valeur locale diffère de Jira. -->
+                            <div class="planif-sync-actions"
+                                x-show="hasJiraDelta(tickets[<?= $i ?>]) && !tickets[<?= $i ?>].synced">
+                                <!-- Pull : écrase les valeurs locales par celles de Jira
+                                     (même logo, retourné à 180°) -->
+                                <span class="planif-sync" data-tooltip="Récupérer la valeur de Jira">
+                                    <img src="/img/atlassian-jira-icon.webp" alt="Récupérer la valeur de Jira"
+                                        class="planif-sync__icon planif-sync__icon--flip"
+                                        :class="{ 'planif-sync__icon--loading': tickets[<?= $i ?>].syncing }"
+                                        @click="askResetToJira(<?= $i ?>)">
+                                </span>
+                                <!-- Push : envoie « Reste à faire » + « Points rééstimés » vers Jira -->
+                                <span class="planif-sync"
+                                    :data-tooltip="tickets[<?= $i ?>].syncing ? 'Mise à jour…' : 'Mettre à jour Jira'">
+                                    <img src="/img/atlassian-jira-icon.webp" alt="Mettre à jour Jira"
+                                        class="planif-sync__icon"
+                                        :class="{ 'planif-sync__icon--loading': tickets[<?= $i ?>].syncing }"
+                                        @click="askUpdateJira(<?= $i ?>)">
+                                </span>
+                            </div>
+                            <input type="number" min="0" step="0.5" class="planif-remaining__input"
+                                :value="tickets[<?= $i ?>].reestimated"
+                                @input="tickets[<?= $i ?>].reestimated = parseFieldValue($event.target.value); markEdited(<?= $i ?>)"
+                                @change="tickets[<?= $i ?>].reestimated = parseFieldValue($event.target.value); markEdited(<?= $i ?>); save()">
+                        </div>
+                        <div class="planif-remaining__warn"
+                            x-show="tickets[<?= $i ?>].reestimated !== tickets[<?= $i ?>].jiraReestimated && !tickets[<?= $i ?>].synced"
+                            title="La valeur diffère de la valeur Jira (Story Points final, ou Story Points à défaut — vide si non renseignée)">
+                            ⚠️ Delta avec Jira
+                        </div>
+                        <div class="planif-remaining__ok" x-show="tickets[<?= $i ?>].synced">
+                            ✅ Jira mis à jour
+                        </div>
+                        <div class="planif-sync__err" x-show="tickets[<?= $i ?>].syncError"
+                            x-text="tickets[<?= $i ?>].syncError"></div>
+                    </td>
+                    <td>
+                        <?php if (!empty($ticket['parentKey'])): ?>
+                            <strong><?= htmlspecialchars($ticket['parentKey']) ?></strong>
+                            — <?= htmlspecialchars($ticket['parentSummary'] ?? '') ?>
+                        <?php else: ?>
+                            —
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+        <tfoot>
+            <tr class="sprint-tfoot-total">
+                <td colspan="7"><?= $bucket['count'] ?> sujet(s) au total</td>
+                <td class="text-center"><?= $view->formatSp($bucket['storyPoints']) ?> Story Points</td>
+                <td class="text-center">Reste à faire : <span x-text="sumRemaining(<?= $tableStart ?>, <?= $tableEnd ?>)"></span></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+    <!-- Rappel du CTA d'assignation sous le tableau : à portée de clic après avoir parcouru la liste, sans
+         remonter au bandeau. Agit sur les tickets cochés de TOUTE la page, pas seulement sur ce tableau. -->
+    <div class="planif-table-cta">
+        <?php include __DIR__ . '/assignNextSprintCta.phtml'; ?>
+    </div>
+<?php endif; ?>

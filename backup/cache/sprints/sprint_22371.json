@@ -1,0 +1,2131 @@
+{
+    "cached_at": 1780662096,
+    "metrics_version": 9,
+    "data": {
+        "sprintId": "22371",
+        "projectKey": "GCS",
+        "boardId": "3493",
+        "sprintData": {
+            "id": 22371,
+            "self": "https:\/\/imsa.atlassian.net\/rest\/agile\/1.0\/sprint\/22371",
+            "state": "closed",
+            "name": "GCS PI8 it\u00e9 3",
+            "startDate": "2026-05-04T10:15:12.236Z",
+            "endDate": "2026-05-22T16:00:00.000Z",
+            "completeDate": "2026-05-27T07:36:00.349Z",
+            "createdDate": "2026-02-25T15:54:53.168Z",
+            "originBoardId": 3493,
+            "goal": "obj 1 : Mener \u00e0 terme le planning ACIJ et valider les r\u00e9sultats pour autoriser la facturation Agrica par GPCD.\nobj 2 : Livraison en production de la s\u00e9lection de la population impact\u00e9e par la recodification du code NAF redevable de la cotisation Val'hor."
+        },
+        "issuesCount": 26,
+        "landingByStatus": [
+            {
+                "status": "En r\u00e9daction",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 0.3,
+                "averageDays": 0
+            },
+            {
+                "status": "A affiner",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 4,
+                "averageDays": 0.2
+            },
+            {
+                "status": "A planifier",
+                "category": "refinement",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 11,
+                "averageDays": 0.4
+            },
+            {
+                "status": "\u00c0 faire",
+                "category": "sprint",
+                "count": 4,
+                "storyPoints": 0.5,
+                "totalDays": 130.8,
+                "averageDays": 5
+            },
+            {
+                "status": "En cours",
+                "category": "sprint",
+                "count": 7,
+                "storyPoints": 10,
+                "totalDays": 71.5,
+                "averageDays": 2.8
+            },
+            {
+                "status": "Revue D\u00e9v \/ Pair",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 12.3,
+                "averageDays": 0.5
+            },
+            {
+                "status": "A Qualifier",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 3,
+                "totalDays": 8.5,
+                "averageDays": 0.3
+            },
+            {
+                "status": "Qualif En Cours",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 35,
+                "averageDays": 1.3
+            },
+            {
+                "status": "Validation PO",
+                "category": "sprint",
+                "count": 0,
+                "storyPoints": 0,
+                "totalDays": 16.5,
+                "averageDays": 0.6
+            },
+            {
+                "status": "Vainci 2",
+                "category": "sprint",
+                "count": 1,
+                "storyPoints": 3,
+                "totalDays": 14.8,
+                "averageDays": 0.6
+            },
+            {
+                "status": "Termin\u00e9(e)",
+                "category": "done",
+                "count": 11,
+                "storyPoints": 16,
+                "totalDays": 64.3,
+                "averageDays": 2.5
+            },
+            {
+                "status": "Abandonn\u00e9",
+                "category": "done",
+                "count": 2,
+                "storyPoints": 0,
+                "totalDays": 20.5,
+                "averageDays": 0.8
+            }
+        ],
+        "objectiveGroups": [
+            {
+                "label": "objectif_1",
+                "title": "Objectif 1",
+                "issues": [
+                    {
+                        "key": "GCS-746",
+                        "summary": "Lancement de test ACIJ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-746",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 13,
+                        "leadTime": 43.75,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-747",
+                        "summary": "Suivi des traitements ACIJ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-747",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-880",
+                        "summary": "[R\u00e9tro] ACIJ : pr\u00e9voir Doc + T-Shaping",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-880",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue",
+                            "objectif_1"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            {
+                "label": "objectif_2",
+                "title": "Objectif 2",
+                "issues": [
+                    {
+                        "key": "GCS-512",
+                        "summary": "[Recodif NAF] impact Val'hor (s\u00e9lection de la population \u00e0 transmettre au partenaire)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-512",
+                        "issueType": "Story",
+                        "status": "Vainci 2",
+                        "statusCategory": "sprint",
+                        "statusRank": 90,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-448",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot2)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12,
+                        "leadTime": 119.5,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            }
+        ],
+        "features": [
+            {
+                "key": "REP-264",
+                "summary": "MCO REPAIRES PI8"
+            },
+            {
+                "key": "REP-362",
+                "summary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)"
+            },
+            {
+                "key": "REP-448",
+                "summary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot2)"
+            },
+            {
+                "key": "REP-474",
+                "summary": "Optimisation K28 suite au probl\u00e8me au pb de file MOM DLQ"
+            },
+            {
+                "key": "REP-534",
+                "summary": "Suivi planning ACIJ \/tortue \/ RAC 2026"
+            },
+            {
+                "key": "REP-552",
+                "summary": "Gestion des anomalies techniques du traitement K4430 "
+            }
+        ],
+        "stats": {
+            "issuesWithoutStoryPoints": 4,
+            "estimatedAfterAdd": {
+                "count": 11,
+                "storyPoints": 20,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-828",
+                        "summary": "[Inno] Industrialiser outil OPALE",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-828",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 25.5,
+                        "leadTime": 25.5,
+                        "labels": [
+                            "amelio_continue",
+                            "attente_test2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-838",
+                        "summary": "DSN Mixte - Volum\u00e9trie des DSN mixte en vu d'une reprise automatique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-838",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 13,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-841",
+                        "summary": "[K4430] Retours reprises - Mise \u00e0 jour des codes objets d\u00e9clarants",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-841",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 8,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 22.5,
+                        "labels": [
+                            "attente_analyse_cas_particulier"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-857",
+                        "summary": "[Recodif NAF] impact Val'hor - Vainci 1",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-857",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 5,
+                        "leadTime": 5,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-868",
+                        "summary": "Validation des donn\u00e9es p\u00e9nibilit\u00e9s transmises au partenaire pour l'exercice 2025 pour leur int\u00e9gration",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-868",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-879",
+                        "summary": "[R\u00e9tro] Atelier organisation Gitlab + habilitations \u00e9quipe des projets gitlab",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-879",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 9,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-880",
+                        "summary": "[R\u00e9tro] ACIJ : pr\u00e9voir Doc + T-Shaping",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-880",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue",
+                            "objectif_1"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-881",
+                        "summary": "[R\u00e9tro] Assist : atelier installation + doc utilisateur",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-881",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-882",
+                        "summary": "[K4430 Reprise] Script pr\u00e9paration - prise en compte des rectifications de R\u00e9mun\u00e9rations",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-882",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 10,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-904",
+                        "summary": "K60TI - erreur lors du passage de mai",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-904",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 14,
+                        "leadTime": 14,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-913",
+                        "summary": "Volum\u00e9trie ano BB10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-913",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 4.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "totalStoryPoints": 32.5,
+            "storyPointsRange": {
+                "min": 0.5,
+                "max": 8,
+                "median": 1,
+                "average": 2.17
+            },
+            "scopeChange": {
+                "plannedTicketCount": 13,
+                "currentTicketCount": 26,
+                "ticketDelta": 13,
+                "ticketGrowthPercent": 100,
+                "plannedStoryPoints": 16.5,
+                "currentStoryPoints": 32.5,
+                "storyPointsDelta": 16,
+                "storyPointsGrowthPercent": 97,
+                "addedStoryPointsPercent": 97,
+                "nouvellePrioStoryPointsPercent": 54.5
+            },
+            "addedDuringSprint": {
+                "count": 13,
+                "storyPoints": 16,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-705",
+                        "summary": "[I&A] Demander une SLO GCS",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-705",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Action_I&A",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-731",
+                        "summary": "K4430 reprise 2026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-731",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 2.5,
+                        "leadTime": 53.5,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-820",
+                        "summary": "[K2800] Am\u00e9lioration des compteurs phase A",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-820",
+                        "issueType": "Story",
+                        "status": "A Qualifier",
+                        "statusCategory": "sprint",
+                        "statusRank": 73,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-474",
+                        "parentSummary": "Optimisation K28 suite au probl\u00e8me au pb de file MOM DLQ",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-838",
+                        "summary": "DSN Mixte - Volum\u00e9trie des DSN mixte en vu d'une reprise automatique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-838",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 13,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-868",
+                        "summary": "Validation des donn\u00e9es p\u00e9nibilit\u00e9s transmises au partenaire pour l'exercice 2025 pour leur int\u00e9gration",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-868",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-880",
+                        "summary": "[R\u00e9tro] ACIJ : pr\u00e9voir Doc + T-Shaping",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-880",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue",
+                            "objectif_1"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-881",
+                        "summary": "[R\u00e9tro] Assist : atelier installation + doc utilisateur",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-881",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-882",
+                        "summary": "[K4430 Reprise] Script pr\u00e9paration - prise en compte des rectifications de R\u00e9mun\u00e9rations",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-882",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 10,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-903",
+                        "summary": "Analyse retours fichiers Camcot du T1 2026 contenant les donn\u00e9es du T4 2025",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-903",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-904",
+                        "summary": "K60TI - erreur lors du passage de mai",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-904",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 14,
+                        "leadTime": 14,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-905",
+                        "summary": "Erreur dans le flux CAMCOT",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-905",
+                        "issueType": "Bug",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-910",
+                        "summary": "Pb de cr\u00e9ation de guide pour les DSN du 15",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-910",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 9.5,
+                        "leadTime": 9.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-913",
+                        "summary": "Volum\u00e9trie ano BB10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-913",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 4.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "removedDuringSprint": {
+                "count": 2,
+                "storyPoints": 4,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-820",
+                        "summary": "[K2800] Am\u00e9lioration des compteurs phase A",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-820",
+                        "issueType": "Story",
+                        "status": "A Qualifier",
+                        "statusCategory": "sprint",
+                        "statusRank": 73,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-474",
+                        "parentSummary": "Optimisation K28 suite au probl\u00e8me au pb de file MOM DLQ",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-913",
+                        "summary": "Volum\u00e9trie ano BB10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-913",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 4.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "nouvellePrio": {
+                "count": 6,
+                "storyPoints": 9,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-868",
+                        "summary": "Validation des donn\u00e9es p\u00e9nibilit\u00e9s transmises au partenaire pour l'exercice 2025 pour leur int\u00e9gration",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-868",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-903",
+                        "summary": "Analyse retours fichiers Camcot du T1 2026 contenant les donn\u00e9es du T4 2025",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-903",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-904",
+                        "summary": "K60TI - erreur lors du passage de mai",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-904",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 14,
+                        "leadTime": 14,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-905",
+                        "summary": "Erreur dans le flux CAMCOT",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-905",
+                        "issueType": "Bug",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-910",
+                        "summary": "Pb de cr\u00e9ation de guide pour les DSN du 15",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-910",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 9.5,
+                        "leadTime": 9.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-913",
+                        "summary": "Volum\u00e9trie ano BB10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-913",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 4.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            },
+            "continuousImprovement": [
+                {
+                    "key": "GCS-705",
+                    "summary": "[I&A] Demander une SLO GCS",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-705",
+                    "issueType": "T\u00e2che",
+                    "status": "\u00c0 faire",
+                    "statusCategory": "sprint",
+                    "statusRank": 47,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "Action_I&A",
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": true,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-704",
+                    "summary": "[R\u00e9tro] Utiliser la DoD simplifi\u00e9e D\u00e9v\/Qualif -> valid PO, puis la compl\u00e8te pour -> Termin\u00e9",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-704",
+                    "issueType": "T\u00e2che",
+                    "status": "En cours",
+                    "statusCategory": "sprint",
+                    "statusRank": 57,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Normal",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                        "id": "4"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "Action_R\u00e9tro",
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": false
+                },
+                {
+                    "key": "GCS-828",
+                    "summary": "[Inno] Industrialiser outil OPALE",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-828",
+                    "issueType": "T\u00e2che",
+                    "status": "Termin\u00e9(e)",
+                    "statusCategory": "done",
+                    "statusRank": 102,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 25.5,
+                    "leadTime": 25.5,
+                    "labels": [
+                        "amelio_continue",
+                        "attente_test2"
+                    ],
+                    "isDone": true,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": true
+                },
+                {
+                    "key": "GCS-879",
+                    "summary": "[R\u00e9tro] Atelier organisation Gitlab + habilitations \u00e9quipe des projets gitlab",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-879",
+                    "issueType": "T\u00e2che",
+                    "status": "Termin\u00e9(e)",
+                    "statusCategory": "done",
+                    "statusRank": 102,
+                    "storyPoints": 1,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 9,
+                    "labels": [
+                        "amelio_continue"
+                    ],
+                    "isDone": true,
+                    "addedDuringSprint": false,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": true
+                },
+                {
+                    "key": "GCS-880",
+                    "summary": "[R\u00e9tro] ACIJ : pr\u00e9voir Doc + T-Shaping",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-880",
+                    "issueType": "T\u00e2che",
+                    "status": "\u00c0 faire",
+                    "statusCategory": "sprint",
+                    "statusRank": 47,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "amelio_continue",
+                        "objectif_1"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": true,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": true
+                },
+                {
+                    "key": "GCS-881",
+                    "summary": "[R\u00e9tro] Assist : atelier installation + doc utilisateur",
+                    "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-881",
+                    "issueType": "T\u00e2che",
+                    "status": "\u00c0 faire",
+                    "statusCategory": "sprint",
+                    "statusRank": 47,
+                    "storyPoints": 0,
+                    "spFinal": null,
+                    "spRemaining": null,
+                    "parentKey": null,
+                    "parentSummary": null,
+                    "priority": {
+                        "name": "Majeur",
+                        "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                        "id": "3"
+                    },
+                    "cycleTime": 0,
+                    "leadTime": 0,
+                    "labels": [
+                        "amelio_continue"
+                    ],
+                    "isDone": false,
+                    "addedDuringSprint": true,
+                    "removedDuringSprint": false,
+                    "estimatedAfterAdd": true
+                }
+            ],
+            "doneTickets": {
+                "count": 13,
+                "storyPoints": 16,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-491",
+                        "summary": "[R\u00e9tro documentation] tableaux de bord Comptable",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-491",
+                        "issueType": "Spike",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 122.25,
+                        "leadTime": 126,
+                        "labels": [
+                            "BA"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-731",
+                        "summary": "K4430 reprise 2026",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-731",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 2.5,
+                        "leadTime": 53.5,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-838",
+                        "summary": "DSN Mixte - Volum\u00e9trie des DSN mixte en vu d'une reprise automatique",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-838",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 13,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-905",
+                        "summary": "Erreur dans le flux CAMCOT",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-905",
+                        "issueType": "Bug",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-688",
+                        "summary": "[Recodif NAF - FMSE] Qualif -Bilan V2 -MEP",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-688",
+                        "issueType": "Release",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12,
+                        "leadTime": 65,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-857",
+                        "summary": "[Recodif NAF] impact Val'hor - Vainci 1",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-857",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-362",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot1)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 5,
+                        "leadTime": 5,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-746",
+                        "summary": "Lancement de test ACIJ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-746",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 2,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 13,
+                        "leadTime": 43.75,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-770",
+                        "summary": "[K4430] - PM56547 - Mise \u00e0 jour des TPL des Workflow",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-770",
+                        "issueType": "Bug",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 38,
+                        "leadTime": 38,
+                        "labels": [
+                            "Bug_prod",
+                            "attente_SOLAU-SOLIQ"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-841",
+                        "summary": "[K4430] Retours reprises - Mise \u00e0 jour des codes objets d\u00e9clarants",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-841",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 8,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 22,
+                        "leadTime": 22.5,
+                        "labels": [
+                            "attente_analyse_cas_particulier"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-882",
+                        "summary": "[K4430 Reprise] Script pr\u00e9paration - prise en compte des rectifications de R\u00e9mun\u00e9rations",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-882",
+                        "issueType": "Story",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-552",
+                        "parentSummary": "Gestion des anomalies techniques du traitement K4430 ",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 10,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-828",
+                        "summary": "[Inno] Industrialiser outil OPALE",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-828",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 25.5,
+                        "leadTime": 25.5,
+                        "labels": [
+                            "amelio_continue",
+                            "attente_test2"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-879",
+                        "summary": "[R\u00e9tro] Atelier organisation Gitlab + habilitations \u00e9quipe des projets gitlab",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-879",
+                        "issueType": "T\u00e2che",
+                        "status": "Termin\u00e9(e)",
+                        "statusCategory": "done",
+                        "statusRank": 102,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 9,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-906",
+                        "summary": "Campagne d'alimentation des droits CPF -  SD765804 ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-906",
+                        "issueType": "Bug",
+                        "status": "Abandonn\u00e9",
+                        "statusCategory": "done",
+                        "statusRank": 103,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": true,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    }
+                ]
+            },
+            "reliquat": {
+                "count": 13,
+                "storyPoints": 16.5,
+                "remainingStoryPoints": 0,
+                "finalStoryPoints": 0,
+                "issues": [
+                    {
+                        "key": "GCS-790",
+                        "summary": "[ECART PAS] Caisse 12",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-790",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0.5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-903",
+                        "summary": "Analyse retours fichiers Camcot du T1 2026 contenant les donn\u00e9es du T4 2025",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-903",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-904",
+                        "summary": "K60TI - erreur lors du passage de mai",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-904",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-264",
+                        "parentSummary": "MCO REPAIRES PI8",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 14,
+                        "leadTime": 14,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-512",
+                        "summary": "[Recodif NAF] impact Val'hor (s\u00e9lection de la population \u00e0 transmettre au partenaire)",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-512",
+                        "issueType": "Story",
+                        "status": "Vainci 2",
+                        "statusCategory": "sprint",
+                        "statusRank": 90,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-448",
+                        "parentSummary": "Changement de la Codification NAF : Recodification des codes NAF en DUR (lot2)",
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 12,
+                        "leadTime": 119.5,
+                        "labels": [
+                            "objectif_2"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-820",
+                        "summary": "[K2800] Am\u00e9lioration des compteurs phase A",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-820",
+                        "issueType": "Story",
+                        "status": "A Qualifier",
+                        "statusCategory": "sprint",
+                        "statusRank": 73,
+                        "storyPoints": 3,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-474",
+                        "parentSummary": "Optimisation K28 suite au probl\u00e8me au pb de file MOM DLQ",
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-747",
+                        "summary": "Suivi des traitements ACIJ",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-747",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": "REP-534",
+                        "parentSummary": "Suivi planning ACIJ \/tortue \/ RAC 2026",
+                        "priority": {
+                            "name": "Critique",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/high_new.svg",
+                            "id": "2"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "objectif_1"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-705",
+                        "summary": "[I&A] Demander une SLO GCS",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-705",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Action_I&A",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-704",
+                        "summary": "[R\u00e9tro] Utiliser la DoD simplifi\u00e9e D\u00e9v\/Qualif -> valid PO, puis la compl\u00e8te pour -> Termin\u00e9",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-704",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Normal",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/low_new.svg",
+                            "id": "4"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "Action_R\u00e9tro",
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": false,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-868",
+                        "summary": "Validation des donn\u00e9es p\u00e9nibilit\u00e9s transmises au partenaire pour l'exercice 2025 pour leur int\u00e9gration",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-868",
+                        "issueType": "Story",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 5,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-880",
+                        "summary": "[R\u00e9tro] ACIJ : pr\u00e9voir Doc + T-Shaping",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-880",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue",
+                            "objectif_1"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-881",
+                        "summary": "[R\u00e9tro] Assist : atelier installation + doc utilisateur",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-881",
+                        "issueType": "T\u00e2che",
+                        "status": "\u00c0 faire",
+                        "statusCategory": "sprint",
+                        "statusRank": 47,
+                        "storyPoints": 0,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 0,
+                        "leadTime": 0,
+                        "labels": [
+                            "amelio_continue"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": true
+                    },
+                    {
+                        "key": "GCS-910",
+                        "summary": "Pb de cr\u00e9ation de guide pour les DSN du 15",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-910",
+                        "issueType": "Bug",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": null,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Bloquant",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/highest_new.svg",
+                            "id": "1"
+                        },
+                        "cycleTime": 9.5,
+                        "leadTime": 9.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": false,
+                        "estimatedAfterAdd": false
+                    },
+                    {
+                        "key": "GCS-913",
+                        "summary": "Volum\u00e9trie ano BB10",
+                        "url": "https:\/\/imsa.atlassian.net\/\/browse\/GCS-913",
+                        "issueType": "T\u00e2che",
+                        "status": "En cours",
+                        "statusCategory": "sprint",
+                        "statusRank": 57,
+                        "storyPoints": 1,
+                        "spFinal": null,
+                        "spRemaining": null,
+                        "parentKey": null,
+                        "parentSummary": null,
+                        "priority": {
+                            "name": "Majeur",
+                            "icon": "https:\/\/imsa.atlassian.net\/images\/icons\/priorities\/medium_new.svg",
+                            "id": "3"
+                        },
+                        "cycleTime": 4,
+                        "leadTime": 4.5,
+                        "labels": [
+                            "nouvelle_prio"
+                        ],
+                        "isDone": false,
+                        "addedDuringSprint": true,
+                        "removedDuringSprint": true,
+                        "estimatedAfterAdd": true
+                    }
+                ]
+            }
+        },
+        "predictability": {
+            "startStoryPoints": 16.5,
+            "completedStoryPoints": 16,
+            "startTicketCount": 13,
+            "completedTicketCount": 13,
+            "completedFromStartTicketCount": 9,
+            "targetPercent": 80,
+            "targetStoryPoints": 13.2,
+            "achievedPercent": 97,
+            "isReached": true,
+            "engagementPercent": 69.2,
+            "isEngagementReached": false
+        }
+    }
+}

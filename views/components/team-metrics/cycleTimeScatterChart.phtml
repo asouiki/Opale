@@ -1,0 +1,224 @@
+<?php
+
+/**
+ * Cycle time scatter chart — « Points d'effort VS temps de cycle ».
+ *
+ * Nuage de points où chaque point représente UN ticket terminé :
+ *   - x = estimation en Story Points (points d'effort)
+ *   - y = cycle time réellement observé (en cours → terminé, en jours ouvrés)
+ *
+ * Les points sont SEGMENTÉS PAR TYPE de ticket (Story, Tâche, Bug...) : un
+ * dataset coloré par type (cf. TeamMetricsView::getCycleTimeScatterDatasets()).
+ * Un sélecteur « Tout / <type> » filtre l'affichage (défaut : Tout). Les courbes
+ * de tendance (moyenne et médiane par estimation) sont recalculées côté client à
+ * partir des seuls points visibles, pour rester cohérentes avec le filtre actif.
+ *
+ * But : visualiser la (non-)corrélation entre estimation et durée réelle, et
+ * repérer un type qui dérive (ex : les Bugs estimés à 3 prennent plus de temps
+ * que les Stories).
+ *
+ * @var \App\View\TeamMetricsView $view
+ */
+
+$scatterDatasets = $view->getCycleTimeScatterDatasets();
+?>
+<div class="team-scatter__filters" id="cycleScatterFilters">
+    <button type="button" class="team-filter team-filter--active" data-type="">Tout</button>
+    <?php foreach ($scatterDatasets as $d): ?>
+        <button type="button" class="team-filter" data-type="<?= htmlspecialchars($d['type']) ?>">
+            <span class="team-filter__dot" style="background: <?= htmlspecialchars($d['color']) ?>;"></span>
+            <?= htmlspecialchars($d['type']) ?>
+            <span class="team-filter__count">(<?= count($d['points']) ?>)</span>
+        </button>
+    <?php endforeach; ?>
+</div>
+
+<div class="team-scatter">
+    <canvas id="cycleTimeScatterChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // [{type, color, points:[{x,y,key}]}] — un groupe de points par type.
+        const typeData = <?= json_encode($scatterDatasets, JSON_HEX_TAG) ?>;
+
+        // Base d'URL Jira (baseUrl + key) pour ouvrir un ticket au clic ; vide si
+        // JIRA_BASE_URL n'est pas configuré (le clic est alors sans effet).
+        const jiraBrowseBase = <?= json_encode($view->getJiraBrowseBaseUrl(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
+        const round1 = (v) => Math.round(v * 10) / 10;
+
+        /** Médiane d'un tableau de nombres (0 si vide). */
+        function median(arr) {
+            if (!arr.length) return 0;
+            const s = [...arr].sort((a, b) => a - b);
+            const m = Math.floor(s.length / 2);
+            return s.length % 2 ? s[m] : round1((s[m - 1] + s[m]) / 2);
+        }
+
+        /**
+         * Tendance par estimation : pour chaque valeur de x (SP), moyenne et
+         * médiane des cycle times. Trié par estimation croissante.
+         */
+        function trend(points) {
+            const byX = new Map();
+            points.forEach((p) => {
+                if (!byX.has(p.x)) byX.set(p.x, []);
+                byX.get(p.x).push(p.y);
+            });
+            const xs = [...byX.keys()].sort((a, b) => a - b);
+            const avg = xs.map((x) => {
+                const ys = byX.get(x);
+                return { x, y: round1(ys.reduce((a, b) => a + b, 0) / ys.length) };
+            });
+            const med = xs.map((x) => ({ x, y: median(byX.get(x)) }));
+            const minmax = xs.map((x) => {
+                const ys = byX.get(x);
+                return { x, min: round1(Math.min(...ys)), max: round1(Math.max(...ys)) };
+            });
+            return { avg, med, minmax };
+        }
+
+        // Un dataset de points par type (marqueur « × », couleur du type).
+        const pointDatasets = typeData.map((t) => ({
+            label: t.type,
+            data: t.points,
+            backgroundColor: t.color,
+            borderColor: t.color,
+            pointStyle: 'crossRot',
+            radius: 6,
+            borderWidth: 2,
+            _isType: true, // marqueur interne pour le filtrage
+        }));
+
+        // Tendances initiales : sur l'ensemble des points (filtre « Tout »).
+        const allPoints = typeData.flatMap((t) => t.points);
+        const initial = trend(allPoints);
+        let medians = initial.med; // mutable : médianes affichées sous chaque graduation X
+        let averages = initial.avg; // mutable : moyennes affichées sous la médiane
+        let minmaxs = initial.minmax; // mutable : min-max affiché sous la moyenne
+
+        const avgDataset = {
+            label: 'Moyenne par estimation',
+            data: initial.avg,
+            backgroundColor: '#37FFC8',
+            borderColor: '#37FFC8',
+            pointStyle: 'rectRot', // losange plein
+            radius: 7,
+            showLine: true,
+            borderDash: [6, 4], // ligne pointillée
+            borderWidth: 2,
+        };
+        const medDataset = {
+            label: 'Médiane par estimation',
+            data: initial.med,
+            backgroundColor: '#0d9488',
+            borderColor: '#0d9488',
+            pointStyle: 'triangle', // triangle plein
+            radius: 7,
+            showLine: true,
+            borderWidth: 2, // ligne continue
+        };
+
+        const chart = new Chart(document.getElementById('cycleTimeScatterChart').getContext('2d'), {
+            type: 'scatter',
+            data: { datasets: [...pointDatasets, avgDataset, medDataset] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                // Clic sur un point de ticket → ouvre le ticket dans Jira (nouvel onglet).
+                // Ignore les datasets de tendance (moyenne/médiane), sans clé.
+                onClick: (evt, elements, c) => {
+                    if (!jiraBrowseBase || !elements.length) return;
+                    const el = elements[0];
+                    const ds = c.data.datasets[el.datasetIndex];
+                    const point = ds && ds._isType ? ds.data[el.index] : null;
+                    if (point && point.key) {
+                        window.open(jiraBrowseBase + encodeURIComponent(point.key), '_blank', 'noopener');
+                    }
+                },
+                // Curseur « main » au survol d'un point de ticket cliquable.
+                onHover: (evt, elements, c) => {
+                    const overTicket = jiraBrowseBase && elements.some((el) => {
+                        const ds = c.data.datasets[el.datasetIndex];
+                        return ds && ds._isType && ds.data[el.index] && ds.data[el.index].key;
+                    });
+                    c.canvas.style.cursor = overTicket ? 'pointer' : 'default';
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        title: { display: true, text: "Points d'effort estimés (SP)", font: { weight: 'bold' } },
+                        beginAtZero: true,
+                        // Graduations placées EXACTEMENT sur les estimations observées.
+                        afterBuildTicks: (axis) => {
+                            axis.ticks = medians.map((p) => ({ value: p.x }));
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            callback: (value) => {
+                                const m = medians.find((p) => p.x === value);
+                                if (!m) return value + ' SP';
+                                // Libellé multi-lignes : estimation, médiane, moyenne, min-max.
+                                const a = averages.find((p) => p.x === value);
+                                const mm = minmaxs.find((p) => p.x === value);
+                                // Ligne vide entre l'estimation et les stats, pour aérer.
+                                const lines = [value + ' SP', '', 'méd. ' + m.y + ' j'];
+                                if (a) lines.push('moy. ' + a.y + ' j');
+                                if (mm) lines.push('min-max ' + mm.min + ' – ' + mm.max + ' j');
+                                return lines;
+                            },
+                        },
+                    },
+                    y: {
+                        title: { display: true, text: 'Cycle time (jours ouvrés)', font: { weight: 'bold' } },
+                        beginAtZero: true,
+                    },
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const k = ctx.raw && ctx.raw.key ? ctx.raw.key + ' — ' : '';
+                                return `${k}${ctx.parsed.x} SP → ${ctx.parsed.y} j ouvrés`;
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        // --- Filtre par type ---
+        document.getElementById('cycleScatterFilters').addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-type]');
+            if (!btn) return;
+            const filter = btn.dataset.type; // '' = Tout
+
+            // Bouton actif
+            this.querySelectorAll('.team-filter').forEach((b) =>
+                b.classList.toggle('team-filter--active', b === btn)
+            );
+
+            // Visibilité des datasets de points (par type)
+            chart.data.datasets.forEach((ds) => {
+                if (ds._isType) {
+                    ds.hidden = filter !== '' && ds.label !== filter;
+                }
+            });
+
+            // Recalcule moyenne/médiane sur les seuls points visibles
+            const visible = typeData
+                .filter((t) => filter === '' || t.type === filter)
+                .flatMap((t) => t.points);
+            const tr = trend(visible);
+            medians = tr.med;
+            averages = tr.avg;
+            minmaxs = tr.minmax;
+            avgDataset.data = tr.avg;
+            medDataset.data = tr.med;
+
+            chart.update();
+        });
+    });
+</script>
